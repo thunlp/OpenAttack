@@ -1,0 +1,19 @@
+name: Test
+on:
+    push:
+        branches:
+            -   master
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+        -   uses: actions/checkout@v2
+        -   uses: actions/setup-python@v1
+            with:
+                python-version: '3.7'
+                architecture: 'x64'
+        -   name: Run test script
+            run: |
+                cd test
+                python run_test.py
+
