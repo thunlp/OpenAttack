@@ -8,12 +8,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         -   uses: actions/checkout@v2
-        -   uses: actions/setup-python@v1
+        -   uses: actions/setup-python@v2
             with:
                 python-version: '3.7'
                 architecture: 'x64'
         -   name: Run test script
             run: |
+                pip install -r requirements.txt
                 cd test
                 python run_test.py
 
