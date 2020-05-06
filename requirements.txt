@@ -1,3 +1,1 @@
-numpy>=1.18.1
-black
-tqdm>=4.45.0
+nltk==3.5

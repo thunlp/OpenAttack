@@ -1,39 +1,35 @@
 import unittest
-import TAADToolbox as tad
+import TAADToolbox as tat
 import os
 import pickle
 
 
 class TestDataManager(unittest.TestCase):
     def setUp(self):
-        os.mkdir("./testdir")
-        pickle.dump({"result": "success"}, open("./testdir/example", "wb"))
-        tad.DataManager.set_path("/")
+        os.system("mkdir ./testdir")
+        tat.DataManager.set_path("./testdir")
 
     def tearDown(self):
-        os.remove("./testdir/example")
-        os.rmdir("./testdir")
+        os.system("rm -r ./testdir")
 
     def test_load(self):
-        with self.assertRaises(tad.exceptions.UnknownDataException):
-            tad.DataManager.load("unknown_data")
-        with self.assertRaises(tad.exceptions.DataNotExistException):
-            tad.DataManager.load("example")
-        tad.DataManager.set_path(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "testdir")
-        )
-        self.assertDictEqual(tad.DataManager.load("example"), {"result": "success"})
+        with self.assertRaises(tat.exceptions.UnknownDataException):
+            tat.DataManager.load("unknown_data")
+        with self.assertRaises(tat.exceptions.DataNotExistException):
+            tat.DataManager.load("test")
+        tat.DataManager.download("test")
+        self.assertDictEqual(tat.DataManager.load("test"), {"result": "success"})
 
     def test_get(self):
-        with self.assertRaises(tad.exceptions.UnknownDataException):
-            tad.DataManager.get("unknown_data")
-        self.assertEqual("/example", tad.DataManager.get("example"))
-        tad.DataManager.set_path("/home")
-        self.assertEqual("/home/example", tad.DataManager.get("example"))
-        tad.DataManager.set_path("/home/123", "example")
-        self.assertEqual("/home/123", tad.DataManager.get("example"))
-        tad.DataManager.set_path("/home/example", "example")
+        with self.assertRaises(tat.exceptions.UnknownDataException):
+            tat.DataManager.get("unknown_data")
+        self.assertEqual("./testdir/test", tat.DataManager.get("test"))
+        tat.DataManager.set_path("/home")
+        self.assertEqual("/home/test", tat.DataManager.get("test"))
+        tat.DataManager.set_path("/home/123", "test")
+        self.assertEqual("/home/123", tat.DataManager.get("test"))
+        tat.DataManager.set_path("/home/test", "test")
 
     def test_set_path(self):
-        with self.assertRaises(tad.exceptions.UnknownDataException):
-            tad.DataManager.set_path("/data", "unknown_data")
+        with self.assertRaises(tat.exceptions.UnknownDataException):
+            tat.DataManager.set_path("/data", "unknown_data")

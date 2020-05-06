@@ -2,15 +2,20 @@ import pickle
 import os
 import urllib
 from .exceptions import UnknownDataException, DataNotExistException
+from .data import data_list
 
 
 class DataManager(object):
 
-    AVAILABLE_DATAS = ["example"]
+    AVAILABLE_DATAS = [x["name"] for x in data_list]
 
-    data_path = {"example": "/example"}
+    data_path = {
+        x["name"]: os.path.join(os.getcwd(), "data", x["name"]) for x in data_list
+    }
 
-    data_download = {"example": "https://data.to.example/example"}
+    data_download = {x["name"]: x["download"] for x in data_list}
+
+    data_loader = {x["name"]: x["load"] for x in data_list}
 
     data_reference = {kw: None for kw in AVAILABLE_DATAS}
 
@@ -18,16 +23,19 @@ class DataManager(object):
         raise NotImplementedError
 
     @classmethod
-    def load(cls, data_name):
+    def load(cls, data_name, cached=True):
         """
         Write usage here!
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
-        if cls.data_reference[data_name] is None:
+
+        if not cached:
+            return cls.data_loader[data_name](cls.data_path[data_name])
+        elif cls.data_reference[data_name] is None:
             try:
-                cls.data_reference[data_name] = pickle.load(
-                    open(cls.get(data_name), "rb")
+                cls.data_reference[data_name] = cls.data_loader[data_name](
+                    cls.data_path[data_name]
                 )
             except OSError:
                 raise DataNotExistException
@@ -52,11 +60,12 @@ class DataManager(object):
             cls.data_path[data_name] = path
 
     @classmethod
-    def download(cls, data_name, path=None):
+    def download(cls, data_name, path=None, force=False):
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
         if path is None:
             path = cls.data_path[data_name]
-        with urllib.request.urlopen(cls.data_download[data_name]) as f:
-            open(path, "wb").write(f.read())
+        if os.path.exists(path) and not force:
+            return True
+        cls.data_download[data_name](path)
         return True

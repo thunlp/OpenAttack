@@ -139,3 +139,5 @@ dmypy.json
 
 # Project
 /docs/build
+
+/data/
