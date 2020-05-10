@@ -29,16 +29,18 @@ class DataManager(object):
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
-
+        
         if not cached:
             return cls.data_loader[data_name](cls.data_path[data_name])
         elif cls.data_reference[data_name] is None:
+            if not os.path.exists(cls.data_path[data_name]):
+                raise DataNotExistException(data_name, cls.data_path[data_name])
             try:
                 cls.data_reference[data_name] = cls.data_loader[data_name](
                     cls.data_path[data_name]
                 )
             except OSError:
-                raise DataNotExistException
+                raise DataNotExistException(data_name, cls.data_path[data_name])
         return cls.data_reference[data_name]
 
     @classmethod

@@ -1,22 +1,11 @@
-import urllib
-import zipfile
-import os
-from TAADToolbox.utils import WordVector
 import numpy as np
-import io
-
+import os
+from TAADToolbox.utils import WordVector, make_zip_downloader
 
 NAME = "CounterFit"
 
-
-def DOWNLOAD(path):
-    URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
-    with urllib.request.urlopen(URL) as f:
-        zf = zipfile.ZipFile(io.BytesIO(f.read()))
-        os.makedirs(path, exist_ok=True)
-        zf.extract("counter-fitted-vectors.txt", path)
-    return
-
+URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
+DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")
 
 def LOAD(path):
     with open(os.path.join(path, "counter-fitted-vectors.txt"), "r") as f:
