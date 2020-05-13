@@ -3,9 +3,11 @@ import zipfile
 import os
 import io
 
+
 def make_zip_downloader(URL, file_list=None):
     if isinstance(file_list, str):
-        file_list = [ file_list ]
+        file_list = [file_list]
+
     def DOWNLOAD(path):
         with urllib.request.urlopen(URL) as f:
             zf = zipfile.ZipFile(io.BytesIO(f.read()))
@@ -16,4 +18,5 @@ def make_zip_downloader(URL, file_list=None):
             else:
                 zf.extractall(path)
         return
+
     return DOWNLOAD

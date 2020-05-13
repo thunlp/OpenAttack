@@ -7,6 +7,7 @@ NAME = "CounterFit"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")
 
+
 def LOAD(path):
     with open(os.path.join(path, "counter-fitted-vectors.txt"), "r") as f:
         id2vec = []

@@ -141,3 +141,5 @@ dmypy.json
 /docs/build
 
 /data/
+
+/test/testdir

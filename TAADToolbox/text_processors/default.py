@@ -1,56 +1,61 @@
 from ..text_processor import TextProcessor
 from ..data_manager import DataManager
 
+
 class DefaultTextProcessor(TextProcessor):
     def __init__(self):
         self.nltk = __import__("nltk")
-        self.tokenize = None
-        self.tag = None  # LazyLoad
-        self.lemmatize = None
-        self.delemmatize = None
-        self.ner = None
-        self.parser = None
-        self.wordnet = None
-        
+        self.__tokenize = None
+        self.__tag = None  # LazyLoad
+        self.__lemmatize = None
+        self.__delemmatize = None
+        self.__ner = None
+        self.__parser = None
+        self.__wordnet = None
 
     def get_tokens(self, sentence):
-        if self.tokenize is None:
-            self.tokenize = DataManager.load("NLTKSentTokenizer")
-        if self.tag is None:
-            self.tag = DataManager.load("NLTKPerceptronPosTagger")
-        return self.tag(self.tokenize(sentence))
+        if self.__tokenize is None:
+            self.__tokenize = DataManager.load("NLTKSentTokenizer")
+        if self.__tag is None:
+            self.__tag = DataManager.load("NLTKPerceptronPosTagger")
+        return self.__tag(self.__tokenize(sentence))
 
     def get_lemmas(self, token_and_pos):
-        if self.lemmatize is None:
-            self.lemmatize = DataManager.load("NLTKWordnet").lemma
+        if self.__lemmatize is None:
+            self.__lemmatize = DataManager.load("NLTKWordnet").lemma
         if not isinstance(token_and_pos, list):
-            return self.lemmatize(token_and_pos[0], token_and_pos[1])
+            return self.__lemmatize(token_and_pos[0], token_and_pos[1])
         else:
-            return [ self.lemmatize(token, pos) for token, pos in token_and_pos ]
+            return [self.__lemmatize(token, pos) for token, pos in token_and_pos]
 
     def get_delemmas(self, lemma_and_pos):
-        if self.delemmatize is None:
-            self.delemmatize = DataManager.load("NLTKWordnetDelemma")
+        if self.__delemmatize is None:
+            self.__delemmatize = DataManager.load("NLTKWordnetDelemma")
         if not isinstance(lemma_and_pos, list):
             token, pos = lemma_and_pos
-            return self.delemmatize[token][pos] if (token in self.delemmatize) and (pos in self.delemmatize[token]) else token
+            return (
+                self.__delemmatize[token][pos]
+                if (token in self.__delemmatize) and (pos in self.__delemmatize[token])
+                else token
+            )
         else:
             return [
-                self.delemmatize[token][pos] 
-                    if (token in self.delemmatize) and (pos in self.delemmatize[token]) else token
-                    for token, pos in lemma_and_pos
-                ]
+                self.__delemmatize[token][pos]
+                if (token in self.__delemmatize) and (pos in self.__delemmatize[token])
+                else token
+                for token, pos in lemma_and_pos
+            ]
 
     def get_ner(self, sentence):
-        if self.ner is None:
-            self.ner = DataManager.load("StanfordNER")
-        if self.tokenize is None:
-            self.tokenize = DataManager.load("NLTKSentTokenizer")
-        
+        if self.__ner is None:
+            self.__ner = DataManager.load("StanfordNER")
+        if self.__tokenize is None:
+            self.__tokenize = DataManager.load("NLTKSentTokenizer")
+
         ret = []
         if isinstance(sentence, list):  # list of tokens
             tokens = sentence
-            nes = self.ner(tokens)
+            nes = self.__ner(tokens)
 
             ne_buffer = []
             ne_start_pos = 0
@@ -61,28 +66,39 @@ class DefaultTextProcessor(TextProcessor):
                 if ne == "O":
                     if last_NE:
                         last_NE = False
-                        ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
+                        ret.append(
+                            (" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type)
+                        )
                 else:
                     if (not last_NE) or (ne_type != ne):
                         if last_NE:
                             # append last ne
-                            ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
+                            ret.append(
+                                (
+                                    " ".join(ne_buffer),
+                                    ne_start_pos,
+                                    ne_last_pos,
+                                    ne_type,
+                                )
+                            )
                         # new entity
                         ne_start_pos = it
                         ne_last_pos = it + 1
                         ne_type = ne
-                        ne_buffer = [ word ]
+                        ne_buffer = [word]
                         last_NE = True
                     else:
                         ne_last_pos = it + 1
-                        ne_buffer.append( word )
+                        ne_buffer.append(word)
                 if last_NE:
                     # handle the last NE
-                    ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
+                    ret.append(
+                        (" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type)
+                    )
                 it += 1
         else:
-            tokens = self.tokenize(sentence)
-            nes = self.ner(tokens)
+            tokens = self.__tokenize(sentence)
+            nes = self.__ner(tokens)
 
             ne_buffer = []
             ne_type = ""
@@ -97,49 +113,57 @@ class DefaultTextProcessor(TextProcessor):
                 if ne == "O":
                     if last_NE:
                         last_NE = False
-                        ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
+                        ret.append(
+                            (" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type)
+                        )
                 else:
                     if (not last_NE) or (ne_type != ne):
                         if last_NE:
                             # append last ne
-                            ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
+                            ret.append(
+                                (
+                                    " ".join(ne_buffer),
+                                    ne_start_pos,
+                                    ne_last_pos,
+                                    ne_type,
+                                )
+                            )
                         # new entity
                         ne_start_pos = it
                         ne_last_pos = it + len(word)
                         ne_type = ne
-                        ne_buffer = [ word ]
+                        ne_buffer = [word]
                         last_NE = True
                     else:
                         ne_last_pos = it + len(word)
-                        ne_buffer.append( word )
+                        ne_buffer.append(word)
                 it += len(word)
             if last_NE:
                 # handle the last NE
                 ret.append((" ".join(ne_buffer), ne_start_pos, ne_last_pos, ne_type))
         return ret
 
-
     def get_parser(self, sentence):
-        if self.parser is None:
-            self.parser = DataManager.load("StanfordParser")
-        return list(self.parser(sentence))[0]
+        if self.__parser is None:
+            self.__parser = DataManager.load("StanfordParser")
+        return str(list(self.__parser(sentence))[0])
 
     def get_wsd(self, tokens_and_pos):
-        if self.wordnet is None:
-            self.wordnet = DataManager.load("NLTKWordnet")
+        if self.__wordnet is None:
+            self.__wordnet = DataManager.load("NLTKWordnet")
 
-        def lesk(sentence, word, pos=None):
+        def lesk(sentence, word, pos):
             sent = set(sentence)
-            synsets = self.wordnet.synsets(word)
+            synsets = self.__wordnet.synsets(word)
             if pos is not None:
                 synsets = [ss for ss in synsets if str(ss.pos()) == pos]
             if len(synsets) == 0:
-                return None
+                return word
             _, sense = max(
                 (len(sent.intersection(ss.definition().split())), ss) for ss in synsets
             )
             return sense.name()
-        
+
         sentoken = []
         sentence = []
         for word, pos in tokens_and_pos:
@@ -162,5 +186,5 @@ class DefaultTextProcessor(TextProcessor):
         ret = []
 
         for word, pos in sentence:
-            ret.append( lesk(sentoken, word, pos) )
+            ret.append(lesk(sentoken, word, pos))
         return ret
