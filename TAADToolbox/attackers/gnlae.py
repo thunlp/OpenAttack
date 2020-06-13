@@ -3,6 +3,7 @@ from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
 from ..utils import check_parameters
+from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
     [
@@ -46,7 +47,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class GNLAEAttacker(object):
+class GNLAEAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
