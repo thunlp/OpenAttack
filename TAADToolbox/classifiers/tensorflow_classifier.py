@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 from .pre_processor import PreProcessor
 from ..classifier import Classifier
 from ..text_processors import DefaultTextProcessor
@@ -20,6 +19,8 @@ DEFAULT_CONFIG = {
 
 class TensorflowClassifier(Classifier):
     def __init__(self, *args, **kwargs):
+        import tensorflow as tf
+
         self.model = args[0]
         
         self.config = DEFAULT_CONFIG.copy()
@@ -32,6 +33,8 @@ class TensorflowClassifier(Classifier):
             self.pre_processor = PreProcessor(self.config["vocab"], self.config["max_len"], processor=self.config["processor"], embedding=self.config["embedding"])
 
     def get_pred(self, input_):
+        import tensorflow as tf
+
         if self.use_sentence:
             prob = self.model(input_)
         elif self.use_word_id:
@@ -48,6 +51,8 @@ class TensorflowClassifier(Classifier):
         
 
     def get_prob(self, input_):
+        import tensorflow as tf
+
         if self.use_sentence:
             prob = self.model(input_)
         elif self.use_word_id:
@@ -62,6 +67,8 @@ class TensorflowClassifier(Classifier):
         return prob.numpy()
 
     def get_grad(self, input_, labels):
+        import tensorflow as tf
+
         if self.use_sentence:
             raise ClassifierNotSupportException
         elif self.use_word_id:
@@ -77,4 +84,4 @@ class TensorflowClassifier(Classifier):
                 for i in range(len(labels)):
                     loss += prob[i][labels[i]]
             gradient = t.gradient(loss, seqs2)
-        return gradient
+        return gradient.numpy()
