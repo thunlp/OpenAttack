@@ -32,15 +32,15 @@ def make_model():
 
 
 def main():
-    print("Download CounterFittedEmbedding")
-    tat.DataManager.download("CounterFit")
+    print("Download SCPN")
+    tat.DataManager.download("SCPN")
     print("New Attacker")
-    attacker = tat.attackers.GNLAEAttacker()
+    attacker = tat.attackers.SCPNAttacker()
 
     print("Build model")
     clsf = make_model()
 
-    sentence = "It is also seems like it wants to really poke at christianity but then loses that in the end much to my chagrin but leaving an inconsistent feel to the movie . Could have been much worse if excesses were taken in sex and violence, but they try to keep this at a minimal despite some disgusting scenes . My final thought is why would Hooper want to make this movie . It obviously took awhile to actually get distributed , then it has to be advertised gruesomely and with Hooper 's name in the title to hopefully make some money on his name and his gore . It is obvious this did not work .".lower()
+    sentence = "The quick brown fox jumps over a lazy dog.".lower()
     print("Start attack")
     print("Original prediction:")
     print((sentence, clsf.get_pred([sentence])[0]))
