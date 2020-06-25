@@ -3,6 +3,7 @@ from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute   # TODO: replace it to WordNet !!
 from ..utils import check_parameters
 from ..attacker import Attacker
+from ..exceptions import WordNotInDictionaryException
 
 DEFAULT_CONFIG = {
     "threshold": 0.5,
@@ -17,7 +18,7 @@ class PWWSAttacker(Attacker):
         self.config.update(kwargs)
         if self.config["substitute"] is None:
             self.config["substitute"] = CounterFittedSubstitute()
-        check_parameters(DEFAULT_CONFIG)
+        check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.processor = self.config["processor"]
         self.substitute = self.config["substitute"]
@@ -37,7 +38,6 @@ class PWWSAttacker(Attacker):
         S_softmax = S_softmax / S_softmax.sum()
 
         w_star = [ self.get_wstar(clsf, x_orig, i, target, targeted) for i in range(len(x_orig)) ]  # (len(sent), )
-
         H = [ (idx, w_star[idx][0], S_softmax[idx] * w_star[idx][1]) for idx in range(len(x_orig)) ]
 
         H = sorted(H, key=lambda x:-x[2])
@@ -46,11 +46,11 @@ class PWWSAttacker(Attacker):
         for i in range(len(H)):
             idx, wd, _ = H[i]
             ret_sent[idx] = wd
-            pred = clsf.get_pred([ret_sent])[0]
+            pred = clsf.get_pred([" ".join(ret_sent)])[0]
             if targeted:
                 if pred == target:
                     return (" ".join(ret_sent), pred)
-            else 
+            else:
                 if pred != target:
                     return (" ".join(ret_sent), pred)
         return None
@@ -74,13 +74,18 @@ class PWWSAttacker(Attacker):
 
     def get_wstar(self, clsf, sent, idx, target, targeted):
         word = sent[idx]
-        rep_words = list(map(lambda x:x[0], self.substitute(word, threshold = self.config["threshold"])))
+        try:
+            rep_words = list(map(lambda x:x[0], self.substitute(word, threshold = self.config["threshold"])))
+        except WordNotInDictionaryException:
+            rep_words = []
         rep_words = list(filter(lambda x: x != word, rep_words))
+        if len(rep_words) == 0:
+            return ( word, 0 )
         sents = []
         for rw in rep_words:
             new_sent = sent[:idx] + [rw] + sent[idx + 1:]
-            sents.append(new_sent)
-        sents.append(sent)
+            sents.append(" ".join(new_sent))
+        sents.append(" ".join(sent))
         res = clsf.get_prob(sents)[:, target]
         prob_orig = res[-1]
         res = res[:-1]
