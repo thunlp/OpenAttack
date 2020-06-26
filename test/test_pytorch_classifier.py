@@ -3,7 +3,9 @@ import numpy as np
 import pickle
 import TAADToolbox as tat
 import nltk
-import  torch.nn as nn
+import torch.nn as nn
+import unittest
+import os
 
 class SentimentRNN(nn.Module):
     def __init__(self, output_size, embedding_dim, hidden_dim, n_layers, train_on_gpu, bidirectional=True, drop_prob=0.5):
@@ -51,18 +53,45 @@ class SentimentRNN(nn.Module):
         return hidden
 
 
-punc = [',', '.', '?', '!']
-embedding_matrix = np.random.randn(20, 10)
-net = SentimentRNN(2, 10, 128, 2, True, False, 0.8).double()
-vocab = dict()
-num = 0
-for p in punc:
-    vocab[p] = num
-    num += 1
-for w in "i like apples".split():
-    vocab[w] = num
-    num += 1
-lstm_classifier = tat.classifiers.pytorch_classifier.PytorchClassifier(net, vocab=vocab, max_len=250, embedding=embedding_matrix)
-print(lstm_classifier.get_pred(["i like apples", "i like apples"]))
-print(lstm_classifier.get_prob(["i like apples", "i like apples"]))
-print(lstm_classifier.get_grad(["i like apples", "i like apples"], [1, 1]))
+class TestPytorch(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        tat.DataManager.set_path("./testdir")
+        tat.DataManager.download("NLTKSentTokenizer")
+        tat.DataManager.download("NLTKPerceptronPosTagger")
+    
+    @classmethod
+    def tearDownClass(cls):
+        os.system("rm -r ./testdir")
+    
+    def test_pytorch(self):
+        punc = [',', '.', '?', '!']
+        embedding_matrix = np.random.randn(20, 10).astype("float32")
+        net = SentimentRNN(2, 10, 128, 2, False, False, 0.8).double()
+        vocab = dict()
+        num = 0
+        for p in punc:
+            vocab[p] = num
+            num += 1
+        for w in "i like apples".split():
+            vocab[w] = num
+            num += 1
+        classifier = tat.classifiers.PytorchClassifier(net, vocab=vocab, max_len=250, embedding=embedding_matrix)
+        test_str = ["i like apples", "i like apples"]
+
+        ret = classifier.get_pred(test_str)
+        self.assertIsInstance(ret, np.ndarray)
+        self.assertEqual(ret.shape, (len(test_str),))
+        
+        ret = classifier.get_prob(test_str)
+        self.assertIsInstance(ret, np.ndarray)
+        self.assertEqual(len(ret.shape), 2)
+        self.assertEqual(ret.shape[0], len(test_str))
+        
+        ret = classifier.get_grad(test_str, [1, 1])
+        self.assertIsInstance(ret, tuple)
+        self.assertEqual(len(ret), 2)
+        self.assertIsInstance(ret[0], np.ndarray)
+        self.assertEqual(len(ret[0].shape), 2)
+        self.assertEqual(ret[0].shape[0], len(test_str))
+        self.assertIsInstance(ret[1], np.ndarray)
