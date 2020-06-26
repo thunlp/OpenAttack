@@ -10,10 +10,7 @@ DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
     "embedding": None,
     "vocab": None,
-    "max_len":None,    
-    "use_sentence": False,
-    "use_word_id": False,
-    "use_embedding": True,
+    "max_len": 1e9,    
 }
 
 
@@ -26,11 +23,18 @@ class TensorflowClassifier(Classifier):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
-        self.use_sentence = self.config["use_sentence"]
-        self.use_word_id = self.config["use_word_id"]
-        self.use_embedding = self.config["use_embedding"]
-        if self.use_word_id or self.use_embedding:
-            self.pre_processor = PreProcessor(self.config["vocab"], self.config["max_len"], processor=self.config["processor"], embedding=self.config["embedding"])
+
+        self.use_embedding = False
+        self.use_sentence = False
+        self.use_word_id = False
+        if self.config["embedding"] is not None:
+            self.use_embedding = True
+        elif self.config["vocab"] is not None:
+            self.use_word_id = True
+        else:
+            self.use_sentence = True
+
+        self.pre_processor = PreProcessor(self.config["vocab"], self.config["max_len"], processor=self.config["processor"], embedding=self.config["embedding"])
 
     def get_pred(self, input_):
         import tensorflow as tf
@@ -84,4 +88,4 @@ class TensorflowClassifier(Classifier):
                 for i in range(len(labels)):
                     loss += prob[i][labels[i]]
             gradient = t.gradient(loss, seqs2)
-        return gradient.numpy()
+        return (prob.numpy(), gradient.numpy())
