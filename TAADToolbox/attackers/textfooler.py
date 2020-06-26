@@ -1,0 +1,180 @@
+import numpy as np
+from ..text_processors import DefaultTextProcessor
+from ..substitutes import CounterFittedSubstitute
+from ..exceptions import WordNotInDictionaryException
+from ..utils import check_parameters
+from ..attacker import Attacker
+
+DEFAULT_SKIP_WORDS = set(
+    [
+        "the",
+        "and",
+        "a",
+        "of",
+        "to",
+        "is",
+        "it",
+        "in",
+        "i",
+        "this",
+        "that",
+        "was",
+        "as",
+        "for",
+        "with",
+        "movie",
+        "but",
+        "film",
+        "on",
+        "not",
+        "you",
+        "he",
+        "are",
+        "his",
+        "have",
+        "be",
+    ]
+)
+
+DEFAULT_CONFIG = {
+    "skip_words": DEFAULT_SKIP_WORDS,
+    "import_score_threshold": -1.,
+    "sim_score_threshold": 0.5, 
+    "sim_score_window": 15, 
+    "synonym_num": 50,
+    "batch_size": 32,
+    "processor": DefaultTextProcessor(),
+    "substitute": None,
+}
+
+class TextFoolerAttacker(Attacker):
+    def __init__(self, **kwargs):
+        self.config = DEFAULT_CONFIG.copy()
+        self.config.update(kwargs)
+        if self.config["substitute"] is None:
+            self.config["substitute"] = CounterFittedSubstitute()
+
+        check_parameters(DEFAULT_CONFIG.keys(), self.config)
+
+    def __call__(self, clsf, x_orig, target=None):
+        """
+        * **clsf** : **Classifier** .
+        * **x_orig** : Input sentence.
+        """
+        x_orig = x_orig.lower()
+        if target is None:
+            targeted = False
+            target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
+        else:
+            targeted = True
+        orig_probs = clsf.get_prob([x_orig])
+        orig_label = clsf.get_pred([x_orig])
+        orig_prob = orig_probs.max()
+
+        len_text = len(x_orig)
+        if len_text < self.config["sim_score_window"]:
+            self.config["sim_score_threshold"] = 0.1  # shut down the similarity thresholding function
+        half_sim_score_window = (self.config["sim_score_window"] - 1) // 2
+
+
+        # get the pos and verb tense info
+        pos_ls = list(map(lambda x: x[1], self.config["processor"].get_tokens(x_orig)))
+        #pos_ls = criteria.get_pos(text_ls)
+
+        # get importance score
+
+        leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
+        leave_1_probs = clsf.get_prob(leave_1_texts)
+        leave_1_probs_argmax = np.argmax(leave_1_probs, axis=-1)
+        import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).float() * (
+                    leave_1_probs.max(axis=-1)[0] - orig_probs[leave_1_probs_argmax])
+
+
+
+        # get words to perturb ranked by importance scorefor word in words_perturb
+        words_perturb = []
+        for idx, score in sorted(enumerate(import_scores), key=lambda x: x[1], reverse=True):
+            try:
+                if score > self.config["import_score_threshold"] and x_orig[idx] not in self.config["skip_words"]:
+                    words_perturb.append((idx, x_orig[idx]))
+            except:
+                print(idx, len(x_orig), import_scores.shape, x_orig, len(leave_1_texts))
+
+
+
+        # find synonyms
+        #words_perturb_idx = [word2idx[word] for idx, word in words_perturb if word in word2idx]
+        synonym_words = [
+            self.get_neighbours(word)
+            if word not in self.config["skip_words"]
+            else []
+            for idx, word in words_perturb
+        ]
+        #synonym_words, _ = pick_most_similar_words_batch(words_perturb_idx, cos_sim, idx2word, self.config["synonym_num"], 0.5)
+        synonyms_all = []
+        for idx, word in words_perturb:
+            synonyms = synonym_words.pop(0)
+            if synonyms:
+                synonyms_all.append((idx, synonyms))
+
+
+
+        # start replacing and attacking
+        text_prime = x_orig[:]
+        text_cache = text_prime[:]
+        for idx, synonyms in synonyms_all:
+            new_texts = [text_prime[:idx] + [synonym] + text_prime[min(idx + 1, len_text):] for synonym in synonyms]
+            new_probs = clsf.get_prob(new_texts)
+
+            # compute semantic similarity
+            if idx >= half_sim_score_window and len_text - idx - 1 >= half_sim_score_window:
+                text_range_min = idx - half_sim_score_window
+                text_range_max = idx + half_sim_score_window + 1
+            elif idx < half_sim_score_window and len_text - idx - 1 >= half_sim_score_window:
+                text_range_min = 0
+                text_range_max = self.config["sim_score_window"]
+            elif idx >= half_sim_score_window and len_text - idx - 1 < half_sim_score_window:
+                text_range_min = len_text - self.config["sim_score_window"]
+                text_range_max = len_text
+            else:
+                text_range_min = 0
+                text_range_max = len_text
+#            semantic_sims = self.semantic_sim([' '.join(text_cache[text_range_min:text_range_max])] * len(new_texts),
+#                                       list(map(lambda x: ' '.join(x[text_range_min:text_range_max]), new_texts)))[0]
+
+            if len(new_probs.shape) < 2:
+                new_probs = new_probs.unsqueeze(0)
+            new_probs_mask = orig_label != np.argmax(new_probs, axis=-1)
+            # prevent bad synonyms
+#            new_probs_mask *= (semantic_sims >= self.config["sim_score_threshold"])
+            # prevent incompatible pos
+            #synonyms_pos_ls = [list(map(lambda x: x[0], self.config["processor"].get_tokens(new_text[max(idx - 4, 0):idx + 5])))[min(4, idx)]
+            #                   if len(new_text) > 10 else list(map(lambda x: x[0], self.config["processor"].get_tokens(new_text)))[idx] for new_text in new_texts]
+            #pos_mask = np.array(criteria.pos_filter(pos_ls[idx], synonyms_pos_ls))
+            #new_probs_mask *= pos_mask
+
+            if np.sum(new_probs_mask) > 0:
+                text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
+                break
+            else:
+                #new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(float)
+                new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"])
+                new_label_prob_min, new_label_prob_argmin = np.min(new_label_probs, axis=-1)
+                if new_label_prob_min < orig_prob:
+                    text_prime[idx] = synonyms[new_label_prob_argmin]
+            text_cache = text_prime[:]
+
+    def get_neighbours(self, word):
+        threshold = 0.5
+        try:
+            return list(
+                map(
+                    lambda x: x[0],
+                    self.config["substitute"](word, threshold=threshold)[1 : self.config["synonym_num"] + 1],
+                )
+            )
+        except WordNotInDictionaryException:
+            return []
+
+#    def semantic_sim(self, sents1, sents2):
+
