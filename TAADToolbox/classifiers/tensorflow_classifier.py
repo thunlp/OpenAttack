@@ -25,7 +25,7 @@ class TensorflowClassifier(ClassifierBase):
         self.model = model
         
         self.config = DEFAULT_CONFIG.copy()
-        self.config["device"] = tf.device( tf.config.list_logical_devices("GPU")[0].name if len(tf.config.list_logical_devices("GPU")) > 0 else tf.config.list_logical_devices()[0].name )
+        self.config["device"] = tf.device( "/gpu:0" if tf.test.is_gpu_available() else "/cpu:0" )
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 

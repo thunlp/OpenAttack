@@ -20,8 +20,9 @@ class TestTensorflow(unittest.TestCase):
         os.system("rm -r ./testdir")
     
     def test_tensorflow(self):
+        tf.keras.backend.set_floatx('float64')
         net = tf.keras.models.Sequential([
-            tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(300), dtype='float64'),
+            tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(300)),
             tf.keras.layers.Dense(300, activation='relu'),
             tf.keras.layers.Dense(2, activation='sigmoid')
         ])
