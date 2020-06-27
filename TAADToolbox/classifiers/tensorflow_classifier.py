@@ -1,91 +1,70 @@
 import numpy as np
-from .pre_processor import PreProcessor
-from ..classifier import Classifier
+from . import ClassifierBase
 from ..text_processors import DefaultTextProcessor
 from ..utils import check_parameters
 from ..exceptions import ClassifierNotSupportException
 
 DEFAULT_CONFIG = {
-    "device": 'CPU:0',
+    "device": None,
     "processor": DefaultTextProcessor(),
     "embedding": None,
-    "vocab": None,
-    "max_len": 1e9,    
+    "word2id": None,
+    "max_len": None,
+    "tokenization": False,
+    "padding": False,
+    "token_unk": "<UNK>",
+    "token_pad": "<PAD>"
 }
 
 
-class TensorflowClassifier(Classifier):
-    def __init__(self, *args, **kwargs):
+
+class TensorflowClassifier(ClassifierBase):
+    def __init__(self, model, **kwargs):
         import tensorflow as tf
 
-        self.model = args[0]
+        self.model = model
         
         self.config = DEFAULT_CONFIG.copy()
+        self.config["device"] = tf.device( tf.config.list_logical_devices("GPU")[0].name if len(tf.config.list_logical_devices("GPU")) > 0 else tf.config.list_logical_devices()[0].name )
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
-        self.use_embedding = False
-        self.use_sentence = False
-        self.use_word_id = False
-        if self.config["embedding"] is not None:
-            self.use_embedding = True
-        elif self.config["vocab"] is not None:
-            self.use_word_id = True
-        else:
-            self.use_sentence = True
-
-        self.pre_processor = PreProcessor(self.config["vocab"], self.config["max_len"], processor=self.config["processor"], embedding=self.config["embedding"])
+        super().__init__(**self.config)
 
     def get_pred(self, input_):
         import tensorflow as tf
 
-        if self.use_sentence:
-            prob = self.model(input_)
-        elif self.use_word_id:
-            with tf.device(self.config["device"]):
-                seqs = tf.constant(self.pre_processor.POS_process(input_))
-            prob = self.model(seqs)
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            
-            with tf.device(self.config["device"]):
-                seqs2 = tf.constant(self.pre_processor.embedding_process(seqs))
-            prob = self.model(seqs2)
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            with self.config["device"]:
+                input_ = tf.constant( input_ )
+
+        prob = self.model(input_)
         return tf.math.argmax(prob, 1).numpy()
-        
 
     def get_prob(self, input_):
         import tensorflow as tf
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            with self.config["device"]:
+                input_ = tf.constant( input_ )
 
-        if self.use_sentence:
-            prob = self.model(input_)
-        elif self.use_word_id:
-            with tf.device(self.config["device"]):
-                seqs = tf.constant(self.pre_processor.POS_process(input_))
-            prob = self.model(seqs)
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            with tf.device(self.config["device"]):
-                seqs2 = tf.constant(self.pre_processor.embedding_process(seqs))
-            prob = self.model(seqs2)
+        prob = self.model(input_)
         return prob.numpy()
 
     def get_grad(self, input_, labels):
-        import tensorflow as tf
+        if self.config["word2id"] is None or self.config["embedding"] is None:
+            raise ClassifierNotSupportException("gradient")
 
-        if self.use_sentence:
-            raise ClassifierNotSupportException
-        elif self.use_word_id:
-            raise ClassifierNotSupportException
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            with tf.device(self.config["device"]):
-                seqs2 = tf.constant(self.pre_processor.embedding_process(seqs))
-            with tf.GradientTape() as t:
-                t.watch(seqs2)
-                prob = self.model(seqs2)
-                loss = tf.zeros([1])
-                for i in range(len(labels)):
-                    loss += prob[i][labels[i]]
-            gradient = t.gradient(loss, seqs2)
-        return (prob.numpy(), gradient.numpy())
+        import tensorflow as tf
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            with self.config["device"]:
+                input_ = tf.constant( input_ )
+        
+        with tf.GradientTape() as t:
+            t.watch(input_)
+            prob = self.model(input_)
+            loss = tf.reduce_sum(tf.gather_nd(prob, list( zip( range(len(labels)), labels ))))
+        gradient = t.gradient(loss, input_)
+        return prob.numpy(), gradient.numpy()
