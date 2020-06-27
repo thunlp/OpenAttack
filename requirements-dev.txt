@@ -1,10 +1,7 @@
-numpy>=1.18.1
-black
-tqdm>=4.45.0
 nltk==3.5
 numpy>=1.18.1
 black
 tqdm>=4.45.0
 nltk==3.5
-torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-tensorflow-gpu==2.0.0
+torch==1.5.0
+tensorflow==2.0.0
