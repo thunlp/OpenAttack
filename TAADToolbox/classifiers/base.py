@@ -42,17 +42,18 @@ class ClassifierBase(Classifier):
 
     def preprocess(self, x_batch):
         if not self.config["tokenization"]:
-            return x_batch
+            return x_batch, None
         
         x_batch = [ list(map(lambda x:x[0], self.config["processor"].get_tokens(sent))) for sent in x_batch ]
-        max_len = max( list( map( lambda x: len(x), x_batch ) ) )
+        seq_len = list( map( lambda x: len(x), x_batch ) )
+        max_len = max( seq_len )
         if self.config["max_len"] is not None:
             max_len = min(max_len, self.config["max_len"])
 
         if self.config["word2id"] is None:
             if isinstance(self.config["token_pad"], str) and self.config["padding"]:
                 x_batch = [ self.pad_list(tokens, self.config["token_pad"], max_len) for tokens in x_batch ]
-            return x_batch
+            return x_batch, seq_len
         
         x_batch = [ list( map( lambda x: self.transform_id(x) , tokens) )  for tokens in x_batch ]
         
@@ -64,8 +65,8 @@ class ClassifierBase(Classifier):
         x_batch = [ self.pad_list(token_ids, pad_id, max_len) for token_ids in x_batch ]
 
         if self.config["embedding"] is None:
-            return np.array(x_batch, dtype="int64")
+            return np.array(x_batch, dtype="int64"), seq_len
         
         x_batch = [ list( map( lambda idx: self.config["embedding"][idx] , token_ids) )  for token_ids in x_batch ]
-        return np.array(x_batch, dtype="float64")
+        return np.array(x_batch, dtype="float64"), seq_len
 
