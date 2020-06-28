@@ -158,7 +158,12 @@ class TextFoolerAttacker(Attacker):
 
             if np.sum(new_probs_mask) > 0:
                 text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
-                break
+                x_adv = " ".join(text_prime)
+                pred = clsf.get_pred(x_adv)
+                if not targeted:
+                    return x_adv, pred
+                elif clsf.get_pred(x_adv)[0] == target:
+                    retrun x_adv, pred
             else:
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(float)
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"])
@@ -166,6 +171,8 @@ class TextFoolerAttacker(Attacker):
                 if new_label_prob_min < orig_prob:
                     text_prime[idx] = synonyms[new_label_prob_argmin]
             text_cache = text_prime[:]
+            return None
+            
 
     def get_neighbours(self, word):
         threshold = 0.5
