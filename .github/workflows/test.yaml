@@ -14,7 +14,7 @@ jobs:
                 architecture: 'x64'
         -   name: Run test script
             run: |
-                pip install -r requirements.txt
+                pip install -r requirements-dev.txt
                 cd test
                 python run_test.py
 
