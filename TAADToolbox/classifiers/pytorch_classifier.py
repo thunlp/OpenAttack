@@ -13,7 +13,8 @@ DEFAULT_CONFIG = {
     "tokenization": False,
     "padding": False,
     "token_unk": "<UNK>",
-    "token_pad": "<PAD>"
+    "token_pad": "<PAD>",
+    "require_length": False
 }
 
 
@@ -32,29 +33,39 @@ class PytorchClassifier(ClassifierBase):
 
     def get_pred(self, input_):
         import torch
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             input_ = torch.from_numpy(input_).to(self.config["device"])
-        return self.model(input_).max(dim=1)[1].cpu().numpy()
+        if self.config["tokenization"] and self.config["require_length"]:
+            return self.model(input_, seq_len).max(dim=1)[1].cpu().numpy()
+        else:
+            return self.model(input_).max(dim=1)[1].cpu().numpy()
         
 
     def get_prob(self, input_):        
         import torch
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             input_ = torch.from_numpy(input_).to(self.config["device"])
-        return self.model(input_).detach().cpu().numpy()
+        
+        if self.config["tokenization"] and self.config["require_length"]:
+            return self.model(input_, seq_len).detach().cpu().numpy()
+        else:
+            return self.model(input_).detach().cpu().numpy()
 
     def get_grad(self, input_, labels):
         if self.config["word2id"] is None or self.config["embedding"] is None:
             raise ClassifierNotSupportException("gradient")
 
         import torch
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             input_ = torch.from_numpy(input_).to(self.config["device"])
             input_.requires_grad_(True)
-        prob = self.model(input_)
+        if self.config["require_length"]:
+            prob = self.model(input_, seq_len)
+        else:
+            prob = self.model(input_)
         loss = prob[ [ list(range(len(labels))), list(labels) ] ].sum()
         loss.backward()
         return prob.cpu().detach().numpy(), input_.grad.cpu().numpy()
