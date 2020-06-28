@@ -58,14 +58,15 @@ class CAISAttacker(Attacker):
                     reps = list(map(lambda x:x[0], self.substitute(sent[idx], threshold=self.config["threshold"])))
                 except WordNotInDictionaryException:
                     continue
-                reps = list(filter(lambda x: x != sent[idx], reps))
                 reps = list(filter(lambda x: x in self.wordid, reps))
                 if len(reps) > 0:
                     break
             
-            grad = clsf.get_grad([sent], [target])[1]
+            prob, grad = clsf.get_grad([" ".join(sent)], [target])
+            grad = grad[0]
+            prob = prob[0]
             if grad.shape[0] != len(sent) or grad.shape[1] != self.embedding.shape[1]:
-                raise TokensNotAligned("Sent %d != Grad %d" % (len(sent), grad.shape[0]))
+                raise TokensNotAligned("Sent %d != Gradient %d" % (len(sent), grad.shape[0]))
             s1 = np.sign(grad[idx])
             
             mn = None
@@ -73,13 +74,14 @@ class CAISAttacker(Attacker):
             
             for word in reps:
                 s0 = np.sign(self.transform(word) - self.transform(sent[idx]))
-                v = (s0 - s1).sum()
+                v = np.abs(s0 - s1).sum()
                 if targeted:
                     v = -v
                 
                 if (mn is None) or v < mn:
                     mn = v
                     mnwd = word
+
             if mnwd is None:
                 return None
             sent[idx] = mnwd
