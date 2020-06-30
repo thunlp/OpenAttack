@@ -76,7 +76,7 @@ class TestPytorch(unittest.TestCase):
         for w in "i like apples".split():
             vocab[w] = num
             num += 1
-        classifier = tat.classifiers.PytorchClassifier(net, vocab=vocab, max_len=250, embedding=embedding_matrix)
+        classifier = tat.classifiers.PytorchClassifier(net, word2id=vocab, max_len=250, embedding=embedding_matrix, token_pad=0)
         test_str = ["i like apples", "i like apples"]
 
         ret = classifier.get_pred(test_str)
@@ -95,3 +95,7 @@ class TestPytorch(unittest.TestCase):
         self.assertEqual(len(ret[0].shape), 2)
         self.assertEqual(ret[0].shape[0], len(test_str))
         self.assertIsInstance(ret[1], np.ndarray)
+        self.assertEqual(len(ret[1].shape), 3)
+        self.assertEqual(ret[1].shape[0], len(test_str))
+        self.assertEqual(ret[1].shape[1], len(test_str[0].split()))
+        self.assertEqual(ret[1].shape[2], embedding_matrix.shape[1])

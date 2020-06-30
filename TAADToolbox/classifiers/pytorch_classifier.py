@@ -1,6 +1,5 @@
 import numpy as np
-from .pre_processor import PreProcessor
-from ..classifier import Classifier
+from . import ClassifierBase
 from ..text_processors import DefaultTextProcessor
 from ..utils import check_parameters
 from ..exceptions import ClassifierNotSupportException
@@ -9,78 +8,53 @@ DEFAULT_CONFIG = {
     "device": None,
     "processor": DefaultTextProcessor(),
     "embedding": None,
-    "vocab": None,
-    "max_len": 1e9,
+    "word2id": None,
+    "max_len": None,
+    "tokenization": False,
+    "padding": False,
+    "token_unk": "<UNK>",
+    "token_pad": "<PAD>"
 }
 
 
-class PytorchClassifier(Classifier):
-    def __init__(self, *args, **kwargs):
+class PytorchClassifier(ClassifierBase):
+    def __init__(self, model, **kwargs):
         import torch
+        self.model = model
 
-        self.model = args[0]
-        
         self.config = DEFAULT_CONFIG.copy()
         self.config["device"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
-        self.use_embedding = False
-        self.use_sentence = False
-        self.use_word_id = False
-        if self.config["embedding"] is not None:
-            self.use_embedding = True
-        elif self.config["vocab"] is not None:
-            self.use_word_id = True
-        else:
-            self.use_sentence = True
-        
-        self.pre_processor = PreProcessor(self.config["vocab"], self.config["max_len"], processor=self.config["processor"], embedding=self.config["embedding"])
+        super().__init__(**self.config)
         self.model.to(self.config["device"])
 
     def get_pred(self, input_):
         import torch
-
-        if self.use_sentence:
-            prob = self.model(input_)
-        elif self.use_word_id:
-            seqs = torch.tensor(self.pre_processor.POS_process(input_), device=self.config["device"])
-            prob = self.model(seqs)
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            seqs2 = torch.tensor(self.pre_processor.embedding_process(seqs), device=self.config["device"])
-            prob = self.model(seqs2)
-        return np.array(prob.max(1)[1].cpu(), dtype=np.long)
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            input_ = torch.from_numpy(input_).to(self.config["device"])
+        return self.model(input_).max(dim=1)[1].cpu().numpy()
         
 
-    def get_prob(self, input_):
+    def get_prob(self, input_):        
         import torch
-
-        if self.use_sentence:
-            prob = self.model(input_)
-        elif self.use_word_id:
-            seqs = torch.tensor(self.pre_processor.POS_process(input_), device=self.config["device"])
-            prob = self.model(seqs)
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            seqs2 = torch.tensor(self.pre_processor.embedding_process(seqs), device=self.config["device"])
-            prob = self.model(seqs2)
-        return prob.cpu().detach().numpy()
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            input_ = torch.from_numpy(input_).to(self.config["device"])
+        return self.model(input_).detach().cpu().numpy()
 
     def get_grad(self, input_, labels):
+        if self.config["word2id"] is None or self.config["embedding"] is None:
+            raise ClassifierNotSupportException("gradient")
+
         import torch
-        
-        if self.use_sentence:
-            raise ClassifierNotSupportException
-        elif self.use_word_id:
-            raise ClassifierNotSupportException
-        elif self.use_embedding:
-            seqs = self.pre_processor.POS_process(input_)
-            seqs2 = torch.tensor(self.pre_processor.embedding_process(seqs), device=self.config["device"], requires_grad=True)
-            prob = self.model(seqs2)
-        loss = torch.zeros([1], device=self.config["device"])
-        for i in range(len(labels)):
-            loss += prob[i][labels[i]]
-        sample = torch.zeros(loss.size(), device=self.config["device"])
-        loss.backward(sample)
-        return (prob.cpu().detach().numpy(), seqs2.grad.cpu().numpy())
+        input_ = self.preprocess(input_)
+        if isinstance(input_, np.ndarray):
+            input_ = torch.from_numpy(input_).to(self.config["device"])
+            input_.requires_grad_(True)
+        prob = self.model(input_)
+        loss = prob[ [ list(range(len(labels))), list(labels) ] ].sum()
+        loss.backward()
+        return prob.cpu().detach().numpy(), input_.grad.cpu().numpy()

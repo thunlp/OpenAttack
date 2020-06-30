@@ -163,7 +163,7 @@ class TextFoolerAttacker(Attacker):
                 if not targeted:
                     return x_adv, pred
                 elif clsf.get_pred(x_adv)[0] == target:
-                    retrun x_adv, pred
+                    return x_adv, pred
             else:
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(float)
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"])
