@@ -72,9 +72,11 @@ class AttackerEvalBase(AttackerEval):
                 self.__result["succeed"] = 0
             if attack_result is not None:
                 self.__result["succeed"] += 1
+            
         if attack_result is None:
-            return
-        
+            return { "succeed": False }
+
+        info = { "succeed": True }
         if self.__config["levenstein"]:
             va = input_
             vb = attack_result
@@ -85,21 +87,29 @@ class AttackerEvalBase(AttackerEval):
             if "edit" not in self.__result:
                 self.__result["edit"] = 0
             self.__result["edit"] += rv
+            info["edit"] = rv
         
         if self.__config["mistake"]:
             if "mistake" not in self.__result:
                 self.__result["mistake"] = 0
-            self.__result["mistake"] += self.__get_mistakes(attack_result)
+            rv = self.__get_mistakes(attack_result)
+            self.__result["mistake"] += rv
+            info["mistake"] = rv
         
         if self.__config["fluency"]:
             if "fluency" not in self.__result:
                 self.__result["fluency"] = 0
-            self.__result["fluency"] += self.__get_fluency(attack_result)
+            rv = self.__get_fluency(attack_result)
+            self.__result["fluency"] += rv
+            info["fluency"] += rv
         
         if self.__config["semantic"]:
             if "semantic" not in self.__result:
                 self.__result["semantic"] = 0
-            self.__result["semantic"] += self.__get_semantic(input_, attack_result)
+            rv = self.__get_semantic(input_, attack_result)
+            self.__result["semantic"] += rv
+            info["semantic"] = rv
+        return info
         
     def get_result(self):
         ret = {}
