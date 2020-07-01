@@ -31,7 +31,7 @@ class DefaultAttackerEval(AttackerEvalBase):
         json.dump( self.get_result(), file_like_object )
 
     def dumps(self):
-        return json.dumps()
+        return json.dumps( self.get_result() )
 
     def eval_results(self, dataset):
         self.clear()
