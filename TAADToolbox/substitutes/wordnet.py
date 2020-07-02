@@ -1,13 +1,13 @@
-'''
-    由wordnet提供的近义词（初步过滤）。
-    进一步工作：加入NE
-'''
-
+"""
+    由wordnet提供的近义词
+    require:
+    DataManager.download("SpacyECW")
+    DataManager.download("WordnetSynsets")
+"""
 from ..substitute import Substitute
+from ..data_manager import DataManager
 # from ..exceptions import
-import spacy
-from functools import partial
-from nltk.corpus import wordnet as wn
+
 
 # nltk.download('wordnet')
 # python -m spacy download en_core_web_sm
@@ -34,7 +34,9 @@ def get_pos(pos_tag):
 class WordNetSubstitute(Substitute):
 
     def __init__(self):
-        self.nlp = spacy.load('en_core_web_sm')
+        # self.nlp = spacy.load('en_core_web_sm')
+        self.nlp = DataManager.load("SpacyECW")
+        self.wn = DataManager.load("WordnetSynsets")
 
     def __call__(self, word_or_char, pos_tag):
         if pos_tag not in ['noun', 'verb', 'adj', 'adv']:
@@ -43,7 +45,7 @@ class WordNetSubstitute(Substitute):
         pos = get_pos(pos_tag)  # 整理词性
 
         wordnet_synonyms = []
-        synsets = wn.synsets(word_or_char, pos=pos)
+        synsets = self.wn.synsets(word_or_char, pos=pos)
         # print("synsets:", synsets)  # wordnet提供近义词
         for synset in synsets:
             wordnet_synonyms.extend(synset.lemmas())
@@ -55,7 +57,8 @@ class WordNetSubstitute(Substitute):
         # print("synonyms:", synonyms)
         token = self.nlp(word_or_char.replace('_', ' '))[0]
 
-        synonyms = filter(partial(prefilter, token), synonyms)  # 初步过滤
+        synonyms = filter(__import__("functools").partial(prefilter, token), synonyms)
+        # synonyms = filter(partial(prefilter, token), synonyms)  # 初步过滤
 
         synonyms_1 = []
         for synonym in synonyms:
