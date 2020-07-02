@@ -101,7 +101,7 @@ class AttackerEvalBase(AttackerEval):
                 self.__result["fluency"] = 0
             rv = self.__get_fluency(attack_result)
             self.__result["fluency"] += rv
-            info["fluency"] += rv
+            info["fluency"] = rv
         
         if self.__config["semantic"]:
             if "semantic" not in self.__result:
@@ -129,4 +129,11 @@ class AttackerEvalBase(AttackerEval):
 
     def clear(self):
         self.__result = {}
-
+    
+    def __del__(self):
+        if self.__config["sentence_encoder"] is not None:   # is this a feature of tensorflow?!?
+            del self.__config["sentence_encoder"]
+        if self.__config["language_model"] is not None:
+            del self.__config["language_model"]
+        if self.__config["language_tool"] is not None:
+            del self.__config["language_tool"]

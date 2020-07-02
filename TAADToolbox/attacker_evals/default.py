@@ -1,15 +1,17 @@
 from . import AttackerEvalBase
 import json
+from tqdm import tqdm
 
 class DefaultAttackerEval(AttackerEvalBase):
-    def __init__(self, attacker, classifier, **kwargs):
+    def __init__(self, attacker, classifier, progress_bar=True, **kwargs):
         super().__init__(**kwargs)
         self.attacker = attacker
         self.classifier = classifier
+        self.progress_bar = progress_bar
     
     def eval(self, dataset):
         self.clear()
-        for sent in dataset:
+        for sent in (tqdm(dataset) if self.progress_bar else dataset):
             if isinstance(sent, tuple):
                 res = self.attacker(self.classifier, sent[0], sent[1])
                 if res is None:
