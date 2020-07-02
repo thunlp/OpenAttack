@@ -4,6 +4,7 @@ from ..substitutes import CounterFittedSubstitute   # TODO: replace it to WordNe
 from ..utils import check_parameters
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
+from tqdm import tqdm
 
 DEFAULT_CONFIG = {
     "triggers": []
@@ -23,7 +24,7 @@ class UATAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        check_parameters(self.config.keys(), DEFAULT_CONFIG)
+        check_parameters(DEFAULT_CONFIG.keys(), self.config)
     
     def __call__(self, clsf, x_orig, target=None):
         if target is None:
@@ -48,7 +49,7 @@ class UATAttacker(Attacker):
     def get_triggers(self, clsf, dataset, **kwargs):
         config = TRAIN_CONFIG.copy()
         config.update(kwargs)
-        check_parameters(config.keys(), DEFAULT_CONFIG)
+        check_parameters(TRAIN_CONFIG.keys(), config)
 
         if (config["word2id"] is None) or (config["embedding"] is None):
             raise NoEmbeddingException()
@@ -61,8 +62,8 @@ class UATAttacker(Attacker):
         
         curr_trigger = ["the" for _ in range(config["trigger_len"])]
         for epoch in range(config["epoch"]):
-            cnt = 0
-            while cnt < len(dataset):
+            for num_iter in tqdm( range( len(dataset) // config["batch_size"] ) ):
+                cnt = num_iter * config["batch_size"]
                 batch = dataset[ cnt: cnt + config["batch_size"] ]
                 cnt += config["batch_size"]
 
@@ -85,21 +86,9 @@ class UATAttacker(Attacker):
                             trigger_sent = " ".join(tt) + " "
                             xt = list(map(lambda x: trigger_sent + x, x))
                             pred = clsf.get_prob(xt)
-                            loss = 0
-                            for j in range(pred.shape[0]):
-                                loss += pred[j, y[j]]
+                            loss = pred[ (list(range(len(y))), list(y) ) ].sum()
                             nw_beams.append((tt, loss))
                     nw_beams = sorted(nw_beams, key=lambda x: x[1])[:config["beam_size"]]
                 curr_trigger = nw_beams[0][0]
         return curr_trigger
                         
-
-
-
-
-
-
-        
-
-
-
