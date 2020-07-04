@@ -11,7 +11,7 @@ def LOAD(path):
     sent_tokenizer = (
         __import__("nltk").data.load(os.path.join(path, "english.pickle")).tokenize
     )
-    word_tokenizer = __import__("nltk").NLTKWordTokenizer().tokenize
+    word_tokenizer = __import__("nltk").WordPunctTokenizer().tokenize
 
     def tokenize(sent):
         sentences = sent_tokenizer(sent)

@@ -13,7 +13,8 @@ DEFAULT_CONFIG = {
     "tokenization": False,
     "padding": False,
     "token_unk": "<UNK>",
-    "token_pad": "<PAD>"
+    "token_pad": "<PAD>",
+    "require_length": False
 }
 
 
@@ -34,22 +35,27 @@ class TensorflowClassifier(ClassifierBase):
     def get_pred(self, input_):
         import tensorflow as tf
 
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             with self.config["device"]:
                 input_ = tf.constant( input_ )
-
-        prob = self.model(input_)
+        if self.config["tokenization"] and self.config["require_length"]:
+            prob = self.model(input_, seq_len)
+        else:
+            prob = self.model(input_)
         return tf.math.argmax(prob, 1).numpy()
 
     def get_prob(self, input_):
         import tensorflow as tf
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             with self.config["device"]:
                 input_ = tf.constant( input_ )
 
-        prob = self.model(input_)
+        if self.config["tokenization"] and self.config["require_length"]:
+            prob = self.model(input_, seq_len)
+        else:
+            prob = self.model(input_)
         return prob.numpy()
 
     def get_grad(self, input_, labels):
@@ -57,14 +63,17 @@ class TensorflowClassifier(ClassifierBase):
             raise ClassifierNotSupportException("gradient")
 
         import tensorflow as tf
-        input_ = self.preprocess(input_)
+        input_, seq_len = self.preprocess(input_)
         if isinstance(input_, np.ndarray):
             with self.config["device"]:
                 input_ = tf.constant( input_ )
         
         with tf.GradientTape() as t:
             t.watch(input_)
-            prob = self.model(input_)
+            if self.config["require_length"]:
+                prob = self.model(input_, seq_len)
+            else:
+                prob = self.model(input_)
             loss = tf.reduce_sum(tf.gather_nd(prob, list( zip( range(len(labels)), labels ))))
         gradient = t.gradient(loss, input_)
         return prob.numpy(), gradient.numpy()
