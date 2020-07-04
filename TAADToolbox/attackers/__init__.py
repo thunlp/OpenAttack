@@ -6,3 +6,7 @@ from .textfooler import TextFoolerAttacker
 from .pwws import PWWSAttacker
 from .sears import SEARSAttacker
 from .uat import UATAttacker
+from .viper import ViperAttacker
+from .wordbug import WordBugAttacker
+from .gnae import GNAEAttacker
+from .textbugger import TextBuggerAttacker
