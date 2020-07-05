@@ -20,12 +20,7 @@ class GNAEAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.idx2word = DataManager.load("Idx2Word")
-        self.word2idx = DataManager.load("Word2Idx")
-        self.autoencoder = DataManager.load("AutoEncoder")
-        self.inverter = DataManager.load("Inverter")
-        self.gan_gen = DataManager.load("GanGen")
-        self.gan_disc = DataManager.load("GanDisc")
+        self.idx2word, word2idx, autoencoder, inverter, gan_gen, gan_disc = DataManager.load("GANE")
         self.gan_gen = self.gan_gen.cpu()
         self.inverter = self.inverter.cpu()
         self.autoencoder.eval()

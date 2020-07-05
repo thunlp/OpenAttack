@@ -2,28 +2,28 @@ from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
 import random
-from spacy.lang.en import English
-import nltk
-from nltk.tokenize import TreebankWordTokenizer
+# from spacy.lang.en import English
+# import nltk
+# from nltk.tokenize import TreebankWordTokenizer
 # from spacy.lang.en import English
 
 
 DEFAULT_CONFIG = {
 
-        }
+}
 
 
 class TextBuggerAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
+        self.nlp = DataManager.load("SpacyEn")
+        self.textprocesser = DefaultTextProcessor()
+        self.glove_vectors = None
+        # self.glove_vectors = DataManager.load("GloveVector")
         # self.treebank = TreebankWordTokenizer()
         # self.nlp = English()
-        self.treebank = DataManager.load("TREEBANK")
-        self.nlp = DataManager.load("SpacyEn")
-        # self.textprocesser = DefaultTextProcessor()
-        # self.glove_vectors = DataManager.load("GloveVector")
-        self.glove_vectors = None
+        # self.treebank = DataManager.load("TREEBANK")
 
     def __call__(self, clsf, x_orig, target=None):
         """
@@ -32,9 +32,8 @@ class TextBuggerAttacker(Attacker):
         """
         if target is None:
             target = clsf.get_pred([x_orig])[0]
-        x = self.treebank.tokenize(x_orig)  # tokenize
-        # x = self.tokenize(x_orig)
-        # x = x_orig.strip().split()
+        # x = self.treebank.tokenize(x_orig)  # tokenize
+        x = self.tokenize(x_orig)
         sentences_of_doc = self.get_sentences(x)
         ranked_sentences = self.rank_sentences(sentences_of_doc, clsf, target)
         x_prime = x.copy()
@@ -65,8 +64,7 @@ class TextBuggerAttacker(Attacker):
 
     def rank_sentences(self, sentences, clsf, target_all):
         import torch
-        import torch.nn.functional as F
-
+        
         map_sentence_to_loss = {}  # 与原文不同
         for i in range(len(sentences)):
             target = clsf.get_pred([sentences[i]])[0]
@@ -83,10 +81,9 @@ class TextBuggerAttacker(Attacker):
 
     def get_word_importances(self, sentence, clsf, target):
         import torch
-        import torch.nn.functional as F
 
-        sentence_tokens = self.treebank.tokenize(sentence)
-        # sentence_tokens = self.tokenize(sentence)
+        # sentence_tokens = self.treebank.tokenize(sentence)
+        sentence_tokens = self.tokenize(sentence)
         word_losses = {}
         for curr_token in sentence_tokens:
             sentence_tokens_without = [token for token in sentence_tokens if token != curr_token]
@@ -126,7 +123,6 @@ class TextBuggerAttacker(Attacker):
 
     def getScore(self, candidate, x_prime, clsf):
         import torch
-        import torch.nn.functional as F
 
         # x_prime_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x_prime)
         # candidate_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(candidate)
@@ -154,7 +150,6 @@ class TextBuggerAttacker(Attacker):
         bugs["delete"] = self.bug_delete(word)
         bugs["swap"] = self.bug_swap(word)
         bugs["sub_C"] = self.bug_sub_C(word)
-        # 缺少一些东东
         return bugs
 
     def bug_insert(self, word):
@@ -226,5 +221,6 @@ class TextBuggerAttacker(Attacker):
         return neighbors
 
     def tokenize(self, sent):
+        # tokens = sent.strip().split()
         tokens = list(map(lambda x: x[0], self.textprocesser.get_tokens(sent)))
         return tokens

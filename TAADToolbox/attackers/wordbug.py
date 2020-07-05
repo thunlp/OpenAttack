@@ -3,21 +3,26 @@ import numpy as np
 
 
 DEFAULT_CONFIG = {
-    "unk": ''
-        }
-homos = {'-': '˗', '9': '৭', '8': 'Ȣ', '7': '𝟕', '6': 'б', '5': 'Ƽ', '4': 'Ꮞ', '3': 'Ʒ', '2': 'ᒿ', '1': 'l', '0': 'O',
+    "unk": "unk",  # unk token
+    "scoring": "replaceone",  # replaceone, temporal, tail, combined
+    "transformer": "homoglyph",  # homoglyph, swap
+    "power": 5
+}
+homos = {
+         '-': '˗', '9': '৭', '8': 'Ȣ', '7': '𝟕', '6': 'б', '5': 'Ƽ', '4': 'Ꮞ', '3': 'Ʒ', '2': 'ᒿ', '1': 'l', '0': 'O',
          "'": '`', 'a': 'ɑ', 'b': 'Ь', 'c': 'ϲ', 'd': 'ԁ', 'e': 'е', 'f': '𝚏', 'g': 'ɡ', 'h': 'հ', 'i': 'і', 'j': 'ϳ',
          'k': '𝒌', 'l': 'ⅼ', 'm': 'ｍ', 'n': 'ո', 'o': 'о', 'p': 'р', 'q': 'ԛ', 'r': 'ⲅ', 's': 'ѕ', 't': '𝚝', 'u': 'ս',
-         'v': 'ѵ', 'w': 'ԝ', 'x': '×', 'y': 'у', 'z': 'ᴢ'}
+         'v': 'ѵ', 'w': 'ԝ', 'x': '×', 'y': 'у', 'z': 'ᴢ'
+}
 
 
 class WordBugAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.scoring = 'replaceone'
-        self.transformer = 'homoglyph'
-        self.power = 5
+        self.scoring = self.config["scoring"]
+        self.transformer = self.config["transformer"]
+        self.power = self.config["power"]
 
     def __call__(self, clsf, x_orig, target=None):
         import torch
@@ -70,10 +75,7 @@ class WordBugAttacker(Attacker):
         losses = torch.zeros(len(inputs))
         for i in range(len(inputs)):
             tempinputs = inputs[:]  # ##
-            if self.config['unk'] != '':
-                tempinputs[i] = self.config['unk']
-            else:
-                tempinputs[i] = 'unk'  # 有待商榷
+            tempinputs[i] = self.config['unk']
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))  # ##
             softmax = torch.nn.Softmax(dim=1)
@@ -102,7 +104,6 @@ class WordBugAttacker(Attacker):
 
     def temporaltail(self, clsf, inputs, target):
         import torch
-        # import torch.nn.functional as F
         softmax = torch.nn.Softmax(dim=1)
 
         losses1 = torch.zeros(len(inputs))

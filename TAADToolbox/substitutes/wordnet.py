@@ -57,7 +57,12 @@ class WordNetSubstitute(Substitute):
         # print("synonyms:", synonyms)
         token = self.nlp(word_or_char.replace('_', ' '))[0]
 
-        synonyms = filter(__import__("functools").partial(prefilter, token), synonyms)
+        # synonyms = filter(__import__("functools").partial(prefilter, token), synonyms)
+        sss = []
+        for synonym in synonyms:
+            if prefilter(token, synonym):
+                sss.append(synonym)
+        synonyms = sss[:]
         # synonyms = filter(partial(prefilter, token), synonyms)  # 初步过滤
 
         synonyms_1 = []
