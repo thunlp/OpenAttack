@@ -12,7 +12,6 @@ DEFAULT_CONFIG = {
 
 }
 
-
 class TextBuggerAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()

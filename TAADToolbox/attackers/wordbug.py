@@ -15,7 +15,6 @@ homos = {
          'v': 'ѵ', 'w': 'ԝ', 'x': '×', 'y': 'у', 'z': 'ᴢ'
 }
 
-
 class WordBugAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
