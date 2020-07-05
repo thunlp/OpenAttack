@@ -65,13 +65,14 @@ class HotFlipAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        x_orig = self.config["processor"].get_tokens(x_orig)
+
+        x_orig = list(map(lambda x: x[0], self.config["processor"].get_tokens(x_orig)))
         counter = -1
-        for (key, value) in x_orig:
+        for word in x_orig:
             counter += 1
-            if key in self.config["skip_words"]:
+            if word in self.config["skip_words"]:
                 continue
-            neighbours = self.get_neighbours(key, value, self.config["top_n"])
+            neighbours = self.get_neighbours(word, self.config["processor"].get_tokens(word)[0][1], self.config["top_n"])
             for neighbour in neighbours:
                 x_new = " ".join(self.do_replace(x_orig, neighbour, counter))
                 pred_target = clsf.get_pred(x_new)[0]
@@ -79,9 +80,10 @@ class HotFlipAttacker(Attacker):
                     return (x_new, target)
                 elif not targeted and pred_target != target:
                     return (x_new, pred_target)
+        return None
       
     def do_replace(self, x_cur, word, index):
-        ret = x_cur.copy()
+        ret = x_cur
         ret[index] = word
         return ret
              
@@ -94,9 +96,11 @@ class HotFlipAttacker(Attacker):
                     self.config["substitute"](word, threshold=threshold)[:num],
                 )
             )
+            #print(sub_words)
             neighbours = []
             for sub_word in sub_words:
-                if self.config["processor"].get_tokens(sub_word) == POS:
+                if self.config["processor"].get_tokens(sub_word)[0][1] == POS:
                     neighbours.append(sub_word)
+            return neighbours
         except WordNotInDictionaryException:
             return []

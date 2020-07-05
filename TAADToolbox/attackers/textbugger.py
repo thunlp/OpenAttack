@@ -64,7 +64,7 @@ class TextBuggerAttacker(Attacker):
 
     def rank_sentences(self, sentences, clsf, target_all):
         import torch
-
+        
         map_sentence_to_loss = {}  # 与原文不同
         for i in range(len(sentences)):
             target = clsf.get_pred([sentences[i]])[0]
