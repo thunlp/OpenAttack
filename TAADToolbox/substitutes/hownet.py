@@ -1,14 +1,13 @@
-'''
+"""
     由hownet提供的近义词。
     进一步工作：以义原数量排序
-'''
-
+    require:
+    DataManager.download("HOWNET")
+    DataManager.download("WNL")
+"""
 from ..substitute import Substitute
+from ..data_manager import DataManager
 # from ..exceptions import
-import OpenHowNet
-from nltk.stem import WordNetLemmatizer
-
-# OpenHowNet.download()
 
 
 pos_list = ['noun', 'verb', 'adj', 'adv']
@@ -18,9 +17,11 @@ pos_set = set(pos_list)
 class HowNetSubstitute(Substitute):
 
     def __init__(self):
-        self.hownet_dict = OpenHowNet.HowNetDict()
-        self.wnl = WordNetLemmatizer()
+        self.hownet_dict = DataManager.load("HOWNET")
+        self.wn = DataManager.load("NLTKWordnet")
         self.en_word_list = self.hownet_dict.get_en_words()
+        # self.hownet_dict = OpenHowNet.HowNetDict()
+        # self.wnl = WordNetLemmatizer()
 
     def __call__(self, word_or_char, pos_tag):
         word_candidate = []
@@ -30,9 +31,9 @@ class HowNetSubstitute(Substitute):
             return
 
         if pos_tag == 'adv':
-            word_origin = self.wnl.lemmatize(word_or_char, pos='r')
+            word_origin = self.wn.lemma(word_or_char, pos='r')
         else:
-            word_origin = self.wnl.lemmatize(word_or_char, pos=pos_tag[0])
+            word_origin = self.wn.lemma(word_or_char, pos=pos_tag[0])
 
         # pos tagging
         result_list = self.hownet_dict.get(word_origin)
@@ -45,8 +46,6 @@ class HowNetSubstitute(Substitute):
         if len(word_pos & pos_set) == 0:
             # raise exception
             return'''
-
-        # print(word_pos)
 
         # get sememes
         word_sememes = self.hownet_dict.get_sememes_by_word(word_origin, structured=False, lang="en", merge=False)
@@ -103,4 +102,4 @@ class HowNetSubstitute(Substitute):
         ret = []
         for wd in word_candidate_1:
             ret.append((wd, 1))
-        return ret  # 下一步计划：通过义原相同数量排序
+        return ret  # todo: rank by same sememes
