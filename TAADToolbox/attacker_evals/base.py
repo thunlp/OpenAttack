@@ -117,14 +117,23 @@ class AttackerEvalBase(AttackerEval):
         if self.__config["success_rate"]:
             ret["succeed"] = self.__result["succeed"]
             ret["success_rate"] = ret["succeed"] / ret["total"]
-        if self.__config["levenstein"]:
-            ret["levenstein"] = self.__result["edit"] / ret["succeed"]
-        if self.__config["mistake"]:
-            ret["mistake"] = self.__result["mistake"] / ret["succeed"]
-        if self.__config["fluency"]:
-            ret["fluency"] = self.__result["fluency"] / ret["succeed"]
-        if self.__config["semantic"]:
-            ret["semantic"] = self.__result["semantic"] / ret["succeed"]
+        if self.__result["succeed"] > 0:
+            if self.__config["levenstein"]:
+                if "edit" not in self.__result:
+                    self.__result["edit"] = 0
+                ret["levenstein"] = self.__result["edit"] / ret["succeed"]
+            if self.__config["mistake"]:
+                if "mistake" not in self.__result:
+                    self.__result["mistake"] = 0
+                ret["mistake"] = self.__result["mistake"] / ret["succeed"]
+            if self.__config["fluency"]:
+                if "fluency" not in self.__result:
+                    self.__result["fluency"] = 0
+                ret["fluency"] = self.__result["fluency"] / ret["succeed"]
+            if self.__config["semantic"]:
+                if "semantic" not in self.__result:
+                    self.__result["semantic"] = 0
+                ret["semantic"] = self.__result["semantic"] / ret["succeed"]
         return ret
 
     def clear(self):
