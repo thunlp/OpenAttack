@@ -11,19 +11,11 @@ class DefaultAttackerEval(AttackerEvalBase):
     
     def eval(self, dataset):
         self.clear()
-        for sent in (tqdm(dataset) if self.progress_bar else dataset):
-            if isinstance(sent, tuple):
-                res = self.attacker(self.classifier, sent[0], sent[1])
-                if res is None:
-                    self.update(sent[0], None)
-                else:
-                    self.update(sent[0], res[0])
-            else:
-                res = self.attacker(self.classifier, sent)
-                if res is None:
-                    self.update(sent, None)
-                else:
-                    self.update(sent, res[0])
+        total_len = None
+        if isinstance(dataset, list):
+            total_len = len(dataset)
+        for _ in (tqdm(self.eval_results(dataset), total=total_len) if self.progress_bar else self.eval_results(dataset)):
+            pass
         return self.get_result()
 
     def print(self):

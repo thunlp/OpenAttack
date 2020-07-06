@@ -38,12 +38,6 @@ class InvokeLimitedAttackerEval(DefaultAttackerEval):
         self.attacker = attacker
         self.classifier = InvokeLimitWrapper(classifier, invoke_limit)
         self.progress_bar = progress_bar
-    
-    def eval(self, dataset):
-        self.clear()
-        for _ in (tqdm(self.eval_results(dataset)) if self.progress_bar else self.eval_results(dataset)):
-            pass
-        return self.get_result()
 
     def eval_results(self, dataset):
         self.clear()
