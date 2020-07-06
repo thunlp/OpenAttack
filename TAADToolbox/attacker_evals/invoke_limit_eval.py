@@ -34,7 +34,7 @@ class InvokeLimitWrapper(Classifier):
 
 class InvokeLimitedAttackerEval(DefaultAttackerEval):
     def __init__(self, attacker, classifier, invoke_limit=100, progress_bar=True, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(attacker, classifier, **kwargs)
         self.attacker = attacker
         self.classifier = InvokeLimitWrapper(classifier, invoke_limit)
         self.progress_bar = progress_bar
