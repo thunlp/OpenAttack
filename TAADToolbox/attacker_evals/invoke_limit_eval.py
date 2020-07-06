@@ -1,4 +1,4 @@
-from . import AttackerEvalBase
+from . import DefaultAttackerEval
 from .. import Classifier
 import json
 from tqdm import tqdm
@@ -32,7 +32,7 @@ class InvokeLimitWrapper(Classifier):
             raise InvokeLimitException()
         return self.clsf.get_grad(input_)
 
-class InvokeLimitedAttackerEval(AttackerEvalBase):
+class InvokeLimitedAttackerEval(DefaultAttackerEval):
     def __init__(self, attacker, classifier, invoke_limit=100, progress_bar=True, **kwargs):
         super().__init__(**kwargs)
         self.attacker = attacker
