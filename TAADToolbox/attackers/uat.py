@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute   # TODO: replace it to WordNet !!
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm

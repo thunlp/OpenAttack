@@ -1,5 +1,6 @@
 from ..attacker import Attacker
 from ..data_manager import DataManager
+from ..utils import detokenizer
 import numpy as np
 from copy import deepcopy
 
@@ -123,13 +124,13 @@ class GNAEAttacker(Attacker):
             if "<eos>" in words:
                 words = words[:words.index("<eos>")]
             # target = clsf.get_pred([premise_orig, hypothesis_orig])[0]
-            return(" ".join(words), clsf.get_pred([premise_orig, " ".join(words)])[0])
+            return(detokenizer(words), clsf.get_pred([premise_orig, detokenizer(words)])[0])
 
         except Exception as e:
             print(e)
             print(premise_words)
             print(hypothesis_words)
             print("no adversary found for : \n {0} \n {1}\n\n". \
-                  format(" ".join(premise_words), " ".join(hypothesis_words)))
+                  format(detokenizer(premise_words), detokenizer(hypothesis_words)))
             return None
 

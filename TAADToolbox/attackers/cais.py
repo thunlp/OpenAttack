@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..exceptions import WordEmbeddingRequired, WordNotInDictionaryException, TokensNotAligned
 from ..attacker import Attacker
 
@@ -40,13 +40,13 @@ class CAISAttacker(Attacker):
         sent = list(map(lambda x: x[0], self.processor.get_tokens(x_orig)))
         
         for i in range(self.config["max_iter"]):
-            pred = clsf.get_pred([" ".join(sent)])[0]
+            pred = clsf.get_pred([ detokenizer(sent) ])[0]
             if targeted:
                 if pred == target:
-                    return (" ".join(sent), pred)
+                    return (detokenizer(sent), pred)
             else:
                 if pred != target:
-                    return (" ".join(sent), pred)
+                    return (detokenizer(sent), pred)
             
             iter_cnt = 0
             while True:
@@ -62,7 +62,7 @@ class CAISAttacker(Attacker):
                 if len(reps) > 0:
                     break
             
-            prob, grad = clsf.get_grad([" ".join(sent)], [target])
+            prob, grad = clsf.get_grad([detokenizer(sent)], [target])
             grad = grad[0]
             prob = prob[0]
             if grad.shape[0] != len(sent) or grad.shape[1] != self.embedding.shape[1]:
