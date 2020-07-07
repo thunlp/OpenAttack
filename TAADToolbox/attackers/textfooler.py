@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
@@ -63,6 +63,7 @@ class TextFoolerAttacker(Attacker):
         * **x_orig** : Input sentence.
         """
         x_orig = x_orig.lower()
+        x_copy = x_orig
         if target is None:
             targeted = False
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
@@ -80,7 +81,7 @@ class TextFoolerAttacker(Attacker):
 
 
         # get the pos and verb tense info
-        pos_ls = list(map(lambda x: x[1], self.config["processor"].get_tokens(x_orig)))
+        pos_ls = list(map(lambda x: x[1], self.config["processor"].get_tokens(x_copy)))
         #pos_ls = criteria.get_pos(text_ls)
 
         # get importance score
@@ -88,12 +89,15 @@ class TextFoolerAttacker(Attacker):
         leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
         leave_1_probs = clsf.get_prob([' '.join(sentence) for sentence in leave_1_texts])
         leave_1_probs_argmax = np.argmax(leave_1_probs, axis=-1)
-        import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).float() * (
-                    leave_1_probs.max(axis=-1)[0] - orig_probs[leave_1_probs_argmax])
+        #import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
+        #            leave_1_probs.max(axis=-1)[0] - orig_probs[:, leave_1_probs_argmax])
+
+        import_scores = orig_prob - leave_1_probs[:, orig_label].squeeze() + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
+                    np.max(leave_1_probs, axis=-1) - orig_probs.squeeze()[leave_1_probs_argmax])
 
 
 
-        # get words to perturb ranked by importance scorefor word in words_perturb
+        # get words to perturb ranked by importance score for word in words_perturb
         words_perturb = []
         for idx, score in sorted(enumerate(import_scores), key=lambda x: x[1], reverse=True):
             try:
@@ -101,7 +105,6 @@ class TextFoolerAttacker(Attacker):
                     words_perturb.append((idx, x_orig[idx]))
             except:
                 print(idx, len(x_orig), import_scores.shape, x_orig, len(leave_1_texts))
-
 
 
         # find synonyms
@@ -118,8 +121,6 @@ class TextFoolerAttacker(Attacker):
             synonyms = synonym_words.pop(0)
             if synonyms:
                 synonyms_all.append((idx, synonyms))
-
-
 
         # start replacing and attacking
         text_prime = x_orig[:]
@@ -151,21 +152,31 @@ class TextFoolerAttacker(Attacker):
             # prevent bad synonyms
             new_probs_mask *= (semantic_sims >= self.config["sim_score_threshold"])
             # prevent incompatible pos
-            synonyms_pos_ls = [list(map(lambda x: x[0], self.config["processor"].get_tokens(new_text[max(idx - 4, 0):idx + 5])))[min(4, idx)]
-                               if len(new_text) > 10 else list(map(lambda x: x[0], self.config["processor"].get_tokens(new_text)))[idx] for new_text in new_texts]
+            synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(' '.join(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
+                               if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(' '.join(new_text))))[idx] for new_text in new_texts]
+
             pos_mask = np.array(self.pos_filter(pos_ls[idx], synonyms_pos_ls))
             new_probs_mask *= pos_mask
 
             if np.sum(new_probs_mask) > 0:
                 text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
-                break
+                x_adv = detokenizer(text_prime)
+                pred = clsf.get_pred([x_adv])
+                if not targeted:
+                    return (x_adv, pred[0])
+                elif pred[0] == target:
+                    return (x_adv, pred[0])
             else:
-                new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(float)
+                #new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(np.float64)
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"])
-                new_label_prob_min, new_label_prob_argmin = np.min(new_label_probs, axis=-1)
+                
+                new_label_prob_min = np.min(new_label_probs, axis=0)[0]
+                new_label_prob_argmin = np.argmin(new_label_probs, axis=0)[0]
                 if new_label_prob_min < orig_prob:
                     text_prime[idx] = synonyms[new_label_prob_argmin]
             text_cache = text_prime[:]
+        return None
+            
 
     def get_neighbours(self, word):
         threshold = 0.5
@@ -197,7 +208,10 @@ class TextFoolerAttacker(Attacker):
             seq = []
             for word in sentence:
                 if len(seq) < max_len:
-                    seq.append(vocab[word])
+                    if word in vocab:
+                        seq.append(vocab[word])
+                    else:
+                        seq.append(0)
             while len(seq) < max_len:
                 seq.append(0)
             seqs.append(seq)

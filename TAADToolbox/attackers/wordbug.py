@@ -1,4 +1,5 @@
 from ..attacker import Attacker
+from ..utils import detokenizer
 import numpy as np
 
 
@@ -79,7 +80,7 @@ class WordBugAttacker(Attacker):
             tempinputs = inputs[:]  # ##
             tempinputs[i] = self.config['unk']
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))  # ##
+                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))  # ##
             softmax = torch.nn.Softmax(dim=1)
             nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target].item()
             # losses[i] = F.nll_loss(tempoutput, torch.tensor([[target]], dtype=torch.long), reduce=False)
@@ -96,10 +97,10 @@ class WordBugAttacker(Attacker):
         for i in range(len(inputs)):
             tempinputs = inputs[: i + 1]
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))
+                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
             # losses1[i] = F.nll_loss(tempoutput, target, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][target].item()
-            print(" ".join(tempinputs), losses1[i])
+            print(detokenizer(tempinputs), losses1[i])
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
@@ -113,7 +114,7 @@ class WordBugAttacker(Attacker):
         for i in range(len(inputs)):
             tempinputs = inputs[i:]
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))
+                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
             # losses1[i] = F.nll_loss(tempoutput, target, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][target].item()
         for i in range(1, len(inputs)):

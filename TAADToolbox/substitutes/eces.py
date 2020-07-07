@@ -1,11 +1,9 @@
-'''
+"""
     对26个字母（大小写），返回一个最相近字母，同时希望其引起最大影响
     进一步工作：对一段文本以概率p进行扰动
-'''
-
+"""
 from ..substitute import Substitute
 # from ..exceptions import
-import random
 
 
 H = {'a': 'â', 'b': 'ḃ', 'c': 'ĉ', 'd': 'ḑ', 'e': 'ê', 'f': 'ḟ', 'g': 'ǵ', 'h': 'ĥ', 'i': 'î',
@@ -29,5 +27,3 @@ class EcesSubstitute(Substitute):
         ret = []
         ret.append((self.h[char], 1))
         return ret
-
-    # def disturb_sentence(self, sentence, prob):  # 以概率prob对一句话进行替换
