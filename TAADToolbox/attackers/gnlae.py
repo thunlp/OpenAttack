@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
@@ -96,12 +96,12 @@ class GNLAEAttacker(Attacker):
             if targeted:
                 top_attack = np.argmax(pop_preds[:, target])
                 if np.argmax(pop_preds[top_attack, :]) == target:
-                    return " ".join(pop[top_attack]), target
+                    return detokenizer(pop[top_attack]), target
             else:
                 top_attack = np.argmax(-pop_preds[:, target])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
-                        " ".join(pop[top_attack]),
+                        detokenizer(pop[top_attack]),
                         np.argmax(pop_preds[top_attack, :]),
                     )
 
@@ -184,7 +184,7 @@ class GNLAEAttacker(Attacker):
             return x_cur
 
     def make_batch(self, sents):
-        return [" ".join(sent) for sent in sents]
+        return [detokenizer(sent) for sent in sents]
 
     def perturb(
         self, clsf, x_cur, x_orig, neighbours, w_select_probs, target, targeted

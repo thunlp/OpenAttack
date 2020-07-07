@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
@@ -160,7 +160,7 @@ class TextFoolerAttacker(Attacker):
 
             if np.sum(new_probs_mask) > 0:
                 text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
-                x_adv = " ".join(text_prime)
+                x_adv = detokenizer(text_prime)
                 pred = clsf.get_pred([x_adv])
                 if not targeted:
                     return (x_adv, pred[0])
