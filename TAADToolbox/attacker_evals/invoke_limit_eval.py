@@ -18,21 +18,23 @@ class InvokeLimitWrapper(Classifier):
         return self.invoke
     
     def get_pred(self, input_):
-        self.invoke += 1
-        if self.invoke > self.invoke_limit:
+        if self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
+        self.invoke += len(input_)
+        
         return self.clsf.get_pred(input_)
     
     def get_prob(self, input_):
-        self.invoke += 1
-        if self.invoke > self.invoke_limit:
+        if self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
+        self.invoke += len(input_)
+        
         return self.clsf.get_prob(input_)
     
     def get_grad(self, input_, labels):
-        self.invoke += 1
         if self.invoke > self.invoke_limit:
             raise InvokeLimitException()
+        self.invoke += len(input_)
         return self.clsf.get_grad(input_)
 
 class InvokeLimitedAttackerEval(DefaultAttackerEval):
