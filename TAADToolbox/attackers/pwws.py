@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute   # TODO: replace it to WordNet !!
-from ..utils import check_parameters
+from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException
 
@@ -46,13 +46,13 @@ class PWWSAttacker(Attacker):
         for i in range(len(H)):
             idx, wd, _ = H[i]
             ret_sent[idx] = wd
-            pred = clsf.get_pred([" ".join(ret_sent)])[0]
+            pred = clsf.get_pred([(ret_sent)])[0]
             if targeted:
                 if pred == target:
-                    return (" ".join(ret_sent), pred)
+                    return (detokenizer(ret_sent), pred)
             else:
                 if pred != target:
-                    return (" ".join(ret_sent), pred)
+                    return (detokenizer(ret_sent), pred)
         return None
 
 
@@ -63,8 +63,8 @@ class PWWSAttacker(Attacker):
             left = sent[:i]
             right = sent[i + 1:]
             x_i_hat = left + [self.config["token_unk"]] + right
-            x_hat_raw.append(" ".join(x_i_hat))
-        x_hat_raw.append(" ".join(sent))
+            x_hat_raw.append(detokenizer(x_i_hat))
+        x_hat_raw.append(detokenizer(sent))
         res = clsf.get_prob(x_hat_raw)[:, target]
         if not targeted:
             res = res[-1] - res[:-1]
@@ -84,8 +84,8 @@ class PWWSAttacker(Attacker):
         sents = []
         for rw in rep_words:
             new_sent = sent[:idx] + [rw] + sent[idx + 1:]
-            sents.append(" ".join(new_sent))
-        sents.append(" ".join(sent))
+            sents.append(detokenizer(new_sent))
+        sents.append(detokenizer(sent))
         res = clsf.get_prob(sents)[:, target]
         prob_orig = res[-1]
         res = res[:-1]

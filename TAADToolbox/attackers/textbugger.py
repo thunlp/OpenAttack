@@ -2,7 +2,8 @@ from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
 import random
-# from spacy.lang.en import English####
+# from spacy.lang.en import English
+from ..utils import detokenizer
 # import nltk
 # from nltk.tokenize import TreebankWordTokenizer
 # from spacy.lang.en import English
@@ -43,24 +44,24 @@ class TextBuggerAttacker(Attacker):
                 bug = self.selectBug(word, x_prime, clsf)
                 x_prime = self.replaceWithBug(x_prime, word, bug)
                 # x_prime_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x_prime)
-                x_prime_sentence = " ".join(x_prime)
+                x_prime_sentence = detokenizer(x_prime)
                 prediction = clsf.get_pred([x_prime_sentence])[0]
 
                 # if self.getSemanticSimilarity(x, x_prime, self.epsilon) <= self.epsilon:
                 #    return None  # elelelelelel
                 if target is None:
                     if prediction != y_orig:
-                        return " ".join(x_prime), prediction
+                        return detokenizer(x_prime), prediction
                 else:
                     if int(prediction) is int(target):
-                        return " ".join(x_prime), prediction
+                        return detokenizer(x_prime), prediction
         return None
 
     def get_sentences(self, x):
         # original_review = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x)
         # self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
         # doc = self.nlp(original_review)
-        original_review = " ".join(x)
+        original_review = detokenizer(x)
         doc = self.nlp(original_review)
         sentences = [sent.strip() for sent in doc]
         # sentences = [sent.string.strip() for sent in doc]
@@ -92,7 +93,7 @@ class TextBuggerAttacker(Attacker):
         for curr_token in sentence_tokens:
             sentence_tokens_without = [token for token in sentence_tokens if token != curr_token]
             # sentence_without = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(sentence_tokens_without)
-            sentence_without = " ".join(sentence_tokens_without)
+            sentence_without = detokenizer(sentence_tokens_without)
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([sentence_without]))
             # word_losses[curr_token] = F.nll_loss(tempoutput, y_orig, reduce=False)
@@ -130,8 +131,8 @@ class TextBuggerAttacker(Attacker):
 
         # x_prime_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x_prime)
         # candidate_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(candidate)
-        x_prime_sentence = " ".join(x_prime)
-        candidate_sentence = " ".join(candidate)
+        x_prime_sentence = detokenizer(x_prime)
+        candidate_sentence = detokenizer(candidate)
         y_orig = clsf.get_pred([x_prime_sentence])[0]
         with torch.no_grad():
             tempoutput = torch.from_numpy(clsf.get_prob(candidate_sentence))

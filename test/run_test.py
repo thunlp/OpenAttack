@@ -6,8 +6,6 @@ def main(args,):
     import os, sys
 
     TEST_BASE = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.abspath(os.path.join(TEST_BASE, "..",))
-    sys.path.append(repo_root)
     test_cases = unittest.defaultTestLoader.discover(TEST_BASE, pattern="test_*.py",)
     runner = unittest.runner.TextTestRunner(verbosity=args.verbosity)
     ret = runner.run(test_cases)
