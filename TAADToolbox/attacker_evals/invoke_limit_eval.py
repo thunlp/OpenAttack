@@ -21,14 +21,12 @@ class InvokeLimitWrapper(Classifier):
         if self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
-        
         return self.clsf.get_pred(input_)
     
     def get_prob(self, input_):
         if self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
-        
         return self.clsf.get_prob(input_)
     
     def get_grad(self, input_, labels):
@@ -48,15 +46,22 @@ class InvokeLimitedAttackerEval(DefaultAttackerEval):
         self.average_invoke = average_invoke
 
     def update(self, sentA, sentB, out_of_invoke_limit):
-        super().update(sentA, sentB)
+        info = super().update(sentA, sentB)
         if self.average_invoke and sentB is not None:
             if "invoke" not in self.__result:
                 self.__result["invoke"] = 0
-            self.__result["invoke"] += self.classifier.get_invoke()
+            rv = self.classifier.get_invoke()
+            self.__result["invoke"] += rv
+            info["invoke"] = rv
         if out_of_invoke_limit:
             if "out_of_invoke" not in self.__result:
                 self.__result["out_of_invoke"] = 0
             self.__result["out_of_invoke"] += 1
+            info["out_of_invoke"] = 1
+        else:
+            info["out_of_invoke"] = 0
+        return info
+        
 
     def eval_results(self, dataset):
         self.clear()
