@@ -55,6 +55,8 @@ class AttackerEvalBase(AttackerEval):
             from ..utils import GPT2LM
             self.__config["language_model"] = GPT2LM()
         
+        if len(sent.strip()) == 0:
+            return 1
         return self.__config["language_model"](sent)
     
     def __get_semantic(self, sentA, sentB):
