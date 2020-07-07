@@ -18,9 +18,10 @@ class TextBuggerAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.nlp = DataManager.load("SpacyEn")
+        self.nlp = DataManager.load("NLTKSentTokenizer")
         self.textprocesser = DefaultTextProcessor()
         self.glove_vectors = None
+        # self.nlp = English()
         # self.glove_vectors = DataManager.load("GloveVector")
         # self.treebank = TreebankWordTokenizer()
         # self.nlp = English()
@@ -58,9 +59,8 @@ class TextBuggerAttacker(Attacker):
     def get_sentences(self, x):
         # original_review = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x)
         original_review = detokenizer(x)
-        self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
         doc = self.nlp(original_review)
-        sentences = [sent.string.strip() for sent in doc.sents]
+        sentences = [sent.strip() for sent in doc]
         return sentences
 
     def rank_sentences(self, sentences, clsf, target_all):

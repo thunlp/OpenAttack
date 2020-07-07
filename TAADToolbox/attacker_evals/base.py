@@ -9,12 +9,13 @@ DEFAULT_CONFIG = {
     "language_model": None,
     "sentence_encoder": None,
 
-    "success_rate": True,   # 成功率
-    "fluency": False,       # 流畅度
-    "mistake": False,       # 语法错误
-    "semantic": False,      # 语义匹配度
-    "levenstein": False,    # 编辑距离
-    "word_distance": False, # 应用词级别编辑距离
+    "success_rate": True,       # 成功率
+    "fluency": False,           # 流畅度
+    "mistake": False,           # 语法错误
+    "semantic": False,          # 语义匹配度
+    "levenstein": False,        # 编辑距离
+    "word_distance": False,     # 应用词级别编辑距离
+    "modification_rate": False, # 修改率
 }
 class AttackerEvalBase(AttackerEval):
     def __init__(self, **kwargs):
@@ -62,6 +63,19 @@ class AttackerEvalBase(AttackerEval):
             self.__config["sentence_encoder"] = UniversalSentenceEncoder()
         
         return self.__config["sentence_encoder"](sentA, sentB)
+    
+    def __get_modification(self, sentA, sentB):
+        va = self.__get_tokens(sentA)
+        vb = self.__get_tokens(sentB)
+        ret = 0
+        if len(va) != len(vb):
+            ret = abs(len(va) - len(vb))
+        mn_len = min( len(va), len(vb) )
+        va, vb = va[:mn_len], vb[:mn_len]
+        for wordA, wordB in zip(va, vb):
+            if wordA != wordB:
+                ret += 1
+        return ret / len(va)
 
     def update(self, input_, attack_result):
         if "total" not in self.__result:
@@ -109,6 +123,13 @@ class AttackerEvalBase(AttackerEval):
             rv = self.__get_semantic(input_, attack_result)
             self.__result["semantic"] += rv
             info["semantic"] = rv
+        
+        if self.__config["modification_rate"]:
+            if "modification" not in self.__result:
+                self.__result["modification"] = 0
+            rv = self.__get_modification(input_, attack_result)
+            self.__result["modification"] += rv
+            info["modification"] = rv
         return info
         
     def get_result(self):
@@ -134,13 +155,17 @@ class AttackerEvalBase(AttackerEval):
                 if "semantic" not in self.__result:
                     self.__result["semantic"] = 0
                 ret["semantic"] = self.__result["semantic"] / ret["succeed"]
+            if self.__config["modification_rate"]:
+                if "modification" not in self.__result:
+                    self.__result["modification"] = 0
+                ret["modification_rate"] = self.__result["modification"] / ret["succeed"]
         return ret
 
     def clear(self):
         self.__result = {}
     
     def __del__(self):
-        if self.__config["sentence_encoder"] is not None:   # is this a feature of tensorflow?!?
+        if self.__config["sentence_encoder"] is not None:
             del self.__config["sentence_encoder"]
         if self.__config["language_model"] is not None:
             del self.__config["language_model"]
