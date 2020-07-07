@@ -2,7 +2,7 @@ from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
 import random
-from spacy.lang.en import English
+# from spacy.lang.en import English
 # import nltk
 # from nltk.tokenize import TreebankWordTokenizer
 # from spacy.lang.en import English
