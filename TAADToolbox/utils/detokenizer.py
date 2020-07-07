@@ -11,7 +11,7 @@ def detokenizer(tokens):
             ret += token
         else:
             if new_sent:
-                ret += " " token.capitalize()
+                ret += " " + token.capitalize()
                 new_sent = False
             else:
                 ret += " " + token
