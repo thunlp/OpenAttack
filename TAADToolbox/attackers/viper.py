@@ -6,7 +6,8 @@ import random
 
 
 DEFAULT_CONFIG = {
-
+    "prob": 0.3,
+    "topn": 12
 }
 
 
@@ -17,9 +18,10 @@ class ViperAttacker(Attacker):
         self.dces = DcesSubstitute()
         self.eces = EcesSubstitute()
         self.mydict = {}
-        self.topn = 12
+        self.topn = self.config["topn"]
+        self.prob = self.config["prob"]
 
-    def __call__(self, clsf, x_orig, prob):
+    def __call__(self, clsf, x_orig, target=None):
         """
         * **clsf** : **Classifier** .
         * **x_orig** : Input sentence.
@@ -40,7 +42,7 @@ class ViperAttacker(Attacker):
                 similar_chars, probs = self.mydict[c]
 
             r = random.random()
-            if r < prob and len(similar_chars):
+            if r < self.prob and len(similar_chars):
                 s = np.random.choice(similar_chars, 1, replace=True, p=probs)[0]
             else:
                 s = c
