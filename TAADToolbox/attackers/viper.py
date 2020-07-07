@@ -7,7 +7,8 @@ import random
 
 DEFAULT_CONFIG = {
     "prob": 0.3,
-    "topn": 12
+    "topn": 12,
+    "generations": 120
 }
 
 
@@ -20,6 +21,7 @@ class ViperAttacker(Attacker):
         self.mydict = {}
         self.topn = self.config["topn"]
         self.prob = self.config["prob"]
+        self.generations = self.config["generations"]
 
     def __call__(self, clsf, x_orig, target=None):
         """
@@ -27,25 +29,33 @@ class ViperAttacker(Attacker):
         * **x_orig** : Input sentence.
         """
         a = x_orig.rstrip("\n")
-        out = []
-        for c in a:
-            if c not in self.mydict:
-                similar_chars, probs = [], []
-                dces_list = self.dces.__call__(c, self.topn)
-                for sc, pr in dces_list:
-                    similar_chars.append(sc)
-                    probs.append(pr)
-                probs = probs[:len(similar_chars)]
-                probs = probs / np.sum(probs)
-                self.mydict[c] = (similar_chars, probs)
-            else:
-                similar_chars, probs = self.mydict[c]
+        y_orig = clsf.get_pred([a])[0]
+        for i in range(self.generations):
+            out = []
+            for c in a:
+                if c not in self.mydict:
+                    similar_chars, probs = [], []
+                    dces_list = self.dces.__call__(c, self.topn)
+                    for sc, pr in dces_list:
+                        similar_chars.append(sc)
+                        probs.append(pr)
+                    probs = probs[:len(similar_chars)]
+                    probs = probs / np.sum(probs)
+                    self.mydict[c] = (similar_chars, probs)
+                else:
+                    similar_chars, probs = self.mydict[c]
 
-            r = random.random()
-            if r < self.prob and len(similar_chars):
-                s = np.random.choice(similar_chars, 1, replace=True, p=probs)[0]
+                r = random.random()
+                if r < self.prob and len(similar_chars):
+                    s = np.random.choice(similar_chars, 1, replace=True, p=probs)[0]
+                else:
+                    s = c
+                out.append(s)
+            ans = "".join(out)
+            if target is None:
+                if clsf.get_pred([ans])[0] != y_orig:
+                    return ans, clsf.get_pred([ans])[0]
             else:
-                s = c
-            out.append(s)
-        ans = "".join(out)
-        return ans, clsf.get_pred([ans])[0]
+                if int(clsf.get_pred([ans])[0]) is int(target):
+                    return ans, clsf.get_pred([ans])[0]
+        return None

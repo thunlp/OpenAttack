@@ -31,10 +31,9 @@ class WordBugAttacker(Attacker):
         * **clsf** : **Classifier** .
         * **x_orig** : Input sentence.
         """
-        if target is None:
-            target = clsf.get_pred([x_orig])[0]
+        y_orig = clsf.get_pred([x_orig])[0]
         inputs = x_orig.strip().lower().split(" ")
-        losses = self.scorefunc(self.scoring, clsf, inputs, target)  # 每个词消失后的loss向量
+        losses = self.scorefunc(self.scoring, clsf, inputs, y_orig)  # 每个词消失后的loss向量
         sorted, indices = torch.sort(losses, descending=True)
 
         advinputs = inputs[:]
@@ -47,17 +46,23 @@ class WordBugAttacker(Attacker):
             t += 1
 
         output2 = clsf.get_pred([detokenizer(advinputs)])[0]
-        return detokenizer(advinputs), output2
+        if target is None:
+            if output2 != y_orig:
+                return detokenizer(advinputs), output2
+        else:
+            if int(output2) is int(target):
+                return detokenizer(advinputs), output2
+        return None
 
-    def scorefunc(self, type, clsf, inputs, target):
+    def scorefunc(self, type, clsf, inputs, y_orig):
         if "replaceone" in type:
-            return self.replaceone(clsf, inputs, target)
+            return self.replaceone(clsf, inputs, y_orig)
         elif "temporal" in type:
-            return self.temporal(clsf, inputs, target)
+            return self.temporal(clsf, inputs, y_orig)
         elif "tail" in type:
-            return self.temporaltail(clsf, inputs, target)
+            return self.temporaltail(clsf, inputs, y_orig)
         elif "combined" in type:
-            return self.combined(clsf, inputs, target)
+            return self.combined(clsf, inputs, y_orig)
         else:
             print("error, No scoring func found")
 
@@ -70,7 +75,7 @@ class WordBugAttacker(Attacker):
             print("error, No transform func found")
 
     # scoring functions
-    def replaceone(self, clsf, inputs, target):
+    def replaceone(self, clsf, inputs, y_orig):
         import torch
 
         losses = torch.zeros(len(inputs))
@@ -78,15 +83,15 @@ class WordBugAttacker(Attacker):
             tempinputs = inputs[:]  # ##
             tempinputs[i] = self.config['unk']
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))  # ##
+                tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))  # ##
             softmax = torch.nn.Softmax(dim=1)
-            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target].item()
-            # losses[i] = F.nll_loss(tempoutput, torch.tensor([[target]], dtype=torch.long), reduce=False)
+            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
+            # losses[i] = F.nll_loss(tempoutput, torch.tensor([[y_orig]], dtype=torch.long), reduce=False)
             losses[i] = nll_lossed  # ##
             # print(" ".join(tempinputs), nll_lossed)
         return losses
 
-    def temporal(self, clsf, inputs, target):
+    def temporal(self, clsf, inputs, y_orig):
         import torch
         softmax = torch.nn.Softmax(dim=1)
 
@@ -96,14 +101,14 @@ class WordBugAttacker(Attacker):
             tempinputs = inputs[: i + 1]
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
-            # losses1[i] = F.nll_loss(tempoutput, target, reduce=False)
-            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][target].item()
+            # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
+            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
             print(detokenizer(tempinputs), losses1[i])
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
 
-    def temporaltail(self, clsf, inputs, target):
+    def temporaltail(self, clsf, inputs, y_orig):
         import torch
         softmax = torch.nn.Softmax(dim=1)
 
@@ -113,15 +118,15 @@ class WordBugAttacker(Attacker):
             tempinputs = inputs[i:]
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
-            # losses1[i] = F.nll_loss(tempoutput, target, reduce=False)
-            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][target].item()
+            # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
+            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
 
-    def combined(self, clsf, inputs, target):
-        temp = self.temporal(clsf, inputs, target)
-        temptail = self.temporaltail(clsf, inputs, target)
+    def combined(self, clsf, inputs, y_orig):
+        temp = self.temporal(clsf, inputs, y_orig)
+        temptail = self.temporaltail(clsf, inputs, y_orig)
         return (temp+temptail) / 2
 
     # transform functions

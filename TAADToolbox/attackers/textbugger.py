@@ -1,9 +1,9 @@
 from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
-from ..utils import detokenizer
 import random
 # from spacy.lang.en import English
+from ..utils import detokenizer
 # import nltk
 # from nltk.tokenize import TreebankWordTokenizer
 # from spacy.lang.en import English
@@ -19,12 +19,11 @@ class TextBuggerAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         self.nlp = DataManager.load("NLTKSentTokenizer")
+        # self.nlp = English()
         self.textprocesser = DefaultTextProcessor()
         self.glove_vectors = None
-        # self.nlp = English()
         # self.glove_vectors = DataManager.load("GloveVector")
         # self.treebank = TreebankWordTokenizer()
-        # self.nlp = English()
         # self.treebank = DataManager.load("TREEBANK")
 
     def __call__(self, clsf, x_orig, target=None):
@@ -32,16 +31,15 @@ class TextBuggerAttacker(Attacker):
         * **clsf** : **Classifier** .
         * **x_orig** : Input sentence.
         """
-        if target is None:
-            target = clsf.get_pred([x_orig])[0]
+        y_orig = clsf.get_pred([x_orig])[0]
         # x = self.treebank.tokenize(x_orig)  # tokenize
         x = self.tokenize(x_orig)
         sentences_of_doc = self.get_sentences(x)
-        ranked_sentences = self.rank_sentences(sentences_of_doc, clsf, target)
+        ranked_sentences = self.rank_sentences(sentences_of_doc, clsf, y_orig)
         x_prime = x.copy()
 
         for sentence_index in ranked_sentences:
-            ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, target)
+            ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
             for word in ranked_words:
                 bug = self.selectBug(word, x_prime, clsf)
                 x_prime = self.replaceWithBug(x_prime, word, bug)
@@ -51,16 +49,22 @@ class TextBuggerAttacker(Attacker):
 
                 # if self.getSemanticSimilarity(x, x_prime, self.epsilon) <= self.epsilon:
                 #    return None  # elelelelelel
-                if prediction != target:
-                    return detokenizer(x_prime), prediction
-        # print("None found")
-        return x_orig, target
+                if target is None:
+                    if prediction != y_orig:
+                        return detokenizer(x_prime), prediction
+                else:
+                    if int(prediction) is int(target):
+                        return detokenizer(x_prime), prediction
+        return None
 
     def get_sentences(self, x):
         # original_review = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x)
+        # self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
+        # doc = self.nlp(original_review)
         original_review = detokenizer(x)
         doc = self.nlp(original_review)
         sentences = [sent.strip() for sent in doc]
+        # sentences = [sent.string.strip() for sent in doc]
         return sentences
 
     def rank_sentences(self, sentences, clsf, target_all):
@@ -68,11 +72,11 @@ class TextBuggerAttacker(Attacker):
         
         map_sentence_to_loss = {}  # 与原文不同
         for i in range(len(sentences)):
-            target = clsf.get_pred([sentences[i]])[0]
-            if target != target_all:
+            y_orig = clsf.get_pred([sentences[i]])[0]
+            if y_orig != target_all:
                 continue
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob(sentences[i]))
+                tempoutput = torch.from_numpy(clsf.get_prob([sentences[i]]))
             # map_sentence_to_loss[i] = F.nll_loss(tempoutput, target_all, reduce=False)
             softmax = torch.nn.Softmax(dim=1)
             nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target_all].item()
@@ -80,7 +84,7 @@ class TextBuggerAttacker(Attacker):
         sentences_sorted_by_loss = {k: v for k, v in sorted(map_sentence_to_loss.items(), key=lambda item: -item[1], reverse=True)}
         return sentences_sorted_by_loss
 
-    def get_word_importances(self, sentence, clsf, target):
+    def get_word_importances(self, sentence, clsf, y_orig):
         import torch
 
         # sentence_tokens = self.treebank.tokenize(sentence)
@@ -91,10 +95,10 @@ class TextBuggerAttacker(Attacker):
             # sentence_without = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(sentence_tokens_without)
             sentence_without = detokenizer(sentence_tokens_without)
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob(sentence_without))
-            # word_losses[curr_token] = F.nll_loss(tempoutput, target, reduce=False)
+                tempoutput = torch.from_numpy(clsf.get_prob([sentence_without]))
+            # word_losses[curr_token] = F.nll_loss(tempoutput, y_orig, reduce=False)
             softmax = torch.nn.Softmax(dim=1)
-            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target].item()
+            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
             word_losses[curr_token] = nll_lossed
         word_losses = {k: v for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
@@ -129,12 +133,12 @@ class TextBuggerAttacker(Attacker):
         # candidate_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(candidate)
         x_prime_sentence = detokenizer(x_prime)
         candidate_sentence = detokenizer(candidate)
-        target = clsf.get_pred([x_prime_sentence])[0]
+        y_orig = clsf.get_pred([x_prime_sentence])[0]
         with torch.no_grad():
             tempoutput = torch.from_numpy(clsf.get_prob(candidate_sentence))
-        # x_prime_loss = F.nll_loss(tempoutput, target, reduce=False)
+        # x_prime_loss = F.nll_loss(tempoutput, y_orig, reduce=False)
         softmax = torch.nn.Softmax(dim=1)
-        nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target].item()
+        nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
         x_prime_loss = nll_lossed
         return x_prime_loss
 
