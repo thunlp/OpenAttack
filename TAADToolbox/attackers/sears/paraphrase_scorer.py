@@ -2,7 +2,8 @@ import time
 import os
 import copy
 import numpy as np
-import onmt_model
+from . import onmt_model
+#import onmt_model
 import onmt
 import collections
 import operator
@@ -14,8 +15,8 @@ from itertools import zip_longest as zip_longest
 
 # DEFAULT_TO_PATHS = ['/home/marcotcr/OpenNMT-py/trained_models/english_french_model_acc_70.61_ppl_3.73_e13.pt', '/home/marcotcr/OpenNMT-py/trained_models/english_german_model_acc_58.34_ppl_7.82_e13.pt', '/home/marcotcr/OpenNMT-py/trained_models/english_portuguese_model_acc_70.90_ppl_4.28_e13.pt']
 # DEFAULT_BACK_PATHS = ['/home/marcotcr/OpenNMT-py/trained_models/french_english_model_acc_68.83_ppl_4.43_e13.pt', '/home/marcotcr/OpenNMT-py/trained_models/german_english_model_acc_57.23_ppl_10.00_e13.pt', '/home/marcotcr/OpenNMT-py/trained_models/portuguese_english_model_acc_69.78_ppl_5.05_e13.pt']
-DEFAULT_TO_PATHS = ['translation_models/english_french_model_acc_71.05_ppl_3.71_e13.pt', 'translation_models/english_portuguese_model_acc_70.75_ppl_4.32_e13.pt']
-DEFAULT_BACK_PATHS = ['translation_models/french_english_model_acc_68.51_ppl_4.43_e13.pt', 'translation_models/portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
+DEFAULT_TO_PATHS = ['data/TranslationModels/english_french_model_acc_71.05_ppl_3.71_e13.pt', 'data/TranslationModels/english_portuguese_model_acc_70.75_ppl_4.32_e13.pt']
+DEFAULT_BACK_PATHS = ['data/TranslationModels/french_english_model_acc_68.51_ppl_4.43_e13.pt', 'data/TranslationModels/portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
 
 def choose_forward_translation(sentence, to_translator, back_translator, n=5):
     # chooses the to_translation that gives the best back_score to
@@ -367,7 +368,7 @@ class ParaphraseScorer(object):
         print()
         print(list(reversed([self.global_itos[x] for x in np.argsort(global_scores)[-100:]])))
         pass
-    def suggest_in_between(self, words, idxs_middle, topk=10, threshold=None,
+    '''def suggest_in_between(self, words, idxs_middle, topk=10, threshold=None,
                      original_sentence=None, max_inserts=4, ignore_set=set(),
                      return_full_texts=False, orig_score=0, verbose=False):
         # TODO: This is outdated
@@ -773,7 +774,7 @@ class ParaphraseScorer(object):
         return global_scores, new_unk
         print()
         print(list(reversed([self.global_itos[x] for x in np.argsort(global_scores)[-100:]])))
-        pass
+        pass'''
     def generate_paraphrases(self, sentence, topk=10, threshold=None, edit_distance_cutoff=None, penalize_unks=True, frequent_ngrams=None):
         # returns a list of (sentence, score).
         assert threshold or topk

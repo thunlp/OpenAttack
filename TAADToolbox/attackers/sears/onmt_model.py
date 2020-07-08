@@ -35,6 +35,7 @@ def clean_text(text, only_upper=False):
     # text = re.sub(' (n?\'.) ', r'\1 ', text)
     # fix apostrophe stuff according to tokenizer
     text = re.sub(' (n)(\'.) ', r'\1 \2 ', text)
+    text = text.replace('<br />', ' ')
     return text
 
 class OnmtModel(object):
@@ -116,7 +117,7 @@ class OnmtModel(object):
         encStates, context = self.translator.model.encoder(src, src_lengths)
         decStates = self.translator.model.decoder.init_decoder_state(
                                         src, context, encStates)
-        src_example = batch.dataset.examples[batch.indices[0].data[0]].src
+        src_example = batch.dataset.examples[batch.indices[0].data.item()].src
         return encStates, context, decStates, src_example
 
     def advance_states(self, encStates, context, decStates, new_idxs,
@@ -178,24 +179,24 @@ class OnmtModel(object):
                 self.translator.translate(batch, data))
             # This is doing replace_unk
             if self.translator.opt.replace_unk:
-                src_example = batch.dataset.examples[batch.indices[0].data[0]].src
+                src_example = batch.dataset.examples[batch.indices[0].data.item()].src
                 for i, x in enumerate(predBatch):
                     for j, sentence in enumerate(x):
                         for k, word in enumerate(sentence):
                             if word == vocab.itos[onmt.IO.UNK]:
                                 _, maxIndex = attn[i][j][k].max(0)
-                                m = int(maxIndex[0])
+                                m = int(maxIndex.item())
                                 predBatch[i][j][k] = src_example[m]
                                 # print 'ae', word, src_example[m]
             if return_from_mapping:
                 this_mappings = []
-                src_example = batch.dataset.examples[batch.indices[0].data[0]].src
+                src_example = batch.dataset.examples[batch.indices[0].data.item()].src
                 for i, x in enumerate(predBatch):
                     for j, sentence in enumerate(x):
                         mapping = {}
                         for k, word in enumerate(sentence):
                             _, maxIndex = attn[i][j][k].max(0)
-                            m = int(maxIndex[0])
+                            m = int(maxIndex.item())
                             mapping[k] = src_example[m]
                         this_mappings.append(mapping)
 
@@ -431,7 +432,7 @@ class ONMTDataset2(torchtext.data.Dataset):
             return alignment
 
         fields["src_map"] = torchtext.data.Field(
-            use_vocab=False, dtype=torch.FloatTensor,
+            use_vocab=False, tensor_type=torch.FloatTensor,
             postprocessing=make_src, sequential=False)
 
         def make_tgt(data, _):
