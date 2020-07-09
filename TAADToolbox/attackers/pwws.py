@@ -46,7 +46,7 @@ class PWWSAttacker(Attacker):
         for i in range(len(H)):
             idx, wd, _ = H[i]
             ret_sent[idx] = wd
-            pred = clsf.get_pred([(ret_sent)])[0]
+            pred = clsf.get_pred([detokenizer(ret_sent)])[0]
             if targeted:
                 if pred == target:
                     return (detokenizer(ret_sent), pred)
