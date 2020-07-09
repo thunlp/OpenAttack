@@ -14,10 +14,12 @@ from ..data_manager import DataManager
 
 
 def prefilter(token, synonym):  # 预过滤（原词，一个候选词
-    if (len(synonym.text.split()) > 2 or (  # the synonym produced is a phrase
-            synonym.lemma == token.lemma) or (  # token and synonym are the same
-            synonym.tag != token.tag) or (  # the pos of the token synonyms are different
-            token.text.lower() == 'be')):  # token is be
+    if (len(synonym.split()) > 2 or (  # the synonym produced is a phrase
+            synonym == token) or (  # the pos of the token synonyms are different
+            token == 'be') or (
+            token == 'is') or (
+            token == 'are') or (
+            token == 'am')):  # token is be
         return False
     else:
         return True
@@ -35,7 +37,7 @@ class WordNetSubstitute(Substitute):
 
     def __init__(self):
         # self.nlp = spacy.load('en_core_web_sm')
-        self.nlp = DataManager.load("SpacyECW")
+        # self.nlp = DataManager.load("SpacyECW")
         self.wn = DataManager.load("NLTKWordnet")
 
     def __call__(self, word_or_char, pos_tag):
@@ -52,10 +54,12 @@ class WordNetSubstitute(Substitute):
         # print("wordnet_wynonyms:", wordnet_synonyms)  # lemma
         synonyms = []
         for wordnet_synonym in wordnet_synonyms:
-            spacy_synonym = self.nlp(wordnet_synonym.name().replace('_', ' '))[0]  # nlp = spacy.load('en_core_web_sm')
+            # spacy_synonym = self.nlp(wordnet_synonym.name().replace('_', ' '))[0]  # nlp = spacy.load('en_core_web_sm')
+            spacy_synonym = wordnet_synonym.name().replace('_', ' ').split()[0]
             synonyms.append(spacy_synonym)  # 原词
         # print("synonyms:", synonyms)
-        token = self.nlp(word_or_char.replace('_', ' '))[0]
+        # token = self.nlp(word_or_char.replace('_', ' '))[0]
+        token = word_or_char.replace('_', ' ').split()[0]
 
         # synonyms = filter(__import__("functools").partial(prefilter, token), synonyms)
         sss = []
@@ -67,9 +71,9 @@ class WordNetSubstitute(Substitute):
 
         synonyms_1 = []
         for synonym in synonyms:
-            if synonym.text.lower() in synonyms_1:
+            if synonym.lower() in synonyms_1:
                 continue
-            synonyms_1.append(synonym.text.lower())
+            synonyms_1.append(synonym.lower())
 
         ret = []
         for syn in synonyms_1:

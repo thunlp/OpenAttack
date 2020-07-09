@@ -8,7 +8,8 @@ import random
 DEFAULT_CONFIG = {
     "prob": 0.3,
     "topn": 12,
-    "generations": 120
+    "generations": 120,
+    "eces": True
 }
 
 
@@ -33,24 +34,33 @@ class ViperAttacker(Attacker):
         for i in range(self.generations):
             out = []
             for c in a:
-                if c not in self.mydict:
-                    similar_chars, probs = [], []
-                    dces_list = self.dces.__call__(c, self.topn)
-                    for sc, pr in dces_list:
-                        similar_chars.append(sc)
-                        probs.append(pr)
-                    probs = probs[:len(similar_chars)]
-                    probs = probs / np.sum(probs)
-                    self.mydict[c] = (similar_chars, probs)
-                else:
-                    similar_chars, probs = self.mydict[c]
+                if self.config["eces"] is False:
+                    if c not in self.mydict:
+                        similar_chars, probs = [], []
+                        dces_list = self.dces.__call__(c, self.topn)
+                        for sc, pr in dces_list:
+                            similar_chars.append(sc)
+                            probs.append(pr)
+                        probs = probs[:len(similar_chars)]
+                        probs = probs / np.sum(probs)
+                        self.mydict[c] = (similar_chars, probs)
+                    else:
+                        similar_chars, probs = self.mydict[c]
 
-                r = random.random()
-                if r < self.prob and len(similar_chars):
-                    s = np.random.choice(similar_chars, 1, replace=True, p=probs)[0]
+                    r = random.random()
+                    if r < self.prob and len(similar_chars):
+                        s = np.random.choice(similar_chars, 1, replace=True, p=probs)[0]
+                    else:
+                        s = c
+                    out.append(s)
                 else:
-                    s = c
-                out.append(s)
+                    r = random.random()
+                    if r < self.prob:
+                        print(self.eces(c)[0])
+                        s = self.eces(c)[0][0]
+                    else:
+                        s = c
+                    out.append(s)
             ans = "".join(out)
             if target is None:
                 if clsf.get_pred([ans])[0] != y_orig:

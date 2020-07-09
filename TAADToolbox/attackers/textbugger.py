@@ -1,9 +1,10 @@
 from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
+from ..substitutes import CounterFittedSubstitute
+from ..utils import detokenizer
 import random
 # from spacy.lang.en import English
-from ..utils import detokenizer
 # import nltk
 # from nltk.tokenize import TreebankWordTokenizer
 # from spacy.lang.en import English
@@ -19,9 +20,10 @@ class TextBuggerAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         self.nlp = DataManager.load("NLTKSentTokenizer")
-        # self.nlp = English()
         self.textprocesser = DefaultTextProcessor()
+        self.counterfit = CounterFittedSubstitute()
         self.glove_vectors = None
+        # self.nlp = English()
         # self.glove_vectors = DataManager.load("GloveVector")
         # self.treebank = TreebankWordTokenizer()
         # self.treebank = DataManager.load("TREEBANK")
@@ -155,7 +157,12 @@ class TextBuggerAttacker(Attacker):
         bugs["delete"] = self.bug_delete(word)
         bugs["swap"] = self.bug_swap(word)
         bugs["sub_C"] = self.bug_sub_C(word)
+        bugs["sub_W"] = self.bug_sub_W(word)
         return bugs
+
+    def bug_sub_W(self, word):
+        res = self.counterfit.__call__('word', threshold=1)[0][0]
+        return res
 
     def bug_insert(self, word):
         if len(word) >= 6:
