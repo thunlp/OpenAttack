@@ -1,8 +1,9 @@
 import numpy as np
+import os
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters
+from ..utils import check_parameters, usencoder, detokenizer
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
@@ -44,9 +45,8 @@ DEFAULT_CONFIG = {
     "synonym_num": 50,
     "processor": DefaultTextProcessor(),
     "substitute": None,
-    "embedding_matrix": None,
-    "vocab": None,
 }
+
 
 class TextFoolerAttacker(Attacker):
     def __init__(self, **kwargs):
@@ -56,6 +56,7 @@ class TextFoolerAttacker(Attacker):
             self.config["substitute"] = CounterFittedSubstitute()
 
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
+        self.sim_predictor = usencoder.UniversalSentenceEncoder()
 
     def __call__(self, clsf, x_orig, target=None):
         """
@@ -87,7 +88,7 @@ class TextFoolerAttacker(Attacker):
         # get importance score
 
         leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
-        leave_1_probs = clsf.get_prob([' '.join(sentence) for sentence in leave_1_texts])
+        leave_1_probs = clsf.get_prob([detokenizer(sentence) for sentence in leave_1_texts])
         leave_1_probs_argmax = np.argmax(leave_1_probs, axis=-1)
         #import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
         #            leave_1_probs.max(axis=-1)[0] - orig_probs[:, leave_1_probs_argmax])
@@ -127,7 +128,7 @@ class TextFoolerAttacker(Attacker):
         text_cache = text_prime[:]
         for idx, synonyms in synonyms_all:
             new_texts = [text_prime[:idx] + [synonym] + text_prime[min(idx + 1, len_text):] for synonym in synonyms]
-            new_probs = clsf.get_prob([' '.join(sentence) for sentence in new_texts])
+            new_probs = clsf.get_prob([detokenizer(sentence) for sentence in new_texts])
 
             # compute semantic similarity
             if idx >= half_sim_score_window and len_text - idx - 1 >= half_sim_score_window:
@@ -142,25 +143,26 @@ class TextFoolerAttacker(Attacker):
             else:
                 text_range_min = 0
                 text_range_max = len_text
-            semantic_sims = self.semantic_sim([text_cache[text_range_min:text_range_max] for i in range(len(new_texts))],
-                                       list(map(lambda x: x[text_range_min:text_range_max], new_texts)), 
-                                       self.config["embedding_matrix"], self.config["vocab"])[0]
 
+            #semantic_sims = self.sim_predictor([' '.join(text_cache[text_range_min:text_range_max]) for i in range(len(new_texts))],
+            #                           list(map(lambda x: ' '.join(x[text_range_min:text_range_max]), new_texts)))[0]
+            texts = [detokenizer(x[text_range_min:text_range_max]) for x in new_texts]
+            semantic_sims = np.array([self.sim_predictor(detokenizer(text_cache[text_range_min:text_range_max]), x) for x in texts])
             if len(new_probs.shape) < 2:
                 new_probs = new_probs.unsqueeze(0)
             new_probs_mask = orig_label != np.argmax(new_probs, axis=-1)
             # prevent bad synonyms
             new_probs_mask *= (semantic_sims >= self.config["sim_score_threshold"])
             # prevent incompatible pos
-            synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(' '.join(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
-                               if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(' '.join(new_text))))[idx] for new_text in new_texts]
+            synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(detokenizer(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
+                               if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(detokenizer(new_text))))[idx] for new_text in new_texts]
 
             pos_mask = np.array(self.pos_filter(pos_ls[idx], synonyms_pos_ls))
             new_probs_mask *= pos_mask
 
             if np.sum(new_probs_mask) > 0:
                 text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
-                x_adv = " ".join(text_prime)
+                x_adv = detokenizer(text_prime)
                 pred = clsf.get_pred([x_adv])
                 if not targeted:
                     return (x_adv, pred[0])
@@ -190,7 +192,7 @@ class TextFoolerAttacker(Attacker):
         except WordNotInDictionaryException:
             return []
 
-    def semantic_sim(self, sents1, sents2, embedding_matrix, vocab):
+    '''def semantic_sim(self, sents1, sents2, embedding_matrix, vocab):
         embeds1 = self.embedding_process(sents1, embedding_matrix, vocab)
         embeds2 = self.embedding_process(sents2, embedding_matrix, vocab)
         norm1 = np.linalg.norm(embeds1, ord=2, axis=2)
@@ -220,7 +222,7 @@ class TextFoolerAttacker(Attacker):
         for i in range(len(seqs)):
             for j in range(max_len):
                 embeds[i, j, :] = embedding_matrix[seqs[i][j]]
-        return embeds
+        return embeds'''
 
     def pos_filter(self, ori_pos, new_pos_list):
         same = [True if ori_pos == new_pos or (set([ori_pos, new_pos]) <= set(['NOUN', 'VERB']))

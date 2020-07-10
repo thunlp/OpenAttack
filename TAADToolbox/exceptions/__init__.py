@@ -3,3 +3,4 @@ from .data import DataConfigErrorException
 from .substitute import NoEmbeddingException, WordNotInDictionaryException
 from .utils import UnknownParameterException
 from .classifier import ClassifierNotSupportException
+from .cais_attacker import WordEmbeddingRequired, TokensNotAligned

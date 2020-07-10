@@ -2,6 +2,8 @@ from ..text_processor import TextProcessor
 from ..data_manager import DataManager
 
 
+
+
 class DefaultTextProcessor(TextProcessor):
     def __init__(self):
         self.nltk = __import__("nltk")
@@ -12,10 +14,17 @@ class DefaultTextProcessor(TextProcessor):
         self.__ner = None
         self.__parser = None
         self.__wordnet = None
+    
+    def __make_tokenizer(self, sent_tokenizer):
+        word_tokenizer = __import__("nltk").WordPunctTokenizer().tokenize
+        def tokenize(sent):
+            sentences = sent_tokenizer(sent)
+            return [token for sent in sentences for token in word_tokenizer(sent)]
+        return tokenize
 
     def get_tokens(self, sentence):
         if self.__tokenize is None:
-            self.__tokenize = DataManager.load("NLTKSentTokenizer")
+            self.__tokenize = self.__make_tokenizer( DataManager.load("NLTKSentTokenizer") )
         if self.__tag is None:
             self.__tag = DataManager.load("NLTKPerceptronPosTagger")
         return self.__tag(self.__tokenize(sentence))
