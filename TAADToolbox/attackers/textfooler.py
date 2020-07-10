@@ -192,38 +192,6 @@ class TextFoolerAttacker(Attacker):
         except WordNotInDictionaryException:
             return []
 
-    '''def semantic_sim(self, sents1, sents2, embedding_matrix, vocab):
-        embeds1 = self.embedding_process(sents1, embedding_matrix, vocab)
-        embeds2 = self.embedding_process(sents2, embedding_matrix, vocab)
-        norm1 = np.linalg.norm(embeds1, ord=2, axis=2)
-        norm2 = np.linalg.norm(embeds2, ord=2, axis=2)
-        cosine_similarities = np.sum(norm1 * norm2, axis=1)
-        clip_cosine_similarities = np.clip(cosine_similarities, -1.0, 1.0)
-        scores = 1.0 - np.arccos(clip_cosine_similarities)
-        return scores
-
-
-    def embedding_process(self, input_, embedding_matrix, vocab):
-        seqs = []
-        max_len = len(input_[0])
-        for sentence in input_:
-            seq = []
-            for word in sentence:
-                if len(seq) < max_len:
-                    if word in vocab:
-                        seq.append(vocab[word])
-                    else:
-                        seq.append(0)
-            while len(seq) < max_len:
-                seq.append(0)
-            seqs.append(seq)
-        embedding_dim = embedding_matrix.shape[1]
-        embeds = np.zeros(shape=((len(seqs), max_len, embedding_dim)))
-        for i in range(len(seqs)):
-            for j in range(max_len):
-                embeds[i, j, :] = embedding_matrix[seqs[i][j]]
-        return embeds'''
-
     def pos_filter(self, ori_pos, new_pos_list):
         same = [True if ori_pos == new_pos or (set([ori_pos, new_pos]) <= set(['NOUN', 'VERB']))
                 else False for new_pos in new_pos_list]
