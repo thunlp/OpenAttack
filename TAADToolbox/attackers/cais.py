@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "wordid": None,
     "threshold": 0.5,
     "token_unk": "<UNK>",
-    "max_iter": 250
+    "max_iter": 100
 }
 
 

@@ -7,7 +7,7 @@ from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm
 
 DEFAULT_CONFIG = {
-    "triggers": []
+    "triggers": ["the", "the", "the"]
 }
 
 TRAIN_CONFIG = {
@@ -32,7 +32,7 @@ class UATAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        trigger_sent = " ".join(self.config["triggers"]) + " " + x_orig
+        trigger_sent = detokenizer(self.config["triggers"]) + " " + x_orig
         pred = clsf.get_pred([trigger_sent])[0]
         if pred == target:
             if targeted:
@@ -78,7 +78,7 @@ class UATAttacker(Attacker):
                     for trigger, _ in beams:
                         while True:
                             trigger_sent =  detokenizer(trigger) + " "
-                            retoken = config["processor"].get_tokens(trigger_sent)
+                            retoken = list(map(lambda x:x[0], config["processor"].get_tokens(trigger_sent))) 
                             if len(retoken) == config["trigger_len"]:
                                 break
                             elif len(retoken) > config["trigger_len"]:
