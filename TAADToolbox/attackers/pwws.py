@@ -1,6 +1,6 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
-from ..substitutes import CounterFittedSubstitute   # TODO: replace it to WordNet !!
+from ..substitutes import WordNetSubstitute
 from ..utils import check_parameters, detokenizer
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException
@@ -17,7 +17,7 @@ class PWWSAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:
-            self.config["substitute"] = CounterFittedSubstitute()
+            self.config["substitute"] = WordNetSubstitute()
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.processor = self.config["processor"]
@@ -31,13 +31,16 @@ class PWWSAttacker(Attacker):
         else:
             targeted = True
         
-        x_orig = list(map(lambda x: x[0], self.processor.get_tokens(x_orig)))   # tokenize
+        #x_orig = list(map(lambda x: x[0], self.processor.get_tokens(x_orig)))   # tokenize
+        x_orig = self.processor.get_tokens(x_orig)
+        poss =  list(map(lambda x: x[1], x_orig)) 
+        x_orig =  list(map(lambda x: x[0], x_orig)) 
 
         S = self.get_saliency(clsf, x_orig, target, targeted) # (len(sent), )
         S_softmax = np.exp(S - S.max())
         S_softmax = S_softmax / S_softmax.sum()
 
-        w_star = [ self.get_wstar(clsf, x_orig, i, target, targeted) for i in range(len(x_orig)) ]  # (len(sent), )
+        w_star = [ self.get_wstar(clsf, x_orig, i, poss[i], target, targeted) for i in range(len(x_orig)) ]  # (len(sent), )
         H = [ (idx, w_star[idx][0], S_softmax[idx] * w_star[idx][1]) for idx in range(len(x_orig)) ]
 
         H = sorted(H, key=lambda x:-x[2])
@@ -72,10 +75,28 @@ class PWWSAttacker(Attacker):
             res = res[:-1] - res[-1]
         return res
 
-    def get_wstar(self, clsf, sent, idx, target, targeted):
+    def get_wstar(self, clsf, sent, idx, pos, target, targeted):
         word = sent[idx]
         try:
-            rep_words = list(map(lambda x:x[0], self.substitute(word, threshold = self.config["threshold"])))
+            # rep_words = list(map(lambda x:x[0], self.substitute(word, pos, threshold = self.config["threshold"])))
+            pp = "noun"
+            if pos in ["a", "r", "n", "v", "s"]:
+                pp = pos
+            else:
+                if pos[:2] == "JJ":
+                    pp = "adj"
+                elif pos[:2] == "VB":
+                    pp = "verb"
+                elif pos[:2] == "NN":
+                    pp = "noun"
+                elif pos[:2] == "RB":
+                    pp = "adv"
+                else:
+                    pp = None
+            if pp is not None:
+                rep_words = list(map(lambda x:x[0], self.substitute(word, pp)))
+            else:
+                rep_words = []
         except WordNotInDictionaryException:
             rep_words = []
         rep_words = list(filter(lambda x: x != word, rep_words))
