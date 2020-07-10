@@ -1,4 +1,5 @@
 from ..substitute import Substitute
+import abc
 
 class WordSubstitute(Substitute):
     @abc.abstractmethod
