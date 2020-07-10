@@ -135,8 +135,8 @@ def disqualify_rules(rule_scores, rule_flips, rule_precsupports, min_precision=0
         bad = (scores < min_bad_score)
         # if bad.mean() > max_bad_proportion:
         #     disqualified.add(i)
-        if np.percentile(scores, max_bad_proportion * 100) < min_bad_score:
-            disqualified.add(i)
+        #if np.percentile(scores, max_bad_proportion * 100) < min_bad_score:
+        #    disqualified.add(i)
         if bad.sum() > max_bad_sum:
             disqualified.add(i)
         if flips.shape[0] == 0 or rule_precsupports[i] == 0 or flips.shape[0] < min_flips:
@@ -158,9 +158,9 @@ def choose_rules_coverage(rule_scores, rule_flips, rule_supports, rule_precsuppo
     chosen_rules = []
     rule_precisions = []
     to_use = rule_scores if frequent_scores_on_all is None else frequent_scores_on_all
-    if disqualified is None:
+    '''if disqualified is None:
         disqualified = disqualify_rules(to_use, rule_flips, rule_precsupports,
-                                        min_precision, min_flips, min_bad_score, max_bad_proportion, max_bad_sum)
+                                        min_precision, min_flips, min_bad_score, max_bad_proportion, max_bad_sum)'''
     # print(len(disqualified))
     if start_from is not None:
         for chosen in start_from:
@@ -173,7 +173,9 @@ def choose_rules_coverage(rule_scores, rule_flips, rule_supports, rule_precsuppo
     while len(chosen_rules) < k:
         best_gain = (-1, -1)
         for i, (scores, flips) in enumerate(zip(rule_scores, rule_flips)):
-            if i in chosen_rules or i in disqualified:
+            '''if i in chosen_rules or i in disqualified:
+                continue'''
+            if i in chosen_rules:
                 continue
             if flips.shape[0] == 0:
                 continue
