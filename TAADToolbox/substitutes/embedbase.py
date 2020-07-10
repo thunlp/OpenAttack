@@ -21,10 +21,10 @@ class EmbedBasedSubstitute(Substitute):
                 / np.linalg.norm(self.config["embedding"])[:, np.newaxis]
             )
 
-    def __call__(self, word_or_char, pos=None, threshold=0.5):
-        if word_or_char not in self.config["word2id"]:
+    def __call__(self, word, pos=None, threshold=0.5):
+        if word not in self.config["word2id"]:
             raise WordNotInDictionaryException
-        wdid = self.config["word2id"][word_or_char]
+        wdid = self.config["word2id"][word]
         wdvec = self.config["embedding"][wdid]
         if self.config["cosine"]:
             dis = 1 - wdvec.dot(self.config["embedding"].T)

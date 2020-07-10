@@ -31,9 +31,9 @@ class HowNetSubstitute(WordSubstitute):
             return
 
         if pos_tag == 'adv':
-            word_origin = self.wn.lemma(word_or_char, pos='r')
+            word_origin = self.wn.lemma(word, pos='r')
         else:
-            word_origin = self.wn.lemma(word_or_char, pos=pos_tag[0])
+            word_origin = self.wn.lemma(word, pos=pos_tag[0])
 
         # pos tagging
         result_list = self.hownet_dict.get(word_origin)

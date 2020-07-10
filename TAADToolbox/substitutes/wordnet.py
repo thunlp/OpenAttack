@@ -9,9 +9,6 @@ from ..data_manager import DataManager
 # from ..exceptions import
 
 
-# nltk.download('wordnet')
-# python -m spacy download en_core_web_sm
-
 
 def prefilter(token, synonym):  # 预过滤（原词，一个候选词
     if (len(synonym.split()) > 2 or (  # the synonym produced is a phrase
@@ -40,34 +37,27 @@ class WordNetSubstitute(WordSubstitute):
         # self.nlp = DataManager.load("SpacyECW")
         self.wn = DataManager.load("NLTKWordnet")
 
-    def __call__(self, word_or_char, pos_tag, threshold=None):
+    def __call__(self, word, pos_tag, threshold=None):
         if pos_tag not in ['noun', 'verb', 'adj', 'adv']:
             print("pos_tag should be ..")
             # raise exception
-        pos = get_pos(pos_tag)  # 整理词性
+        pos = get_pos(pos_tag)
 
         wordnet_synonyms = []
-        synsets = self.wn.synsets(word_or_char, pos=pos)
-        # print("synsets:", synsets)  # wordnet提供近义词
+        synsets = self.wn.synsets(word, pos=pos)
         for synset in synsets:
             wordnet_synonyms.extend(synset.lemmas())
-        # print("wordnet_wynonyms:", wordnet_synonyms)  # lemma
         synonyms = []
         for wordnet_synonym in wordnet_synonyms:
-            # spacy_synonym = self.nlp(wordnet_synonym.name().replace('_', ' '))[0]  # nlp = spacy.load('en_core_web_sm')
             spacy_synonym = wordnet_synonym.name().replace('_', ' ').split()[0]
             synonyms.append(spacy_synonym)  # 原词
-        # print("synonyms:", synonyms)
-        # token = self.nlp(word_or_char.replace('_', ' '))[0]
-        token = word_or_char.replace('_', ' ').split()[0]
+        token = word.replace('_', ' ').split()[0]
 
-        # synonyms = filter(__import__("functools").partial(prefilter, token), synonyms)
         sss = []
         for synonym in synonyms:
             if prefilter(token, synonym):
                 sss.append(synonym)
         synonyms = sss[:]
-        # synonyms = filter(partial(prefilter, token), synonyms)  # 初步过滤
 
         synonyms_1 = []
         for synonym in synonyms:
