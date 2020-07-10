@@ -78,7 +78,7 @@ class UATAttacker(Attacker):
                     for trigger, _ in beams:
                         while True:
                             trigger_sent =  detokenizer(trigger) + " "
-                            retoken = config["processor"].get_tokens(trigger_sent)
+                            retoken = list(map(lambda x:x[0], config["processor"].get_tokens(trigger_sent))) 
                             if len(retoken) == config["trigger_len"]:
                                 break
                             elif len(retoken) > config["trigger_len"]:
