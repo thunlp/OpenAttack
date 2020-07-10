@@ -33,7 +33,7 @@ class InvokeLimitWrapper(Classifier):
         if self.invoke > self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
-        return self.clsf.get_grad(input_)
+        return self.clsf.get_grad(input_, labels)
 
 class InvokeLimitedAttackerEval(DefaultAttackerEval):
     def __init__(self, attacker, classifier, invoke_limit=100,
