@@ -94,7 +94,7 @@ class PWWSAttacker(Attacker):
                 else:
                     pp = None
             if pp is not None:
-                rep_words = list(map(lambda x:x[0], self.substitute(word, pp)))
+                rep_words = list(map(lambda x:x[0], self.substitute(word, pp, threshold = self.config["threshold"])))
             else:
                 rep_words = []
         except WordNotInDictionaryException:
