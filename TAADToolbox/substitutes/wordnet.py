@@ -4,7 +4,7 @@
     DataManager.download("SpacyECW")
     DataManager.download("WordnetSynsets")
 """
-from ..substitute import Substitute
+from .base import WordSubstitute
 from ..data_manager import DataManager
 # from ..exceptions import
 
@@ -33,14 +33,14 @@ def get_pos(pos_tag):
     return pos
 
 
-class WordNetSubstitute(Substitute):
+class WordNetSubstitute(WordSubstitute):
 
     def __init__(self):
         # self.nlp = spacy.load('en_core_web_sm')
         # self.nlp = DataManager.load("SpacyECW")
         self.wn = DataManager.load("NLTKWordnet")
 
-    def __call__(self, word_or_char, pos_tag):
+    def __call__(self, word_or_char, pos_tag, threshold=None):
         if pos_tag not in ['noun', 'verb', 'adj', 'adv']:
             print("pos_tag should be ..")
             # raise exception

@@ -21,7 +21,7 @@ class EmbedBasedSubstitute(Substitute):
                 / np.linalg.norm(self.config["embedding"])[:, np.newaxis]
             )
 
-    def __call__(self, word_or_char, threshold):
+    def __call__(self, word_or_char, pos=None, threshold=0.5):
         if word_or_char not in self.config["word2id"]:
             raise WordNotInDictionaryException
         wdid = self.config["word2id"][word_or_char]
