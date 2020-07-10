@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "wordid": None,
     "threshold": 0.5,
     "token_unk": "<UNK>",
-    "max_iter": 10
+    "max_iter": 250
 }
 
 
@@ -62,6 +62,7 @@ class CAISAttacker(Attacker):
                 if len(reps) > 0:
                     break
             
+            sent = list(map(lambda x: x[0], self.processor.get_tokens( detokenizer(sent) )))
             prob, grad = clsf.get_grad([detokenizer(sent)], [target])
             grad = grad[0]
             prob = prob[0]
