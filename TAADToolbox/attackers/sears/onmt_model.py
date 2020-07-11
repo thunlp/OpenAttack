@@ -26,75 +26,22 @@ def transform_dec_states(decStates, repeat_numbers):
     decStates.input_feed = vars[-1]
 
 def clean_text(text, only_upper=False):
-    # should there be a str here?`
     text = '%s%s' % (text[0].upper(), text[1:])
     if only_upper:
         return text
     text = text.replace('|', 'UNK')
     text = re.sub('(^|\s)-($|\s)', r'\1@-@\2', text)
-    # text = re.sub(' (n?\'.) ', r'\1 ', text)
-    # fix apostrophe stuff according to tokenizer
     text = re.sub(' (n)(\'.) ', r'\1 \2 ', text)
-    text = text.replace('<br />', ' ')
+
     return text
 
 class OnmtModel(object):
     def __init__(self, model_path, gpu_id=1):
-        parser = argparse.ArgumentParser(description='translate.py')
-        parser.add_argument('-model', required=True,
-                            help='Path to model .pt file')
-        parser.add_argument(
-            '-src', required=True,
-            help='Source sequence to decode (one line per sequence)')
-        parser.add_argument('-src_img_dir',   default="",
-                            help='Source image directory')
-        parser.add_argument('-tgt',
-                            help='True target sequence (optional)')
-        parser.add_argument('-output', default='pred.txt',
-                            help="""Path to output the predictions (each line will
-                            be the decoded sequence""")
-        parser.add_argument('-beam_size',  type=int, default=5,
-                            help='Beam size')
-        parser.add_argument('-batch_size', type=int, default=30,
-                            help='Batch size')
-        parser.add_argument('-max_sent_length', type=int, default=100,
-                            help='Maximum sentence length.')
-        parser.add_argument('-replace_unk', action="store_true",
-                            help="""Replace the generated UNK tokens with the
-                            source token that had highest attention weight. If
-                            phrase_table is provided, it will lookup the
-                            identified source token and give the corresponding
-                            target token. If it is not provided (or the
-                            identified source token does not exist in the
-                            table) then it will copy the source token""")
-        parser.add_argument(
-            '-verbose', action="store_true",
-            help='Print scores and predictions for each sentence')
-        parser.add_argument('-attn_debug', action="store_true",
-                            help='Print best attn for each word')
-        parser.add_argument('-dump_beam', type=str, default="",
-                            help='File to dump beam information to.')
-
-        parser.add_argument('-n_best', type=int, default=1,
-                            help="""If verbose is set, will output the n_best
-                            decoded sentences""")
-
-        parser.add_argument('-gpu', type=int, default=-1,
-                            help="Device to run on")
-        # options most relevant to summarization
-        parser.add_argument('-dynamic_dict', action='store_true',
-                            help="Create dynamic dictionaries")
-        parser.add_argument('-share_vocab', action='store_true',
-                            help="Share source and target vocabulary")
-        # Alpha and Beta values for Google Length + Coverage penalty
-        # Described here: https://arxiv.org/pdf/1609.08144.pdf, Section 7
-        parser.add_argument('-alpha', type=float, default=0.0,
-                            help="""Google NMT length penalty parameter
-                            (higher = longer generation)""")
-        parser.add_argument('-beta', type=float, default=0.0,
-                            help="""Coverage penalty parameter""")
-
-        opt = parser.parse_args(( '-model %s -src /tmp/a -tgt /tmp/b -output /tmp/c -gpu %d -verbose -beam_size 5 -batch_size 1 -n_best 5 -replace_unk' % (model_path, gpu_id)).split()) # noqa
+        opt = dict(model = model_path, src = "/tmp/a", tgt = "/tmp/b", output = "/tmp/c", gpu = gpu_id, beam_size = 5, 
+                batch_size = 1, n_best = 5, max_sent_length = 300, replace_unk = True, verbose = True, attn_debug = True, 
+                dump_beam = "", dynamic_dict = True, share_vocab = True, alpha = 0.0, beta = 0.0)
+        opt = argparse.Namespace(**opt)
+        #opt = parser.parse_args(( '-model %s -src /tmp/a -tgt /tmp/b -output /tmp/c -gpu %d -verbose -beam_size 5 -batch_size 1 -n_best 5 -replace_unk' % (model_path, gpu_id)).split()) # noqa
         opt.cuda = opt.gpu > -1
         if opt.cuda:
             torch.cuda.set_device(opt.gpu)
@@ -122,10 +69,6 @@ class OnmtModel(object):
 
     def advance_states(self, encStates, context, decStates, new_idxs,
                        new_sizes):
-        # new_idxs is a list of new inputs
-        # new_sizes indicates how duplicates to make of each decStates in the
-        #   previous round
-        # Returns predict_proba, decStates(updated)
         tt = torch.cuda if self.translator.opt.cuda else torch
 
 
@@ -187,7 +130,6 @@ class OnmtModel(object):
                                 _, maxIndex = attn[i][j][k].max(0)
                                 m = int(maxIndex.item())
                                 predBatch[i][j][k] = src_example[m]
-                                # print 'ae', word, src_example[m]
             if return_from_mapping:
                 this_mappings = []
                 src_example = batch.dataset.examples[batch.indices[0].data.item()].src
@@ -202,10 +144,7 @@ class OnmtModel(object):
 
                 mappings.append(this_mappings)
             out.extend([[' '.join(x) for x in y] for y in predBatch])
-    #         print predScore
-    #         print goldScore
             scores.extend([x[:self.translator.opt.n_best] for x in predScore])
-            # gold.extend([x for x in goldScore])
         self.translator.opt.beam_size = prev_beam_size
         if return_from_mapping:
             return [list(zip(x, y, z)) for x, y, z in zip(out, scores, mappings)]
@@ -214,8 +153,6 @@ class OnmtModel(object):
     def score(self, original_sentence, other_sentences):
         original_sentence = clean_text(original_sentence)
         other_sentences = [clean_text(x) for x in other_sentences]
-        # print(original_sentence, other_sentences)
-        # print other_sentences
         sentences = [original_sentence] * len(other_sentences)
         self.translator.opt.tgt = 'yes'
         data = ONMTDataset2(sentences, other_sentences, self.translator.fields,
@@ -226,9 +163,7 @@ class OnmtModel(object):
             batch_size=opt.batch_size, train=False, sort=False,
             shuffle=False)
         gold = []
-        # print(original_sentence, other_sentences)
         for batch in testData:
-            # print('a')
             scores = self.translator._runTarget(batch, data)
             gold.extend([x for x in scores.cpu().numpy()[0]])
         return np.array(gold)
@@ -311,8 +246,6 @@ class ONMTDataset2(torchtext.data.Dataset):
 
         if tgt_path is not None:
             for i, tgt_line in enumerate(tgt_path):
-                # if i in skip:
-                #     continue
                 tgt_line = tgt_line.split()
 
                 # Check truncation condition.
@@ -377,7 +310,7 @@ class ONMTDataset2(torchtext.data.Dataset):
         fields = ONMTDataset2.get_fields(
             len(ONMTDataset2.collect_features(vocab)))
         for k, v in vocab.items():
-            # Hack. Can't pickle defaultdict :(
+
             v.stoi = defaultdict(lambda: 0, v.stoi)
             fields[k].vocab = v
         return fields
@@ -410,8 +343,6 @@ class ONMTDataset2(torchtext.data.Dataset):
             pad_token=onmt.IO.PAD_WORD,
             include_lengths=True)
 
-        # fields = [("src_img", torchtext.data.Field(
-        #     include_lengths=True))]
 
         for j in range(nFeatures):
             fields["src_feat_"+str(j)] = \
