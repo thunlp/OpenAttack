@@ -2,6 +2,7 @@ import numpy as np
 from copy import deepcopy
 from ..attacker import Attacker
 from ..data_manager import DataManager
+from ..utils import detokenizer
 
 
 def get_min(indices_adv1, d):
@@ -12,7 +13,8 @@ def get_min(indices_adv1, d):
 
 
 DEFAULT_CONFIG = {
-    "sst": False
+    "sst": False,
+    "detokenizer": detokenizer
 }
 
 
@@ -31,6 +33,7 @@ class GNAEAttacker(Attacker):
         self.inverter = self.inverter.cpu()
         self.autoencoder.eval()
         self.autoencoder = self.autoencoder.cpu()
+        self.detokenizer = self.config["detokenizer"]
         self.right = 0.05  # ####
         self.nsamples = 10
         self.autoencoder.gpu = False
@@ -99,8 +102,10 @@ class GNAEAttacker(Attacker):
                 words = [self.idx2word[x] for x in sample_idx]
                 if "<eos>" in words:
                     words = words[:words.index("<eos>")]
-                adv_prob.append(clsf.get_pred([" ".join(words)])[0])
-                sentences.append(" ".join(words))
+                # adv_prob.append(clsf.get_pred([" ".join(words)])[0])
+                # sentences.append(" ".join(words))
+                adv_prob.append(clsf.get_pred([self.detokenizer(words)])[0])
+                sentences.append(self.detokenizer(words))
             for i in range(self.nsamples):
                 if target is None:
                     if adv_prob[i] != y_orig:
@@ -182,7 +187,8 @@ class GNAEAttacker(Attacker):
             for i in range(len(words)):
                 if words[i] is "<oov>":
                     words[i] = ""
-            sent = " ".join(words)
+            # sent = " ".join(words)
+            sent = self.detokenizer(words)
             pred = clsf.get_pred([sent])[0]
             if tt is None:
                 if pred != y_orig:
