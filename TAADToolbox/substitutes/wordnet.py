@@ -6,7 +6,7 @@
 """
 from .base import WordSubstitute
 from ..data_manager import DataManager
-# from ..exceptions import
+from ..exceptions import UnknownPOSException
 
 
 
@@ -38,9 +38,10 @@ class WordNetSubstitute(WordSubstitute):
         self.wn = DataManager.load("NLTKWordnet")
 
     def __call__(self, word, pos_tag, threshold=None):
+        if pos_tag is None:
+            return [word]
         if pos_tag not in ['noun', 'verb', 'adj', 'adv']:
-            print("pos_tag should be ..")
-            # raise exception
+            raise UnknownPOSException(word, pos_tag)
         pos = get_pos(pos_tag)
 
         wordnet_synonyms = []

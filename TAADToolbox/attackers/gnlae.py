@@ -55,6 +55,23 @@ class GNLAEAttacker(Attacker):
             self.config["substitute"] = CounterFittedSubstitute()
 
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
+    
+    def parse_pos(self, pos):
+        pp = "noun"
+        if pos in ["a", "r", "n", "v", "s"]:
+            pp = pos
+        else:
+            if pos[:2] == "JJ":
+                pp = "adj"
+            elif pos[:2] == "VB":
+                pp = "verb"
+            elif pos[:2] == "NN":
+                pp = "noun"
+            elif pos[:2] == "RB":
+                pp = "adv"
+            else:
+                pp = None
+        return pp
 
     def __call__(self, clsf, x_orig, target=None):
         """
@@ -67,18 +84,20 @@ class GNLAEAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        x_orig = list(map(lambda x: x[0], self.config["processor"].get_tokens(x_orig)))
+        x_orig = self.config["processor"].get_tokens(x_orig)
+        x_pos =  list(map(lambda x: self.parse_pos(x[1]), x_orig))
+        x_orig = list(map(lambda x: x[0], x_orig))
 
         x_len = len(x_orig)
         neighbours_nums = [
-            self.get_neighbour_num(word) if word not in self.config["skip_words"] else 0
-            for word in x_orig
+            self.get_neighbour_num(word, pos) if word not in self.config["skip_words"] else 0
+            for word, pos in zip(x_orig, x_pos)
         ]
         neighbours = [
-            self.get_neighbours(word, self.config["top_n1"])
+            self.get_neighbours(word, pos, self.config["top_n1"])
             if word not in self.config["skip_words"]
             else []
-            for word in x_orig
+            for word, pos in zip(x_orig, x_pos)
         ]
 
         if np.sum(neighbours_nums) == 0:
@@ -136,21 +155,21 @@ class GNLAEAttacker(Attacker):
 
         return None  # Failed
 
-    def get_neighbour_num(self, word):
+    def get_neighbour_num(self, word, pos):
         threshold = self.config["neighbour_threshold"]
         cnt = 0
         try:
-            return len(self.config["substitute"](word, threshold=threshold))
+            return len(self.config["substitute"](word, pos, threshold=threshold))
         except WordNotInDictionaryException:
             return 0
 
-    def get_neighbours(self, word, num):
+    def get_neighbours(self, word, pos, num):
         threshold = self.config["neighbour_threshold"]
         try:
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, threshold=threshold)[:num],
+                    self.config["substitute"](word, pos, threshold=threshold)[:num],
                 )
             )
         except WordNotInDictionaryException:
@@ -163,13 +182,14 @@ class GNLAEAttacker(Attacker):
             ret = x_cur.copy()
             ret[indx] = word
             return ret
-
         new_list = []
         rep_words = []
         for word in neighbours:
             if word != x_orig[indx]:
                 new_list.append(do_replace(word))
                 rep_words.append(word)
+        if len(new_list) == 0:
+            return x_cur
         new_list.append(x_cur)
 
         pred_scores = clsf.get_prob(self.make_batch(new_list))[:, target]

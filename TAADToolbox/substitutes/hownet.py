@@ -7,7 +7,7 @@
 """
 from .base import WordSubstitute
 from ..data_manager import DataManager
-# from ..exceptions import
+from ..exceptions import UnknownPOSException
 
 
 pos_list = ['noun', 'verb', 'adj', 'adv']
@@ -24,11 +24,12 @@ class HowNetSubstitute(WordSubstitute):
         # self.wnl = WordNetLemmatizer()
 
     def __call__(self, word, pos_tag, threshold=None):
+        if pos_tag is None:
+            return [word]
         word_candidate = []
         # pos_tag = 'noun' 'verb' 'adj' 'adv'
         if pos_tag not in pos_set:
-            print("pos should be 'noun' 'verb' 'adj' or 'adv'")
-            return
+            raise UnknownPOSException(word, pos_tag)
 
         if pos_tag == 'adv':
             word_origin = self.wn.lemma(word, pos='r')
@@ -39,20 +40,12 @@ class HowNetSubstitute(WordSubstitute):
         result_list = self.hownet_dict.get(word_origin)
         word_pos = set()
         word_pos.add(pos_tag)
-        '''for a in result_list:
-            if type(a) != dict:
-                continue
-            word_pos.add(a['en_grammar'])
-        if len(word_pos & pos_set) == 0:
-            # raise exception
-            return'''
 
         # get sememes
         word_sememes = self.hownet_dict.get_sememes_by_word(word_origin, structured=False, lang="en", merge=False)
         word_sememe_sets = [t['sememes'] for t in word_sememes]
         if len(word_sememes) == 0:
-            # raise exception
-            return
+            return [word]
 
         # find candidates
         for wd in self.en_word_list:
@@ -88,8 +81,6 @@ class HowNetSubstitute(WordSubstitute):
                     if pos_valid == pos_tag:
                         word_candidate.append(wd)
 
-        # print("word_candidate:", word_candidate)
-        # print("len:", len(word_candidate))
         word_candidate_1 = []
         for wd in word_candidate:
             wdlist = wd.split(' ')
@@ -97,8 +88,6 @@ class HowNetSubstitute(WordSubstitute):
             if len(wdlist) == 1:
                 # print("111", wd)
                 word_candidate_1.append(wd)
-        # print("word_candidate_1:", word_candidate_1)
-        # print("len:", len(word_candidate_1))
         ret = []
         for wd in word_candidate_1:
             ret.append((wd, 1))
