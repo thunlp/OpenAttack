@@ -5,7 +5,7 @@
     DataManager.download("HOWNET")
     DataManager.download("WNL")
 """
-from ..substitute import Substitute
+from .base import WordSubstitute
 from ..data_manager import DataManager
 # from ..exceptions import
 
@@ -14,7 +14,7 @@ pos_list = ['noun', 'verb', 'adj', 'adv']
 pos_set = set(pos_list)
 
 
-class HowNetSubstitute(Substitute):
+class HowNetSubstitute(WordSubstitute):
 
     def __init__(self):
         self.hownet_dict = DataManager.load("HOWNET")
@@ -23,7 +23,7 @@ class HowNetSubstitute(Substitute):
         # self.hownet_dict = OpenHowNet.HowNetDict()
         # self.wnl = WordNetLemmatizer()
 
-    def __call__(self, word_or_char, pos_tag):
+    def __call__(self, word, pos_tag, threshold=None):
         word_candidate = []
         # pos_tag = 'noun' 'verb' 'adj' 'adv'
         if pos_tag not in pos_set:
@@ -31,9 +31,9 @@ class HowNetSubstitute(Substitute):
             return
 
         if pos_tag == 'adv':
-            word_origin = self.wn.lemma(word_or_char, pos='r')
+            word_origin = self.wn.lemma(word, pos='r')
         else:
-            word_origin = self.wn.lemma(word_or_char, pos=pos_tag[0])
+            word_origin = self.wn.lemma(word, pos=pos_tag[0])
 
         # pos tagging
         result_list = self.hownet_dict.get(word_origin)

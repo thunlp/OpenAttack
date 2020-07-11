@@ -7,7 +7,7 @@ from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm
 
 DEFAULT_CONFIG = {
-    "triggers": []
+    "triggers": ["the", "the", "the"]
 }
 
 TRAIN_CONFIG = {
@@ -32,7 +32,7 @@ class UATAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        trigger_sent = " ".join(self.config["triggers"]) + " " + x_orig
+        trigger_sent = detokenizer(self.config["triggers"]) + " " + x_orig
         pred = clsf.get_pred([trigger_sent])[0]
         if pred == target:
             if targeted:
@@ -76,14 +76,23 @@ class UATAttacker(Attacker):
                     beams = nw_beams
                     nw_beams = []
                     for trigger, _ in beams:
-                        trigger_sent = " ".join(trigger) + " "
+                        while True:
+                            trigger_sent =  detokenizer(trigger) + " "
+                            retoken = list(map(lambda x:x[0], config["processor"].get_tokens(trigger_sent))) 
+                            if len(retoken) == config["trigger_len"]:
+                                break
+                            elif len(retoken) > config["trigger_len"]:
+                                trigger = retoken[: config["trigger_len"] ]
+                            else:
+                                trigger = retoken + [ "the" for _ in range(config["trigger_len"] - len(retoken)) ]
+
                         xt = list(map(lambda x: trigger_sent + x, x))
                         grad = clsf.get_grad(xt, y)[1]
                         candidates_words = get_candidates(grad[:, i, :].mean(axis=0))
 
                         for cw in candidates_words:
                             tt = trigger[:i] + [cw] + trigger[i + 1:]
-                            trigger_sent = " ".join(tt) + " "
+                            trigger_sent = detokenizer(tt) + " "
                             xt = list(map(lambda x: trigger_sent + x, x))
                             pred = clsf.get_prob(xt)
                             loss = pred[ (list(range(len(y))), list(y) ) ].sum()

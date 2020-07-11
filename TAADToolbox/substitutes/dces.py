@@ -8,7 +8,7 @@
     DataManager.download("DCES")
 """
 
-from ..substitute import Substitute
+from .base import CharSubstitute
 from ..data_manager import DataManager
 # from ..exceptions import
 import numpy as np
@@ -29,7 +29,7 @@ def get_hex_string(ch):
     return '{:04x}'.format(ord(ch)).upper()  # 获得字符16进制编码
 
 
-class DcesSubstitute(Substitute):
+class DcesSubstitute(CharSubstitute):
 
     def __init__(self):
         self.vec_colnames, self.descs, self.neigh = DataManager.load("DCES")

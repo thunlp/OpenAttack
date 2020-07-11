@@ -7,6 +7,8 @@ def detokenizer(tokens):
             new_sent = True
         elif len(token) >= 2 and token[0] == "'" and token[1] != "'":
             ret += token
+        elif len(token) >= 2 and token[:2] == "##":
+            ret += token[2:]
         elif token == "n't":
             ret += token
         else:
