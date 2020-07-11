@@ -7,3 +7,6 @@ class NoEmbeddingException(AttackException):
 
 class WordNotInDictionaryException(AttackException):
     pass
+
+class UnknownPOSException(AttackException):
+    pass
