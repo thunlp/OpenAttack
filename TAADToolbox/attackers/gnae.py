@@ -1,13 +1,8 @@
+import numpy as np
+from copy import deepcopy
 from ..attacker import Attacker
 from ..data_manager import DataManager
 from ..utils import detokenizer
-import numpy as np
-from copy import deepcopy
-
-
-DEFAULT_CONFIG = {
-
-}
 
 
 def get_min(indices_adv1, d):
@@ -17,82 +12,76 @@ def get_min(indices_adv1, d):
     return orig_idx_adv1
 
 
+DEFAULT_CONFIG = {
+    "sst": False,
+    "detokenizer": detokenizer
+}
+
+
 class GNAEAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.idx2word, word2idx, autoencoder, inverter, gan_gen, gan_disc = DataManager.load("GANE")
+        if self.config['sst'] is False:  # snli
+            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("GNAE")
+            self.maxlen = 10
+        else:
+            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("SGNAE")
+            self.maxlen = 100
+        self.idx2word = {v: k for k, v in self.word2idx.items()}
         self.gan_gen = self.gan_gen.cpu()
         self.inverter = self.inverter.cpu()
         self.autoencoder.eval()
         self.autoencoder = self.autoencoder.cpu()
-        self.maxlen = 10
-        self.right = 0.05
-        self.nsamples = 20
+        self.detokenizer = self.config["detokenizer"]
+        self.right = 0.05  # ####
+        self.nsamples = 10
         self.autoencoder.gpu = False
         self.lowercase = True
-        self.hybrid = False
 
-    def __call__(self, clsf, premise_orig, hypothesis_orig, target=None):
+
+    def __call__(self, clsf, hypothesis_orig, target=None):
+        if self.config['sst'] is False:
+            return self.snli_call(clsf, hypothesis_orig, target=target)
+        else:
+            return self.sst_call(clsf, hypothesis_orig, tt=target)
+
+
+    def snli_call(self, clsf, hypothesis_orig, target=None):
         import torch
         from torch.autograd import Variable
-        """
-        * **clsf** : **Classifier** .
-        * **x_orig** : Input sentence.
-        'entailment': 0, 'neutral': 1, 'contradiction': 2
-        """
+
+        # * **clsf** : **Classifier** .
+        # * **x_orig** : Input sentence.
+        # 'entailment': 0, 'neutral': 1, 'contradiction': 2
+
+        y_orig = clsf.get_pred([hypothesis_orig])[0]
         # tokenization
         if self.lowercase:
             hypothesis_orig = hypothesis_orig.strip().lower()
-            premise_orig = premise_orig.strip().lower()
 
-        premise_words = premise_orig.strip().split(" ")
         hypothesis_words = hypothesis_orig.strip().split(" ")
-        premise_words = ['<sos>'] + premise_words
-        premise_words += ['<eos>']
         hypothesis_words = ['<sos>'] + hypothesis_words
-        # hypothesis_words += ['<eos>']
-
-        if ((len(premise_words) > self.maxlen + 1) or \
-                (len(hypothesis_words) > self.maxlen)):
-            print("Sentence too long!")
-            return
+        hypothesis_words += ['<eos>']
 
         vocab = self.word2idx
         unk_idx = vocab['<oov>']
         hypothesis_indices = [vocab[w] if w in vocab else unk_idx for w in hypothesis_words]
-        premise_indices = [vocab[w] if w in vocab else unk_idx for w in premise_words]
-        premise_words = [w if w in vocab else '<oov>' for w in premise_words]
         hypothesis_words = [w if w in vocab else '<oov>' for w in hypothesis_words]
         length = min(len(hypothesis_words), self.maxlen)
-
-        if len(premise_indices) < self.maxlen:
-            premise_indices += [0] * (self.maxlen - len(premise_indices))
-            premise_words += ["<pad>"] * (self.maxlen - len(premise_words))
 
         if len(hypothesis_indices) < self.maxlen:
             hypothesis_indices += [0] * (self.maxlen - len(hypothesis_indices))
             hypothesis_words += ["<pad>"] * (self.maxlen - len(hypothesis_words))
 
-        premise = premise_indices[:self.maxlen]
         hypothesis = hypothesis_indices[:self.maxlen]
-        premise_words = premise_words[:self.maxlen]
         hypothesis_words = hypothesis_words[:self.maxlen]
-        # target = target = clsf.get_pred([x_orig])[0]
-        if target is None:  # 0, 1, 2
-            target = clsf.get_pred([premise_orig, hypothesis_orig])[0]  # calc x_orig's prediction
-        # 这里应该怎么写？
-
-        c = self.autoencoder.encode([hypothesis], [length], noise=False)  # 这里原本是一整个batch?
+        c = self.autoencoder.encode(torch.tensor([hypothesis, hypothesis], dtype=torch.long),
+                                    torch.tensor([length, length], dtype=torch.long), noise=False)
         z = self.inverter(c).data.cpu()
 
-        # search_fast func
-        # if not self.hybrid:
-
-        premise = premise.unsqueeze(0)
+        hypothesis = torch.tensor(hypothesis, dtype=torch.long)
         hypothesis = hypothesis.unsqueeze(0)
-        y = target
-        x_adv1, d_adv1 = None, None
         right_curr = self.right
         counter = 0
 
@@ -100,37 +89,111 @@ class GNAEAttacker(Attacker):
             mus = z.repeat(self.nsamples, 1)
             delta = torch.FloatTensor(mus.size()).uniform_(-1 * right_curr, right_curr)
             dist = np.array([np.sqrt(np.sum(x ** 2)) for x in delta.cpu().numpy()])
-            perturb_z = Variable(mus + delta, volatile=True)
-            x_tilde = self.generator(perturb_z)  # perturb
+            # print(dist)
+            perturb_z = Variable(mus + delta)  # ####  volatile=True
 
-            y_tide = self.clsf([premise, hypothesis])[0]
-            indices_adv = np.where(y_tide.data.cpu().numpy() != y.data.cpu().numpy())[0]
+            x_tilde = self.gan_gen(perturb_z)  # perturb
+            adv_prob = []
+            index_adv = []
+            sentences = []
+            for i in range(self.nsamples):
+                x_adv = x_tilde[i]
+                sample_idx = self.autoencoder.generate(x_adv, 10, True).data.cpu().numpy()[0]
+                words = [self.idx2word[x] for x in sample_idx]
+                if "<eos>" in words:
+                    words = words[:words.index("<eos>")]
+                # adv_prob.append(clsf.get_pred([" ".join(words)])[0])
+                # sentences.append(" ".join(words))
+                adv_prob.append(clsf.get_pred([self.detokenizer(words)])[0])
+                sentences.append(self.detokenizer(words))
+            for i in range(self.nsamples):
+                if target is None:
+                    if adv_prob[i] != y_orig:
+                        index_adv.append(i)
+                else:
+                    if int(adv_prob[i]) is int(target):
+                        index_adv.append(i)
 
-            if(len(indices_adv) > 0) and (indices_adv[0] == 0):
-                indices_adv = np.delete(indices_adv, 0)
-
-            if len(indices_adv) == 0:
+            if len(index_adv) == 0:
                 counter += 1
                 right_curr *= 2
             else:
-                idx_adv = get_min(indices_adv, dist)
-                # if d_adv is None or (dist[idx_adv] < d_adv)
-                x_adv1 = x_tilde[idx_adv]
-                d_adv1 = float(dist[idx_adv])
+                idx_adv = get_min(index_adv, dist)
+                # x_adv = x_tilde[idx_adv]
+                # d_adv = float(dist[idx_adv])
+                return sentences[idx_adv], clsf.get_pred([sentences[idx_adv]])[0]
+        return None
 
-        try:
-            hyp_sample_idx = self.autoencoder.generate(x_adv1, 10, True).data.cpu().numpy()[0]
-            words = [self.idx2word[x] for x in hyp_sample_idx]  # test
+    def sst_call(self, clsf, hypothesis_orig, tt=None):
+        import torch
+        from torch.autograd import Variable
+
+        y_orig = clsf.get_pred([hypothesis_orig])[0]
+        if self.lowercase:
+            hypothesis_orig = hypothesis_orig.strip().lower()
+
+        hypothesis_words = hypothesis_orig.strip().split(" ")
+        hypothesis_words = ['<sos>'] + hypothesis_words
+        hypothesis_words += ['<eos>']
+
+        vocab = self.word2idx
+        unk_idx = vocab['<oov>']
+        hypothesis_indices = [vocab[w] if w in vocab else unk_idx for w in hypothesis_words]
+        hypothesis_words = [w if w in vocab else '<oov>' for w in hypothesis_words]
+        length = min(len(hypothesis_words), self.maxlen)
+
+        if len(hypothesis_indices) < self.maxlen:
+            hypothesis_indices += [0] * (self.maxlen - len(hypothesis_indices))
+            hypothesis_words += ["<pad>"] * (self.maxlen - len(hypothesis_words))
+
+        hypothesis = hypothesis_indices[:self.maxlen]
+        hypothesis_words = hypothesis_words[:self.maxlen]
+        source_orig = hypothesis[:-1]
+        target_orig = hypothesis[1:]
+        if len(source_orig) > self.maxlen:
+            source_orig = source_orig[:self.maxlen]
+        if len(target_orig) > self.maxlen:
+            target_orig = target_orig[:self.maxlen]
+        zeros = (self.maxlen - len(target_orig)) * [0]
+        source_orig += zeros
+        target_orig += zeros
+
+        source = torch.tensor(np.array(source_orig), dtype=torch.long)
+        target = torch.tensor(np.array(target_orig), dtype=torch.long).view(-1)
+
+        source = Variable(source)
+        target = Variable(target)
+        mask = target.gt(0)
+        masked_target = target.masked_select(mask)
+        ntokens = len(self.word2idx)
+        output_mask = mask.unsqueeze(1).expand(mask.size(0), ntokens)
+        output = self.autoencoder(torch.tensor([source_orig], dtype=torch.long),
+                                  torch.tensor([length], dtype=torch.long),
+                                  noise=True)
+        flattened_output = output.view(-1, ntokens)  # ####
+
+        masked_output = flattened_output.masked_select(output_mask).view(-1, ntokens)
+
+        # max_vals, max_indices = torch.max(masked_output, 1)
+        max_values, max_indices = torch.max(output, 2)
+        max_indices = max_indices.view(output.size(0), -1).data.cpu().numpy()
+        target = target.view(output.size(0), -1).data.cpu().numpy()
+        for t, idx in zip(target, max_indices):
+            words = [self.idx2word[x] for x in idx]
             if "<eos>" in words:
                 words = words[:words.index("<eos>")]
-            # target = clsf.get_pred([premise_orig, hypothesis_orig])[0]
-            return(detokenizer(words), clsf.get_pred([premise_orig, detokenizer(words)])[0])
-
-        except Exception as e:
-            print(e)
-            print(premise_words)
-            print(hypothesis_words)
-            print("no adversary found for : \n {0} \n {1}\n\n". \
-                  format(detokenizer(premise_words), detokenizer(hypothesis_words)))
-            return None
-
+            if "." in words:
+                words = words[:words.index(".")]
+            for i in range(len(words)):
+                if words[i] is "<oov>":
+                    words[i] = ""
+            # sent = " ".join(words)
+            sent = self.detokenizer(words)
+            pred = clsf.get_pred([sent])[0]
+            if tt is None:
+                if pred != y_orig:
+                    return sent, pred
+            else:
+                if int(pred) == int(tt):
+                    return sent, pred
+        return None

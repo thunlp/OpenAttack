@@ -56,7 +56,6 @@ class ViperAttacker(Attacker):
                 else:
                     r = random.random()
                     if r < self.prob:
-                        print(self.eces(c)[0])
                         s = self.eces(c)[0][0]
                     else:
                         s = c
