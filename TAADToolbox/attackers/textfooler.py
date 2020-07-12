@@ -3,7 +3,8 @@ import os
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters, usencoder, detokenizer
+from ..utils import check_parameters, detokenizer
+from ..metric import usencoder
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
