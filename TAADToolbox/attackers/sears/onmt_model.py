@@ -5,7 +5,7 @@ import numpy as np
 import re
 import sys
 import torchtext
-
+from ...utils import detokenizer
 from collections import Counter, defaultdict
 
 
@@ -36,10 +36,10 @@ def clean_text(text, only_upper=False):
     return text
 
 class OnmtModel(object):
-    def __init__(self, model_path, gpu_id=1):
+    def __init__(self, model_path, gpu_id=0, cuda=True):
         opt = dict(model = model_path, src = "/tmp/a", tgt = "/tmp/b", output = "/tmp/c", gpu = gpu_id, beam_size = 5, 
                 batch_size = 1, n_best = 5, max_sent_length = 300, replace_unk = True, verbose = True, attn_debug = True, 
-                dump_beam = "", dynamic_dict = True, share_vocab = True, alpha = 0.0, beta = 0.0)
+                dump_beam = "", dynamic_dict = True, share_vocab = True, alpha = 0.0, beta = 0.0, cuda=True)
         opt = argparse.Namespace(**opt)
         #opt = parser.parse_args(( '-model %s -src /tmp/a -tgt /tmp/b -output /tmp/c -gpu %d -verbose -beam_size 5 -batch_size 1 -n_best 5 -replace_unk' % (model_path, gpu_id)).split()) # noqa
         opt.cuda = opt.gpu > -1
@@ -143,7 +143,7 @@ class OnmtModel(object):
                         this_mappings.append(mapping)
 
                 mappings.append(this_mappings)
-            out.extend([[' '.join(x) for x in y] for y in predBatch])
+            out.extend([[detokenizer(x) for x in y] for y in predBatch])
             scores.extend([x[:self.translator.opt.n_best] for x in predScore])
         self.translator.opt.beam_size = prev_beam_size
         if return_from_mapping:

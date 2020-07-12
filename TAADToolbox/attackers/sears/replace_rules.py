@@ -8,6 +8,7 @@ import collections
 import copy
 import sys
 from itertools import zip_longest as zip_longest
+from ...utils import detokenizer
 unicode = lambda x: x
 
 
@@ -71,7 +72,7 @@ class Tokenizer:
 
     def tokenize_text(self, texts):
         ret = [list(map(lambda x: x[0], self.nlp.get_tokens(text))) for text in texts]
-        return [' '.join(r) for r in ret]
+        return [detokenizer(r) for r in ret]
 
     def clean_for_model(self, texts):
         fn = lambda x: re.sub(r'\s+', ' ', re.sub(r'\s\'(\w{1, 3})', r"'\1", x).replace('@-@', '-').strip())
@@ -126,7 +127,7 @@ class ReplaceRule:
                 text = matched_pos[x.value].pop(0)
                 t_mid.append(text)
 
-        ret_text = ' '.join(t_before + t_mid + t_after)
+        ret_text = detokenizer(t_before + t_mid + t_after)
         if fix_apostrophe:
             ret_text = ret_text.replace(' \'', '\'')
         if return_position:
@@ -146,7 +147,7 @@ class ReplaceRule:
         return np.array(idxs), new_texts
 
     def hash(self):
-        return ' '.join([op.hash() for op in self.op_sequence]) + ' -> ' + ' '.join([op.hash() for op in self.replace_sequence])
+        return detokenizer([op.hash() for op in self.op_sequence]) + ' -> ' + detokenizer([op.hash() for op in self.replace_sequence])
 
 class TextToReplaceRules:
     def __init__(self, nlp, from_dataset, flip_dataset=[], min_freq=.01, min_flip=0.01, ngram_size=4):
@@ -272,7 +273,7 @@ class TextToReplaceRules:
 
 
             this_rules = []
-            other_sentence = ' '.join(other)
+            other_sentence = detokenizer(other)
             for rep, withe in zip(reps, withs):
                 if len(rep) > self.ngram_size or len(rep) == 0:
                     continue
