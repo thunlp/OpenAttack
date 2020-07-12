@@ -24,21 +24,9 @@ class AttackerEvalBase(AttackerEval):
         check_parameters(DEFAULT_CONFIG.keys(), self.__config)
         self.clear()
     
-    def __levenshtein(self, a, b):
-        la = len(a)
-        lb = len(b)
-        f = np.zeros((la + 1, lb + 1), dtype=np.uint64)
-        for i in range(la + 1):
-            for j in range(lb + 1):
-                if i == 0:
-                    f[i][j] = j
-                elif j == 0:
-                    f[i][j] = i
-                elif a[i - 1] == b[j - 1]:
-                    f[i][j] = f[i - 1][j - 1]
-                else:
-                    f[i][j] = min(f[i - 1][j - 1], f[i - 1][j], f[i][j - 1]) + 1
-        return f[la][lb]
+    def __levenshtein(self, sentA, sentB):
+        from ..metric import levenshtein
+        return levenshtein(sentA, sentB)
     
     def __get_tokens(self, sent):
         return list(map(lambda x: x[0], self.__config["processor"].get_tokens(sent)))
@@ -52,7 +40,7 @@ class AttackerEvalBase(AttackerEval):
     
     def __get_fluency(self, sent):
         if self.__config["language_model"] is None:
-            from ..utils import GPT2LM
+            from ..metric import GPT2LM
             self.__config["language_model"] = GPT2LM()
         
         if len(sent.strip()) == 0:
@@ -61,24 +49,17 @@ class AttackerEvalBase(AttackerEval):
     
     def __get_semantic(self, sentA, sentB):
         if self.__config["sentence_encoder"] is None:
-            from ..utils import UniversalSentenceEncoder
+            from ..metric import UniversalSentenceEncoder
             self.__config["sentence_encoder"] = UniversalSentenceEncoder()
         
         return self.__config["sentence_encoder"](sentA, sentB)
     
     def __get_modification(self, sentA, sentB):
-        va = self.__get_tokens(sentA)
-        vb = self.__get_tokens(sentB)
-        ret = 0
-        if len(va) != len(vb):
-            ret = abs(len(va) - len(vb))
-        mn_len = min( len(va), len(vb) )
-        va, vb = va[:mn_len], vb[:mn_len]
-        for wordA, wordB in zip(va, vb):
-            if wordA != wordB:
-                ret += 1
-        return ret / len(va)
-
+        from ..metric import modification
+        tokenA = self.__get_tokens(sentA)
+        tokenB = self.__get_tokens(sentB)
+        return modification(tokenA, tokenB)
+        
     def update(self, input_, attack_result):
         if "total" not in self.__result:
             self.__result["total"] = 0
