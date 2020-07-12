@@ -4,6 +4,7 @@ from ..data_manager import DataManager
 from ..substitutes import CounterFittedSubstitute
 from ..utils import detokenizer
 import random
+import numpy as np
 # from spacy.lang.en import English
 # import nltk
 # from nltk.tokenize import TreebankWordTokenizer
@@ -11,7 +12,7 @@ import random
 
 
 DEFAULT_CONFIG = {
-
+    "blackbox": True
 }
 
 
@@ -41,7 +42,11 @@ class TextBuggerAttacker(Attacker):
         x_prime = x.copy()
 
         for sentence_index in ranked_sentences:
-            ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
+            if self.config["blackbox"] is True:
+                ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
+            else:
+                ranked_words = self.get_w_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
+            # ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
             for word in ranked_words:
                 bug = self.selectBug(word, x_prime, clsf)
                 x_prime = self.replaceWithBug(x_prime, word, bug)
@@ -63,11 +68,12 @@ class TextBuggerAttacker(Attacker):
         # original_review = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x)
         # self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
         # doc = self.nlp(original_review)
-        original_review = detokenizer(x)
+        return [detokenizer(x)]
+        '''original_review = detokenizer(x)
         doc = self.nlp(original_review)
         sentences = [sent.strip() for sent in doc]
         # sentences = [sent.string.strip() for sent in doc]
-        return sentences
+        return sentences'''
 
     def rank_sentences(self, sentences, clsf, target_all):
         import torch
@@ -102,6 +108,28 @@ class TextBuggerAttacker(Attacker):
             softmax = torch.nn.Softmax(dim=1)
             nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
             word_losses[curr_token] = nll_lossed
+        word_losses = {k: v for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
+        return word_losses
+
+    def get_w_word_importances(self, sentence, clsf, y_orig):  # white
+        from collections import OrderedDict
+
+        prob, grad = clsf.get_grad([sentence], [y_orig])
+        grad = grad[0]
+        # sentence = detokenizer(self.tokenize(sentence))
+        sentence_tokens = self.tokenize(sentence)
+        dist = []
+        for i in range(len(grad)):
+            dist.append(0.0)
+            for j in range(len(grad[i])):
+                dist[i] += grad[i][j] * grad[i][j]
+            dist[i] = np.sqrt(dist[i])
+        word_losses = OrderedDict()
+        for i, curr_token in enumerate(sentence_tokens):
+            if i < len(dist):
+                word_losses[curr_token] = dist[i]
+            else:
+                word_losses[curr_token] = 0
         word_losses = {k: v for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
 
