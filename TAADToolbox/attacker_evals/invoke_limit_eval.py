@@ -45,23 +45,31 @@ class InvokeLimitedAttackerEval(DefaultAttackerEval):
 
         self.average_invoke = average_invoke
 
-    def update(self, sentA, sentB, out_of_invoke_limit):
-        info = super().update(sentA, sentB)
-        if self.average_invoke and sentB is not None:
+    def __update(self, sentA, sentB, out_of_invoke_limit):
+        info = super().measure(sentA, sentB)
+
+        if self.average_invoke and info["succeed"]:
+            info["invoke"] = self.classifier.get_invoke()
+
+        if out_of_invoke_limit:
+            info["out_of_invoke"] = True
+        else:
+            info["out_of_invoke"] = False
+        
+        return self.update(info)
+    
+    def update(self, info):
+        super().update(info)
+        if "invoke" in info:
             if "invoke" not in self.__result:
                 self.__result["invoke"] = 0
-            rv = self.classifier.get_invoke()
-            self.__result["invoke"] += rv
-            info["invoke"] = rv
-        if out_of_invoke_limit:
+            self.__result["invoke"] += info["invoke"]
+        
+        if info["out_of_invoke"]:
             if "out_of_invoke" not in self.__result:
                 self.__result["out_of_invoke"] = 0
             self.__result["out_of_invoke"] += 1
-            info["out_of_invoke"] = 1
-        else:
-            info["out_of_invoke"] = 0
         return info
-        
 
     def eval_results(self, dataset):
         self.clear()
@@ -71,20 +79,20 @@ class InvokeLimitedAttackerEval(DefaultAttackerEval):
                 if isinstance(sent, tuple):
                     res = self.attacker(self.classifier, sent[0], sent[1])
                     if res is None:
-                        yield (sent[0], None, None, self.update(sent[0], None, False) )
+                        yield (sent[0], None, None, self.__update(sent[0], None, False) )
                     else:
-                        yield (sent[0], res[0], res[1], self.update(sent[0], res[0], False))
+                        yield (sent[0], res[0], res[1], self.__update(sent[0], res[0], False))
                 else:
                     res = self.attacker(self.classifier, sent)
                     if res is None:
-                        yield (sent, None, None, self.update(sent, None, False) )
+                        yield (sent, None, None, self.__update(sent, None, False) )
                     else:
-                        yield (sent, res[0], res[1], self.update(sent, res[0], False))
+                        yield (sent, res[0], res[1], self.__update(sent, res[0], False))
             except InvokeLimitException:
                 if isinstance(sent, tuple):
-                    yield (sent[0], None, None, self.update(sent[0], None, True) )
+                    yield (sent[0], None, None, self.__update(sent[0], None, True) )
                 else:
-                    yield (sent, None, None, self.update(sent, None, True) )
+                    yield (sent, None, None, self.__update(sent, None, True) )
     
     def clear(self):
         super().clear()
