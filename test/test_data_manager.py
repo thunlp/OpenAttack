@@ -8,6 +8,7 @@ class TestDataManager(unittest.TestCase):
     def setUp(self):
         os.system("mkdir ./testdir")
         tat.DataManager.set_path("./testdir")
+        tat.DataManager.setAutoDownload(False)
 
     def tearDown(self):
         os.system("rm -r ./testdir")
