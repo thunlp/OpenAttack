@@ -1,19 +1,19 @@
 import unittest
-import TAADToolbox as tat
+import OpenAttack
 import os
 
 
 class TestDataManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        tat.DataManager.set_path("./testdir")
-        tat.DataManager.download("NLTKSentTokenizer")
-        tat.DataManager.download("NLTKPerceptronPosTagger")
-        tat.DataManager.download("NLTKWordnet")
-        tat.DataManager.download("NLTKWordnetDelemma")
-        tat.DataManager.download("StanfordNER")
-        tat.DataManager.download("StanfordParser")
-        cls.dp = tat.text_processors.DefaultTextProcessor()
+        OpenAttack.DataManager.set_path("./testdir")
+        OpenAttack.DataManager.download("NLTKSentTokenizer")
+        OpenAttack.DataManager.download("NLTKPerceptronPosTagger")
+        OpenAttack.DataManager.download("NLTKWordnet")
+        OpenAttack.DataManager.download("NLTKWordnetDelemma")
+        OpenAttack.DataManager.download("StanfordNER")
+        OpenAttack.DataManager.download("StanfordParser")
+        cls.dp = OpenAttack.text_processors.DefaultTextProcessor()
     
     @classmethod
     def tearDownClass(cls):

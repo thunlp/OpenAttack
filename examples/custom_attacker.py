@@ -1,7 +1,7 @@
-import TAADToolbox as tat
+import OpenAttack
 
-class MyAttacker(tat.Attacker):
-    def __init__(self, max_iter=20, processor = tat.text_processors.DefaultTextProcessor()):
+class MyAttacker(OpenAttack.Attacker):
+    def __init__(self, max_iter=20, processor = OpenAttack.text_processors.DefaultTextProcessor()):
         self.processor = processor
         self.max_iter = max_iter
     
@@ -17,7 +17,7 @@ class MyAttacker(tat.Attacker):
         curr_x = self.processor.get_tokens(x_orig)
         for i in range(self.max_iter):
             curr_x = self.swap(curr_x)
-            sent = tat.utils.detokenizer(curr_x)
+            sent = OpenAttack.utils.detokenizer(curr_x)
             all_sents.append(sent)
         
         # get prediction
@@ -48,15 +48,15 @@ class MyAttacker(tat.Attacker):
 
 
 def main():
-    word_vector = tat.DataManager.load("Glove")
-    model = tat.DataManager.load("Victim.BiLSTM.SST")
-    dataset = tat.DataManager.load("Dataset.SST.sample")[:10]
+    word_vector = OpenAttack.DataManager.load("Glove")
+    model = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
 
-    clsf = tat.classifiers.PytorchClassifier(model, 
+    clsf = OpenAttack.classifiers.PytorchClassifier(model, 
                 word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 
                 token_unk= "UNK", require_length=True, device="cpu")
     attacker = MyAttacker()
-    attack_eval = tat.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
     print( attack_eval.eval(dataset) )
 
 if __name__ == "__main__":

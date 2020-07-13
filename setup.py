@@ -13,11 +13,11 @@ with  open("requirements.txt") as freq:
         requirements.append( line.strip() )
 
 setuptools.setup(
-    name="TAADToolbox",  # Replace with your own username
+    name="OpenAttack",  # Replace with your own username
     version="0.0.1",
     author="THUNLP",
     author_email="thunlp@gmail.com",
-    description="TAADToolbox",
+    description="OpenAttack",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Fanchao-Qi/TAADToolbox",

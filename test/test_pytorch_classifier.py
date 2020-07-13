@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import pickle
-import TAADToolbox as tat
+import OpenAttack
 import nltk
 import torch.nn as nn
 import unittest
@@ -56,9 +56,9 @@ class SentimentRNN(nn.Module):
 class TestPytorch(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        tat.DataManager.set_path("./testdir")
-        tat.DataManager.download("NLTKSentTokenizer")
-        tat.DataManager.download("NLTKPerceptronPosTagger")
+        OpenAttack.DataManager.set_path("./testdir")
+        OpenAttack.DataManager.download("NLTKSentTokenizer")
+        OpenAttack.DataManager.download("NLTKPerceptronPosTagger")
     
     @classmethod
     def tearDownClass(cls):
@@ -76,7 +76,7 @@ class TestPytorch(unittest.TestCase):
         for w in "i like apples".split():
             vocab[w] = num
             num += 1
-        classifier = tat.classifiers.PytorchClassifier(net, word2id=vocab, max_len=250, embedding=embedding_matrix, token_pad=0)
+        classifier = OpenAttack.classifiers.PytorchClassifier(net, word2id=vocab, max_len=250, embedding=embedding_matrix, token_pad=0)
         test_str = ["i like apples", "i like apples"]
 
         ret = classifier.get_pred(test_str)

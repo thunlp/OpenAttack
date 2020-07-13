@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from TAADToolbox.utils import WordVector, make_zip_downloader
+from OpenAttack.utils import WordVector, make_zip_downloader
 
 NAME = "DCES"
 

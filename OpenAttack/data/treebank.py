@@ -1,5 +1,5 @@
 import os
-from TAADToolbox.utils import make_zip_downloader
+from OpenAttack.utils import make_zip_downloader
 
 NAME = "TREEBANK"
 
