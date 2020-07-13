@@ -18,7 +18,7 @@ class EmbedBasedSubstitute(Substitute):
             # normalize embedding if using cosine distance
             self.config["embedding"] = (
                 self.config["embedding"]
-                / np.linalg.norm(self.config["embedding"])[:, np.newaxis]
+                / np.linalg.norm(self.config["embedding"], axis=1)[:, np.newaxis]
             )
 
     def __call__(self, word, pos=None, threshold=0.5):

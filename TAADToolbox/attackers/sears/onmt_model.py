@@ -114,37 +114,37 @@ class OnmtModel(object):
         vocab = self.translator.fields['tgt'].vocab
         if n_best > self.translator.opt.beam_size:
             self.translator.opt.beam_size = n_best
-        for batch in testData:
-            _, lens = batch.src
-            # This only works if batch_size is one
+        batch = next(testData.__iter__())
+        _, lens = batch.src
+        # This only works if batch_size is one
 
-            predBatch, goldBatch, predScore, goldScore, attn, src = (
-                self.translator.translate(batch, data))
-            # This is doing replace_unk
-            if self.translator.opt.replace_unk:
-                src_example = batch.dataset.examples[batch.indices[0].data.item()].src
-                for i, x in enumerate(predBatch):
-                    for j, sentence in enumerate(x):
-                        for k, word in enumerate(sentence):
-                            if word == vocab.itos[onmt.IO.UNK]:
-                                _, maxIndex = attn[i][j][k].max(0)
-                                m = int(maxIndex.item())
-                                predBatch[i][j][k] = src_example[m]
-            if return_from_mapping:
-                this_mappings = []
-                src_example = batch.dataset.examples[batch.indices[0].data.item()].src
-                for i, x in enumerate(predBatch):
-                    for j, sentence in enumerate(x):
-                        mapping = {}
-                        for k, word in enumerate(sentence):
+        predBatch, goldBatch, predScore, goldScore, attn, src = (
+            self.translator.translate(batch, data))
+        # This is doing replace_unk
+        if self.translator.opt.replace_unk:
+            src_example = batch.dataset.examples[batch.indices[0].data.item()].src
+            for i, x in enumerate(predBatch):
+                for j, sentence in enumerate(x):
+                    for k, word in enumerate(sentence):
+                        if word == vocab.itos[onmt.IO.UNK]:
                             _, maxIndex = attn[i][j][k].max(0)
                             m = int(maxIndex.item())
-                            mapping[k] = src_example[m]
-                        this_mappings.append(mapping)
+                            predBatch[i][j][k] = src_example[m]
+        if return_from_mapping:
+            this_mappings = []
+            src_example = batch.dataset.examples[batch.indices[0].data.item()].src
+            for i, x in enumerate(predBatch):
+                for j, sentence in enumerate(x):
+                    mapping = {}
+                    for k, word in enumerate(sentence):
+                        _, maxIndex = attn[i][j][k].max(0)
+                        m = int(maxIndex.item())
+                        mapping[k] = src_example[m]
+                    this_mappings.append(mapping)
 
-                mappings.append(this_mappings)
-            out.extend([[detokenizer(x) for x in y] for y in predBatch])
-            scores.extend([x[:self.translator.opt.n_best] for x in predScore])
+            mappings.append(this_mappings)
+        out.extend([[detokenizer(x) for x in y] for y in predBatch])
+        scores.extend([x[:self.translator.opt.n_best] for x in predScore])
         self.translator.opt.beam_size = prev_beam_size
         if return_from_mapping:
             return [list(zip(x, y, z)) for x, y, z in zip(out, scores, mappings)]
@@ -163,9 +163,9 @@ class OnmtModel(object):
             batch_size=opt.batch_size, train=False, sort=False,
             shuffle=False)
         gold = []
-        for batch in testData:
-            scores = self.translator._runTarget(batch, data)
-            gold.extend([x for x in scores.cpu().numpy()[0]])
+        batch = next(testData.__iter__())
+        scores = self.translator._runTarget(batch, data)
+        gold.extend([x for x in scores.cpu().numpy()[0]])
         return np.array(gold)
 
 

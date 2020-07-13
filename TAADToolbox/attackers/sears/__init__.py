@@ -14,6 +14,11 @@ DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
     "gpu_id": 0,
     "cuda": True,
+    "clsf": None,
+    "topk": 200, 
+    "threshold": -15,
+    "min_freq": 0.005,
+    "ngram_size": 4,
 }
 
 class SEARSAttacker(Attacker):
@@ -101,13 +106,14 @@ class SEARSAttacker(Attacker):
             print(sentence)
             if sentence in flips:
                 continue
-            fs = self.find_flips(sentence, clsf, topk=200, threshold=-15)
+            fs = self.find_flips(sentence, clsf, topk=self.config["topk"], threshold=self.config["thresold"])
             flips[sentence].extend([x[0] for x in fs])
             print(len(flips))
 
 
 
-        tr2 = self.replace_rules.TextToReplaceRules(self.config["processor"], right_val, [], min_freq=0.005, min_flip=0.00, ngram_size=4)
+        tr2 = self.replace_rules.TextToReplaceRules(self.config["processor"], right_val, [], 
+                                                    min_freq=self.config["min_freq"], min_flip=0.00, ngram_size=self.config["ngram_size"])
         self.frequent_rules = []
         rule_idx = {}
         self.rule_flips = {}
@@ -141,7 +147,7 @@ class SEARSAttacker(Attacker):
             old_labels = self.right_preds[applies]
             to_compute = [x for x in nt if x not in model_preds]
             if to_compute:
-                preds = self.config["clsf"].get_pred(to_compute)
+                preds = clsf.get_pred(to_compute)
                 for x, y in zip(to_compute, preds):
                     model_preds[x] = y
             new_labels = np.array([model_preds[x] for x in nt])
@@ -154,7 +160,6 @@ class SEARSAttacker(Attacker):
         self.really_frequent_rules = [i for i in range(len(self.rule_flips)) if len(self.rule_flips[i]) > 1]
 
 
-        print(len(self.really_frequent_rules))
         threshold = -7.15
         orig_scores = {}
         for i, t in enumerate(right_val):
@@ -192,12 +197,17 @@ class SEARSAttacker(Attacker):
         rule_precsupports = [len(rule_applies[i]) for i in self.really_frequent_rules]
         threshold=-7.15
 
+        disqualified = self.rule_picking.disqualify_rules(rule_scores, frequent_flips,
+                          rule_precsupports, 
+                      min_precision=0.0, min_flips=6, 
+                         min_bad_score=threshold, max_bad_proportion=.10,
+                          max_bad_sum=999999)
+
         self.x = self.rule_picking.choose_rules_coverage(rule_flip_scores, frequent_flips, None,
                           None, len(self.right_preds),
                                 frequent_scores_on_all=None, k=10, metric='max',
                       min_precision=0.0, min_flips=0, exp=True,
                          min_bad_score=threshold, max_bad_proportion=.1,
                           max_bad_sum=999999,
-                         disqualified=None,
+                         disqualified=disqualified,
                          start_from=[])
-        print(self.x)

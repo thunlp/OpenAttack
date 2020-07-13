@@ -97,17 +97,6 @@ def choose_rules_with_penalties(rule_scores, rule_flips, rule_supports, rule_pre
 
     return chosen_rules
 
-    for i, (scores, flips) in enumerate(zip(rule_scores, rule_flips)):
-        bad = (scores < threshold).sum()
-        good = np.exp(scores[scores >= threshold]).sum()
-        stats.append((bad, good))
-        rscores.append(val_length - 10 * bad + good)
-
-    chosen = list(np.argsort(rscores)[-k:])
-    chosen.reverse()
-    for c in chosen:
-        print(stats[c], rscores[c])
-    return chosen
 
 def disqualify_rules(rule_scores, rule_flips, rule_precsupports, min_precision=0,
                      min_flips=0, min_bad_score=-99999, max_bad_proportion = 1,
@@ -149,7 +138,7 @@ def choose_rules_coverage(rule_scores, rule_flips, rule_supports, rule_precsuppo
         best_gain = (-1, -1)
         for i, (scores, flips) in enumerate(zip(rule_scores, rule_flips)):
 
-            if i in chosen_rules:
+            if i in chosen_rules or i in disqualified:
                 continue
             if flips.shape[0] == 0:
                 continue
