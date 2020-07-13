@@ -1,6 +1,6 @@
-import TAADToolbox as tat
+import OpenAttack
 
-class AttackEvalConstraint(tat.attack_evals.DefaultAttackEval):
+class AttackEvalConstraint(OpenAttack.attack_evals.DefaultAttackEval):
     def __init__(self, attacker, clsf, mistake_limit=5, **kwargs):
         self.mistake_limit = mistake_limit
         super().__init__(attacker, clsf, mistake=True, **kwargs)
@@ -12,14 +12,14 @@ class AttackEvalConstraint(tat.attack_evals.DefaultAttackEval):
         return info
 
 def main():
-    word_vector = tat.DataManager.load("Glove")
-    model = tat.DataManager.load("Victim.BiLSTM.SST")
-    dataset = tat.DataManager.load("Dataset.SST.sample")[:10]
+    word_vector = OpenAttack.load("Glove")
+    model = OpenAttack.load("Victim.BiLSTM.SST")
+    dataset = OpenAttack.load("Dataset.SST.sample")[:10]
 
-    clsf = tat.classifiers.PytorchClassifier(model, 
+    clsf = OpenAttack.classifiers.PytorchClassifier(model, 
                 word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 
                 token_unk= "UNK", require_length=True, device="cpu")
-    attacker = tat.attackers.PWWSAttacker()
+    attacker = OpenAttack.attackers.PWWSAttacker()
     attack_eval = AttackEvalConstraint(attacker, clsf)
     print( attack_eval.eval(dataset) )
 

@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from TAADToolbox.utils import make_zip_downloader
+from OpenAttack.utils import make_zip_downloader
 
 NAME = "SGNAE"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/SGNAE.zip"

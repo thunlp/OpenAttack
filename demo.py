@@ -1,4 +1,4 @@
-import TAADToolbox as tat
+import OpenAttack
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 def make_model():
-    class MyClassifier(tat.Classifier):
+    class MyClassifier(OpenAttack.Classifier):
         def __init__(self):
             self.model = SentimentIntensityAnalyzer()
 
@@ -27,7 +27,7 @@ def make_model():
             return np.array(ret)
 
         def get_grad(self, input_, labels):
-            raise tat.exceptions.ClassifierNotSupportException(self)
+            raise OpenAttack.exceptions.ClassifierNotSupportException(self)
 
     return MyClassifier()
 
@@ -35,7 +35,7 @@ def make_model():
 def main():
 
     print("New Attacker")
-    attacker = tat.attackers.PWWSAttacker()
+    attacker = OpenAttack.attackers.GeneticAttacker(substitute=OpenAttack.substitutes.WordNetSubstitute())
 
     print("Build model")
     clsf = make_model()
@@ -53,12 +53,17 @@ def main():
         "semantic": True,      # 语义匹配度
         "levenstein": True,    # 编辑距离
         "word_distance": True, # 应用词级别编辑距离
+
+        "invoke_limit": 500,
+        "average_invoke": True
     }
-    for result in tqdm(tat.attacker_evals.DefaultAttackerEval(attacker, clsf, **options ).eval_results(dataset), total=len(dataset)):
+    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options )
+    for result in tqdm(attack_eval.eval_results(dataset), total=len(dataset)):
         print("Input: %s" % result[0])
         print("Result: %s" % result[1])
         print("Label: %s" % result[2])
         print("Info: %s" % result[3])
+    print (attack_eval.get_result())
 
 if __name__ == "__main__":
     main()

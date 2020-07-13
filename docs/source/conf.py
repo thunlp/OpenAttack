@@ -17,7 +17,7 @@ autodoc_mock_imports = ["spacy", "onmt", "onmt_model", "editdistance", "torchtex
 
 # -- Project information -----------------------------------------------------
 
-project = 'TAADToolbox'
+project = 'OpenAttack'
 copyright = '2020, THUNLP'
 author = 'THUNLP'
 
