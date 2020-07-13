@@ -1,6 +1,7 @@
 from . import AttackEvalBase
-import json
+import json, sys
 from tqdm import tqdm
+from ..utils import visualizer, result_visualizer
 
 class DefaultAttackEval(AttackEvalBase):
     def __init__(self, attacker, classifier, progress_bar=True, **kwargs):
@@ -9,14 +10,28 @@ class DefaultAttackEval(AttackEvalBase):
         self.classifier = classifier
         self.progress_bar = progress_bar
     
-    def eval(self, dataset):
+    def eval(self, dataset, total_len=None, visualize=False):
         self.clear()
-        total_len = None
         if isinstance(dataset, list):
             total_len = len(dataset)
-        for _ in (tqdm(self.eval_results(dataset), total=total_len) if self.progress_bar else self.eval_results(dataset)):
-            pass
-        return self.get_result()
+        
+        counter = 0
+
+        def tqdm_writer(x):
+            return tqdm.write(x, end="")
+
+        for x_orig, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.progress_bar else self.eval_results(dataset)):
+            if visualize:
+                counter += 1
+                y_orig = self.classifier.get_pred([x_orig])[0]
+                if self.progress_bar:
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
+                else:
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write)
+        res = self.get_result()
+        if visualize:
+            result_visualizer(res, sys.stdout.write)
+        return res
 
     def print(self):
         print( json.dumps( self.get_result(), indent="\t" ) )

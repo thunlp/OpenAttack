@@ -7,7 +7,7 @@ class AttackEvalConstraint(OpenAttack.attack_evals.DefaultAttackEval):
     
     def measure(self, sentA, sentB):
         info = super().measure(sentA, sentB)
-        if info["succeed"] and info["mistake"] >= self.mistake_limit:
+        if info["succeed"] and info["Mistakes"] >= self.mistake_limit:
             info["succeed"] = False
         return info
 

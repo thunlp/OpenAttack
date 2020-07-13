@@ -79,20 +79,32 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
                 if isinstance(sent, tuple):
                     res = self.attacker(self.classifier, sent[0], sent[1])
                     if res is None:
-                        yield (sent[0], None, None, self.__update(sent[0], None, False) )
+                        info = self.__update(sent[0], None, False)
+                        self.classifier.clear()
+                        yield (sent[0], None, None, info )
                     else:
-                        yield (sent[0], res[0], res[1], self.__update(sent[0], res[0], False))
+                        info = self.__update(sent[0], res[0], False)
+                        self.classifier.clear()
+                        yield (sent[0], res[0], res[1], info)
                 else:
                     res = self.attacker(self.classifier, sent)
                     if res is None:
-                        yield (sent, None, None, self.__update(sent, None, False) )
+                        info = self.__update(sent, None, False)
+                        self.classifier.clear()
+                        yield (sent, None, None, info )
                     else:
-                        yield (sent, res[0], res[1], self.__update(sent, res[0], False))
+                        info = self.__update(sent, res[0], False)
+                        self.classifier.clear()
+                        yield (sent, res[0], res[1], info)
             except InvokeLimitException:
                 if isinstance(sent, tuple):
-                    yield (sent[0], None, None, self.__update(sent[0], None, True) )
+                    info = self.__update(sent[0], None, True)
+                    self.classifier.clear()
+                    yield (sent[0], None, None, info )
                 else:
-                    yield (sent, None, None, self.__update(sent, None, True) )
+                    info = self.__update(sent, None, True)
+                    self.classifier.clear()
+                    yield (sent, None, None, info )
     
     def clear(self):
         super().clear()
