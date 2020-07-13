@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class CAISAttacker(Attacker):
+class FDAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)

@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
     "BACK_PATHS": DEFAULT_BACK_PATHS,
 }
 
-class SEARSAttacker(Attacker):
+class SEAAttacker(Attacker):
     def __init__(self, **kwargs):
         self.paraphrase_scorer = __import__("paraphrase_scorer", globals={
             "__name__":__name__,

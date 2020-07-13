@@ -13,7 +13,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class ViperAttacker(Attacker):
+class VIPERAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
