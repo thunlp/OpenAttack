@@ -47,7 +47,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class GNLAEAttacker(Attacker):
+class GeneticAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)

@@ -29,7 +29,7 @@ def main():
     dataset = tat.DataManager.load("Dataset.SST.sample")[:10]
 
     clsf = MyClassifier()
-    attacker = tat.attackers.GNLAEAttacker()
+    attacker = tat.attackers.GeneticAttacker()
     attack_eval = tat.attack_evals.DefaultAttackEval(attacker, clsf)
     print( attack_eval.eval(dataset) )
 

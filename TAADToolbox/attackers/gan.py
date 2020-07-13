@@ -18,7 +18,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class GNAEAttacker(Attacker):
+class GANAttacker(Attacker):
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
