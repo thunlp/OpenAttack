@@ -30,8 +30,8 @@ def main():
 
     clsf = MyClassifier()
     attacker = tat.attackers.GNLAEAttacker()
-    attacker_eval = tat.attacker_evals.DefaultAttackerEval(attacker, clsf)
-    print( attacker_eval.eval(dataset) )
+    attack_eval = tat.attack_evals.DefaultAttackEval(attacker, clsf)
+    print( attack_eval.eval(dataset) )
 
 if __name__ == "__main__":
     main()

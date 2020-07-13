@@ -1,6 +1,6 @@
 import TAADToolbox as tat
 
-class AttackerEvalConstraint(tat.attacker_evals.DefaultAttackerEval):
+class AttackEvalConstraint(tat.attack_evals.DefaultAttackEval):
     def __init__(self, attacker, clsf, mistake_limit=5, **kwargs):
         self.mistake_limit = mistake_limit
         super().__init__(attacker, clsf, mistake=True, **kwargs)
@@ -20,8 +20,8 @@ def main():
                 word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 
                 token_unk= "UNK", require_length=True, device="cpu")
     attacker = tat.attackers.PWWSAttacker()
-    attacker_eval = AttackerEvalConstraint(attacker, clsf)
-    print( attacker_eval.eval(dataset) )
+    attack_eval = AttackEvalConstraint(attacker, clsf)
+    print( attack_eval.eval(dataset) )
 
 if __name__ == "__main__":
     main()

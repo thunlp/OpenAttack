@@ -1,7 +1,7 @@
 import abc
 
 
-class AttackerEval(metaclass=abc.ABCMeta):
+class AttackEval(metaclass=abc.ABCMeta):
     def __init__(self, attacker, classifier, **kwargs):
         pass
 
