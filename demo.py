@@ -35,16 +35,13 @@ def make_model():
 def main():
 
     print("New Attacker")
-    attacker = OpenAttack.attackers.GeneticAttacker(substitute=OpenAttack.substitutes.WordNetSubstitute())
+    attacker = OpenAttack.attackers.PWWSAttacker()
 
     print("Build model")
     clsf = make_model()
 
-    dataset = [
-        "It is also seems like it wants to really poke at christianity but then loses that in the end much to my chagrin but leaving an inconsistent feel to the movie . Could have been much worse if excesses were taken in sex and violence, but they try to keep this at a minimal despite some disgusting scenes . My final thought is why would Hooper want to make this movie . It obviously took awhile to actually get distributed , then it has to be advertised gruesomely and with Hooper 's name in the title to hopefully make some money on his name and his gore . It is obvious this did not work .",
-        ("I love this movie beacuse of its music.", 0),
-        "Using the Hello World guide, you’ll start a branch, write comments, and open a pull request."
-    ]
+    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
+
     print("Start attack")
     options = {
         "success_rate": True,   # 成功率
@@ -52,18 +49,14 @@ def main():
         "mistake": True,       # 语法错误
         "semantic": True,      # 语义匹配度
         "levenstein": True,    # 编辑距离
-        "word_distance": True, # 应用词级别编辑距离
+        "word_distance": False, # 应用词级别编辑距离
+        "modification_rate": True
 
         "invoke_limit": 500,
         "average_invoke": True
     }
-    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options )
-    for result in tqdm(attack_eval.eval_results(dataset), total=len(dataset)):
-        print("Input: %s" % result[0])
-        print("Result: %s" % result[1])
-        print("Label: %s" % result[2])
-        print("Info: %s" % result[3])
-    print (attack_eval.get_result())
+    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, progress_bar=True, **options )
+    attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":
     main()

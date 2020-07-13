@@ -1,6 +1,8 @@
 import math
 class GPT2LM:
     def __init__(self, use_tf=False):
+        import logging
+        logging.getLogger("transformers").setLevel(logging.ERROR)
         import transformers
         self.use_tf = use_tf
 
@@ -13,7 +15,7 @@ class GPT2LM:
     def __call__(self, sent):
         if self.use_tf:
             import tensorflow as tf
-            ipt = self.tokenizer(sent, return_tensors="tf")
+            ipt = self.tokenizer(sent, return_tensors="tf", verbose=False)
             ret = self.lm(ipt)[0]
             loss = 0
             for i in range(ret.shape[0]):
@@ -25,7 +27,7 @@ class GPT2LM:
                 break
             return math.exp( -loss )
         else:
-            ipt = self.tokenizer(sent, return_tensors="pt")
+            ipt = self.tokenizer(sent, return_tensors="pt", verbose=False)
             return math.exp( self.lm(**ipt, labels=ipt.input_ids)[0] )
         
 

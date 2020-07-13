@@ -72,19 +72,19 @@ class AttackEvalBase(AttackEval):
             if self.__config["word_distance"]:
                 va = self.__get_tokens(va)
                 vb = self.__get_tokens(vb)
-            info["edit"] =  self.__levenshtein(va, vb)
+            info["EditDistance"] =  self.__levenshtein(va, vb)
         
         if self.__config["mistake"]:
-            info["mistake"] = self.__get_mistakes(attack_result)
+            info["Mistakes"] = self.__get_mistakes(attack_result)
         
         if self.__config["fluency"]:
-            info["fluency"] = self.__get_fluency(attack_result)
+            info["Fluency"] = self.__get_fluency(attack_result)
             
         if self.__config["semantic"]:
-            info["semantic"] = self.__get_semantic(input_, attack_result)
+            info["Semantic"] = self.__get_semantic(input_, attack_result)
 
         if self.__config["modification_rate"]:
-            info["modification"] = self.__get_modification(input_, attack_result)
+            info["ModificationRate"] = self.__get_modification(input_, attack_result)
         return info
         
     def update(self, info):
@@ -105,27 +105,27 @@ class AttackEvalBase(AttackEval):
         if self.__config["levenstein"]:
             if "edit" not in self.__result:
                 self.__result["edit"] = 0
-            self.__result["edit"] += info["edit"]
+            self.__result["edit"] += info["EditDistance"]
         
         if self.__config["mistake"]:
             if "mistake" not in self.__result:
                 self.__result["mistake"] = 0
-            self.__result["mistake"] += info["mistake"]
+            self.__result["mistake"] += info["Mistakes"]
 
         if self.__config["fluency"]:
             if "fluency" not in self.__result:
                 self.__result["fluency"] = 0
-            self.__result["fluency"] += info["fluency"]
+            self.__result["fluency"] += info["Fluency"]
 
         if self.__config["semantic"]:
             if "semantic" not in self.__result:
                 self.__result["semantic"] = 0
-            self.__result["semantic"] += info["semantic"]
+            self.__result["semantic"] += info["Semantic"]
         
         if self.__config["modification_rate"]:
             if "modification" not in self.__result:
                 self.__result["modification"] = 0
-            self.__result["modification"] += info["modification"]
+            self.__result["modification"] += info["ModificationRate"]
         return info
         
     def get_result(self):
