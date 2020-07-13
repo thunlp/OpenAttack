@@ -26,6 +26,10 @@ class DefaultAttackerEval(AttackerEvalBase):
 
     def dumps(self):
         return json.dumps( self.get_result() )
+    
+    def __update(self, sentA, sentB):
+        info = self.measure(sentA, sentB)
+        return self.update(info)
 
     def eval_results(self, dataset):
         self.clear()
@@ -33,12 +37,12 @@ class DefaultAttackerEval(AttackerEvalBase):
             if isinstance(sent, tuple):
                 res = self.attacker(self.classifier, sent[0], sent[1])
                 if res is None:
-                    yield (sent[0], None, None, self.update(sent[0], None) )
+                    yield (sent[0], None, None, self.__update(sent[0], None) )
                 else:
-                    yield (sent[0], res[0], res[1], self.update(sent[0], res[0]))
+                    yield (sent[0], res[0], res[1], self.__update(sent[0], res[0]))
             else:
                 res = self.attacker(self.classifier, sent)
                 if res is None:
-                    yield (sent, None, None, self.update(sent, None) )
+                    yield (sent, None, None, self.__update(sent, None) )
                 else:
-                    yield (sent, res[0], res[1], self.update(sent, res[0]))
+                    yield (sent, res[0], res[1], self.__update(sent, res[0]))

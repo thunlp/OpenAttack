@@ -6,5 +6,5 @@ class Attacker(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def __call__(self, model, input_, target=None):
+    def __call__(self, clsf, input_, target=None):
         pass

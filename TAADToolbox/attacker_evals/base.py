@@ -59,60 +59,73 @@ class AttackerEvalBase(AttackerEval):
         tokenA = self.__get_tokens(sentA)
         tokenB = self.__get_tokens(sentB)
         return modification(tokenA, tokenB)
-        
-    def update(self, input_, attack_result):
-        if "total" not in self.__result:
-            self.__result["total"] = 0
-        self.__result["total"] += 1
-        if self.__config["success_rate"]:
-            if "succeed" not in self.__result:
-                self.__result["succeed"] = 0
-            if attack_result is not None:
-                self.__result["succeed"] += 1
-            
+    
+    def measure(self, input_, attack_result):
         if attack_result is None:
             return { "succeed": False }
 
         info = { "succeed": True }
+
         if self.__config["levenstein"]:
             va = input_
             vb = attack_result
             if self.__config["word_distance"]:
                 va = self.__get_tokens(va)
                 vb = self.__get_tokens(vb)
-            rv = self.__levenshtein(va, vb)
+            info["edit"] =  self.__levenshtein(va, vb)
+        
+        if self.__config["mistake"]:
+            info["mistake"] = self.__get_mistakes(attack_result)
+        
+        if self.__config["fluency"]:
+            info["fluency"] = self.__get_fluency(attack_result)
+            
+        if self.__config["semantic"]:
+            info["semantic"] = self.__get_semantic(input_, attack_result)
+
+        if self.__config["modification_rate"]:
+            info["modification"] = self.__get_modification(input_, attack_result)
+        return info
+        
+    def update(self, info):
+        if "total" not in self.__result:
+            self.__result["total"] = 0
+        self.__result["total"] += 1
+
+        if self.__config["success_rate"]:
+            if "succeed" not in self.__result:
+                self.__result["succeed"] = 0
+            if info["succeed"]:
+                self.__result["succeed"] += 1
+        
+        # early stop
+        if not info["succeed"]:
+            return
+
+        if self.__config["levenstein"]:
             if "edit" not in self.__result:
                 self.__result["edit"] = 0
-            self.__result["edit"] += rv
-            info["edit"] = rv
+            self.__result["edit"] += info["edit"]
         
         if self.__config["mistake"]:
             if "mistake" not in self.__result:
                 self.__result["mistake"] = 0
-            rv = self.__get_mistakes(attack_result)
-            self.__result["mistake"] += rv
-            info["mistake"] = rv
-        
+            self.__result["mistake"] += info["mistake"]
+
         if self.__config["fluency"]:
             if "fluency" not in self.__result:
                 self.__result["fluency"] = 0
-            rv = self.__get_fluency(attack_result)
-            self.__result["fluency"] += rv
-            info["fluency"] = rv
-        
+            self.__result["fluency"] += info["fluency"]
+
         if self.__config["semantic"]:
             if "semantic" not in self.__result:
                 self.__result["semantic"] = 0
-            rv = self.__get_semantic(input_, attack_result)
-            self.__result["semantic"] += rv
-            info["semantic"] = rv
+            self.__result["semantic"] += info["semantic"]
         
         if self.__config["modification_rate"]:
             if "modification" not in self.__result:
                 self.__result["modification"] = 0
-            rv = self.__get_modification(input_, attack_result)
-            self.__result["modification"] += rv
-            info["modification"] = rv
+            self.__result["modification"] += info["modification"]
         return info
         
     def get_result(self):
