@@ -26,3 +26,6 @@ from . import substitutes
 
 # utils
 from . import utils
+
+download = DataManager.download
+load = DataManager.load
