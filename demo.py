@@ -50,7 +50,7 @@ def main():
         "semantic": True,      # 语义匹配度
         "levenstein": True,    # 编辑距离
         "word_distance": False, # 应用词级别编辑距离
-        "modification_rate": True
+        "modification_rate": True,
 
         "invoke_limit": 500,
         "average_invoke": True
