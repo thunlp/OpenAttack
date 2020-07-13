@@ -8,13 +8,13 @@ from . import attackers
 # classifier
 from .classifier import Classifier
 
-# from .classifiers import PytorchClassifier, TensorflowClassifier
+from .classifiers import PytorchClassifier, TensorflowClassifier
 from . import classifiers
 
-# attacker_eval
-# from .attacker_evals import DefaultAttackerEval
-from . import attacker_evals
-from .attacker_eval import AttackerEval
+# attack_eval
+from .attack_eval import AttackEval
+from .attack_evals import DefaultAttackEval
+from . import attack_evals
 
 # exception
 from . import exceptions

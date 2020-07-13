@@ -1,8 +1,8 @@
-from . import AttackerEvalBase
+from . import AttackEvalBase
 import json
 from tqdm import tqdm
 
-class DefaultAttackerEval(AttackerEvalBase):
+class DefaultAttackEval(AttackEvalBase):
     def __init__(self, attacker, classifier, progress_bar=True, **kwargs):
         super().__init__(**kwargs)
         self.attacker = attacker

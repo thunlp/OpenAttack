@@ -1,4 +1,4 @@
-from ..attacker_eval import AttackerEval
+from ..attack_eval import AttackEval
 from ..utils import check_parameters
 from ..text_processors import DefaultTextProcessor
 import numpy as np
@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
     "word_distance": False,     # 应用词级别编辑距离
     "modification_rate": False, # 修改率
 }
-class AttackerEvalBase(AttackerEval):
+class AttackEvalBase(AttackEval):
     def __init__(self, **kwargs):
         self.__config = DEFAULT_CONFIG.copy()
         self.__config.update(kwargs)

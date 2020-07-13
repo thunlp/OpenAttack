@@ -56,8 +56,8 @@ def main():
                 word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 
                 token_unk= "UNK", require_length=True, device="cpu")
     attacker = MyAttacker()
-    attacker_eval = tat.attacker_evals.DefaultAttackerEval(attacker, clsf)
-    print( attacker_eval.eval(dataset) )
+    attack_eval = tat.attack_evals.DefaultAttackEval(attacker, clsf)
+    print( attack_eval.eval(dataset) )
 
 if __name__ == "__main__":
     main()
