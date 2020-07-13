@@ -19,6 +19,8 @@ class DataManager(object):
 
     data_reference = {kw: None for kw in AVAILABLE_DATAS}
 
+    __auto_download = True
+
     def __init__(self):
         raise NotImplementedError
 
@@ -30,11 +32,15 @@ class DataManager(object):
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
 
+        if not os.path.exists(cls.data_path[data_name]):
+            if cls.__auto_download:
+                cls.download(data_name)
+            else:
+                raise DataNotExistException(data_name, cls.data_path[data_name])
+
         if not cached:
             return cls.data_loader[data_name](cls.data_path[data_name])
         elif cls.data_reference[data_name] is None:
-            if not os.path.exists(cls.data_path[data_name]):
-                raise DataNotExistException(data_name, cls.data_path[data_name])
             try:
                 cls.data_reference[data_name] = cls.data_loader[data_name](
                     cls.data_path[data_name]
@@ -42,6 +48,10 @@ class DataManager(object):
             except OSError:
                 raise DataNotExistException(data_name, cls.data_path[data_name])
         return cls.data_reference[data_name]
+    
+    @classmethod
+    def setAutoDownload(cls, enabled=True):
+        cls.__auto_download = enabled
 
     @classmethod
     def get(cls, data_name):
