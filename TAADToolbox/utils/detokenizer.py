@@ -1,4 +1,11 @@
 def detokenizer(tokens):
+    all_tuple = True
+    for it in tokens:
+        if not isinstance(it, tuple):
+            all_tuple = False
+    if all_tuple:
+        tokens = list(map(lambda x:x[0], tokens))
+        
     ret = ""
     new_sent = True
     for token in tokens:
