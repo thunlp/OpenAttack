@@ -63,3 +63,5 @@ autodoc_member_order = "groupwise"
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+
+master_doc = 'index'
