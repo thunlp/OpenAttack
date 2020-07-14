@@ -106,7 +106,7 @@ class SEAAttacker(Attacker):
             print(sentence)
             if sentence in flips:
                 continue
-            fs = self.find_flips(sentence, clsf, topk=self.config["topk"], threshold=self.config["thresold"])
+            fs = self.find_flips(sentence, clsf, topk=self.config["topk"], threshold=self.config["threshold"])
             flips[sentence].extend([x[0] for x in fs])
             print(len(flips))
 
