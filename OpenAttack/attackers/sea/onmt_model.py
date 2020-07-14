@@ -1,6 +1,6 @@
 import argparse
 import torch
-import onmt
+from . import onmt
 import numpy as np
 import re
 import sys

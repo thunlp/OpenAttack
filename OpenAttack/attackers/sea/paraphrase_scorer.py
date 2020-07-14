@@ -3,7 +3,7 @@ import os
 import copy
 import numpy as np
 from . import onmt_model
-import onmt
+from . import onmt
 import collections
 import operator
 import editdistance
