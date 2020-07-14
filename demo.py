@@ -31,10 +31,10 @@ def main():
     print("Start attack")
     options = {
         "success_rate": True,   # 成功率
-        "fluency": True,       # 流畅度
-        "mistake": True,       # 语法错误
-        "semantic": True,      # 语义匹配度
-        "levenstein": True,    # 编辑距离
+        "fluency": True,        # 流畅度
+        "mistake": True,        # 语法错误
+        "semantic": True,       # 语义匹配度
+        "levenstein": True,     # 编辑距离
         "word_distance": False, # 应用词级别编辑距离
         "modification_rate": True,
 

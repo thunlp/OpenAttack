@@ -20,7 +20,7 @@ setuptools.setup(
     description="OpenAttack",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Fanchao-Qi/TAADToolbox",
+    url="https://github.com/thunlp/OpenAttack",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
