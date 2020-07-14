@@ -48,24 +48,24 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
     def __update(self, sentA, sentB, out_of_invoke_limit):
         info = super().measure(sentA, sentB)
 
-        if self.average_invoke and info["succeed"]:
-            info["invoke"] = self.classifier.get_invoke()
+        if self.average_invoke and info["Succeed"]:
+            info["Queries"] = self.classifier.get_invoke()
 
         if out_of_invoke_limit:
-            info["out_of_invoke"] = True
+            info["Query Exceeded"] = True
         else:
-            info["out_of_invoke"] = False
+            info["Query Exceeded"] = False
         
         return self.update(info)
     
     def update(self, info):
         super().update(info)
-        if "invoke" in info:
+        if "Queries" in info:
             if "invoke" not in self.__result:
                 self.__result["invoke"] = 0
-            self.__result["invoke"] += info["invoke"]
+            self.__result["invoke"] += info["Queries"]
         
-        if info["out_of_invoke"]:
+        if info["Query Exceeded"]:
             if "out_of_invoke" not in self.__result:
                 self.__result["out_of_invoke"] = 0
             self.__result["out_of_invoke"] += 1
@@ -114,9 +114,5 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
     def get_result(self):
         ret = super().get_result()
         if self.average_invoke and "invoke" in self.__result:
-            ret["invoke"] = self.__result["invoke"] / ret["succeed"]
-        if "out_of_invoke" in self.__result:
-            ret["out_of_invoke"] = self.__result["out_of_invoke"]
-        else:
-            ret["out_of_invoke"] = 0
+            ret["Avg. Victim Model Queries"] = self.__result["invoke"] / ret["Successful Instances"]
         return ret

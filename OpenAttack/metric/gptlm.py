@@ -3,6 +3,8 @@ class GPT2LM:
     def __init__(self, use_tf=False):
         import logging
         logging.getLogger("transformers").setLevel(logging.ERROR)
+        import os
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
         import transformers
         self.use_tf = use_tf
 

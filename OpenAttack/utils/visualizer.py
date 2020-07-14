@@ -83,7 +83,11 @@ def levenshtein_visual(a, b):
 def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
     ret = []
 
-    head_str = "Label: %d --> %d" % (y_orig, y_adv)
+    assert isinstance(y_orig, int) == isinstance(y_adv, int)
+    if isinstance(y_orig, int):
+        head_str = "Label: %d --> %d" % (y_orig, y_adv)
+    else:
+        head_str = "Label: %d (%.2lf%%) --> %d (%.2lf%%)" % (y_orig.argmax(), y_orig.max() * 100, y_adv.argmax(), y_adv.max() * 100)
     ret.append(("\033[32m%s\033[0m" % head_str) + " " * (max_len - len(head_str)))
     ret.append(" " * max_len)
     
@@ -100,21 +104,21 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
             ret.append(curr1 + " " * (max_len - length))
             ret.append(curr2 + " " * (max_len - length))
             ret.append(" " * max_len)
-            length = len(tokenA)
+            length = len(tokenA) + 1
             if tokenA.lower() == tokenB.lower():
-                curr1 = tokenA
-                curr2 = tokenB
+                curr1 = tokenA + " "
+                curr2 = tokenB + " "
             else:
-                curr1 = "\033[1;31m" + tokenA + "\033[0m"
-                curr2 = "\033[1;32m" + tokenB + "\033[0m"
+                curr1 = "\033[1;31m" + tokenA + "\033[0m" + " "
+                curr2 = "\033[1;32m" + tokenB + "\033[0m" + " "
         else:
             length += 1 + len(tokenA)
             if tokenA.lower() == tokenB.lower():
-                curr1 += " " + tokenA
-                curr2 += " " + tokenB
+                curr1 += tokenA + " "
+                curr2 += tokenB + " "
             else:
-                curr1 += " " + "\033[1;31m" + tokenA + "\033[0m"
-                curr2 += " " + "\033[1;32m" + tokenB + "\033[0m"
+                curr1 += "\033[1;31m" + tokenA + "\033[0m" + " "
+                curr2 += "\033[1;32m" + tokenB + "\033[0m" + " "
     if length > 0:
         ret.append(curr1 + " " * (max_len - length))
         ret.append(curr2 + " " * (max_len - length))
@@ -124,7 +128,10 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
 def left_bar_failed(x_orig, y_orig, max_len):
     ret = []
 
-    head_str = "Label: %d --> Failed!" % y_orig
+    if isinstance(y_orig, int):
+        head_str = "Label: %d --> Failed!" % y_orig
+    else:
+        head_str = "Label: %d (%.2lf%%) --> Failed!" % (y_orig.argmax(), y_orig.max() * 100)
     ret.append(("\033[31m%s\033[0m" % head_str) + " " * (max_len - len(head_str)))
     ret.append(" " * max_len)
     tokens = x_orig.split()
@@ -132,15 +139,15 @@ def left_bar_failed(x_orig, y_orig, max_len):
     for tk in tokens:
         if len(curr) + len(tk) + 1 > max_len:
             ret.append(curr + " " * (max_len - len(curr)))
-            curr = tk
+            curr = tk + " "
         else:
-            curr += " " + tk
+            curr += tk + " "
     if len(curr) > 0:
         ret.append(curr + " " * (max_len - len(curr)))
     ret.append(" " * max_len)
     return ret
 
-def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=20, val_len=10):
+def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=25, val_len=10):
     cols = os.get_terminal_size().columns
     headline = "Sample: %d " % idx
     headline = headline + ("=" * (cols - len(headline) - 1)) + "\n"
@@ -148,7 +155,7 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=2
 
     max_len = cols - 1 - key_len - val_len
 
-    right = right_bar_print(info)
+    right = right_bar_print(info, key_len=key_len, val_len=val_len)
     if x_adv is None:
         # Failed
         left = left_bar_failed(x_orig, y_orig, max_len)

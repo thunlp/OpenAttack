@@ -14,7 +14,7 @@ def make_model():
             ret = []
             for sent in input_:
                 res = self.model.polarity_scores(sent)
-                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 2e-6)
+                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 1e-6)
                 ret.append(0 if prob < 0.5 else 1)
             return np.array(ret)
 
@@ -22,7 +22,7 @@ def make_model():
             ret = []
             for sent in input_:
                 res = self.model.polarity_scores(sent)
-                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 2e-6)
+                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 1e-6)
                 ret.append(np.array([1 - prob, prob]))
             return np.array(ret)
 
@@ -55,7 +55,7 @@ def main():
         "invoke_limit": 500,
         "average_invoke": True
     }
-    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, progress_bar=True, **options )
+    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options )
     attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":
