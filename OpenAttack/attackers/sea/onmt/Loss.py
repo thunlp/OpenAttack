@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-import onmt
+from . import IO
+from . import Statistics
 
 
 class LossComputeBase(nn.Module):
@@ -23,7 +24,7 @@ class LossComputeBase(nn.Module):
         super(LossComputeBase, self).__init__()
         self.generator = generator
         self.tgt_vocab = tgt_vocab
-        self.padding_idx = tgt_vocab.stoi[onmt.IO.PAD_WORD]
+        self.padding_idx = tgt_vocab.stoi[IO.PAD_WORD]
 
     def make_shard_state(self, batch, output, range_, attns=None):
         """
@@ -65,7 +66,7 @@ class LossComputeBase(nn.Module):
         """
         Compute the loss in shards for efficiency.
         """
-        batch_stats = onmt.Statistics()
+        batch_stats = Statistics()
         range_ = (cur_trunc, cur_trunc + trunc_size)
         shard_state = self.make_shard_state(batch, output, range_, attns)
 
@@ -89,7 +90,7 @@ class LossComputeBase(nn.Module):
         num_correct = pred.eq(target) \
                           .masked_select(non_padding) \
                           .sum()
-        return onmt.Statistics(loss[0], non_padding.sum(), num_correct)
+        return Statistics(loss[0], non_padding.sum(), num_correct)
 
     def bottle(self, v):
         return v.view(-1, v.size(2))

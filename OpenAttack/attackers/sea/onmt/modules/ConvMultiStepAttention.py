@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from onmt.Utils import aeq
+from ..Utils import aeq
 
 
 SCALE_WEIGHT = 0.5 ** 0.5

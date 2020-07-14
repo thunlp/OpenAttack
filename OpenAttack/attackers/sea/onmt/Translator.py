@@ -1,12 +1,11 @@
 import torch
 from torch.autograd import Variable
 
-import onmt
-import onmt.Models
-import onmt.ModelConstructor
-import onmt.modules
-import onmt.IO
-from onmt.Utils import use_gpu
+from . import Models
+from . import IO
+from . import ModelConstructor
+from . import modules
+from .Utils import use_gpu
 
 
 class Translator(object):
@@ -15,7 +14,7 @@ class Translator(object):
         self.opt = opt
         checkpoint = torch.load(opt.model,
                                 map_location=lambda storage, loc: storage)
-        self.fields = onmt.IO.load_fields(checkpoint['vocab'])
+        self.fields = IO.load_fields(checkpoint['vocab'])
 
         model_opt = checkpoint['opt']
         for arg in dummy_opt:
@@ -25,7 +24,7 @@ class Translator(object):
         self._type = model_opt.encoder_type
         self.copy_attn = model_opt.copy_attn
 
-        self.model = onmt.ModelConstructor.make_base_model(
+        self.model = ModelConstructor.make_base_model(
                             model_opt, self.fields, use_gpu(opt), checkpoint)
         self.model.eval()
         self.model.generator.eval()
@@ -52,21 +51,21 @@ class Translator(object):
                 tokens.append(vocab.itos[tok])
             else:
                 tokens.append(copy_vocab.itos[tok - len(vocab)])
-            if tokens[-1] == onmt.IO.EOS_WORD:
+            if tokens[-1] == IO.EOS_WORD:
                 tokens = tokens[:-1]
                 break
 
         if self.opt.replace_unk and attn is not None:
             for i in range(len(tokens)):
-                if tokens[i] == vocab.itos[onmt.IO.UNK]:
+                if tokens[i] == vocab.itos[IO.UNK]:
                     _, maxIndex = attn[i].max(0)
                     tokens[i] = self.fields["src"].vocab.itos[src[maxIndex.item()]]
         return tokens
 
     def _runTarget(self, batch, data):
         _, src_lengths = batch.src
-        src = onmt.IO.make_features(batch, 'src')
-        tgt_in = onmt.IO.make_features(batch, 'tgt')[:-1]
+        src = IO.make_features(batch, 'src')
+        tgt_in = IO.make_features(batch, 'tgt')[:-1]
 
         #  (1) run the encoder on the src
         encStates, context = self.model.encoder(src, src_lengths)
@@ -80,7 +79,7 @@ class Translator(object):
         decOut, decStates, attn = self.model.decoder(
             tgt_in, context, decStates, context_lengths=src_lengths)
 
-        tgt_pad = self.fields["tgt"].vocab.stoi[onmt.IO.PAD_WORD]
+        tgt_pad = self.fields["tgt"].vocab.stoi[IO.PAD_WORD]
         for dec, tgt in zip(decOut, batch.tgt[1:].data):
             # Log prob of each word.
             out = self.model.generator.forward(dec)
@@ -104,7 +103,7 @@ class Translator(object):
 
         # (1) Run the encoder on the src.
         _, src_lengths = batch.src
-        src = onmt.IO.make_features(batch, 'src')
+        src = IO.make_features(batch, 'src')
         encStates, context = self.model.encoder(src, src_lengths)
         decStates = self.model.decoder.init_decoder_state(
                                         src, context, encStates)
@@ -120,8 +119,8 @@ class Translator(object):
         src = rvar(src.data)
         srcMap = rvar(batch.src_map.data)
         decStates.repeat_beam_size_times(beam_size)
-        scorer = onmt.GNMTGlobalScorer(self.alpha, self.beta)
-        beam = [onmt.Beam(beam_size, n_best=self.opt.n_best,
+        scorer = GNMTGlobalScorer(self.alpha, self.beta)
+        beam = [Beam(beam_size, n_best=self.opt.n_best,
                           cuda=self.opt.cuda,
                           vocab=self.fields["tgt"].vocab,
                           global_scorer=scorer)

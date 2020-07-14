@@ -7,10 +7,12 @@ import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
 
-import onmt
-from onmt.Models import EncoderBase
-from onmt.Models import DecoderState
-from onmt.Utils import aeq
+from .UtilClass import BottleLinear
+from .UtilClass import BottleLayerNorm
+from .MultiHeadedAttn import MultiHeadedAttention
+from .GlobalAttention import GlobalAttention
+from ..Models import EncoderBase, DecoderState
+from ..Utils import aeq
 
 
 MAX_SIZE = 5000
@@ -27,9 +29,9 @@ class PositionwiseFeedForward(nn.Module):
             droput(float): dropout probability(0-1.0).
         """
         super(PositionwiseFeedForward, self).__init__()
-        self.w_1 = onmt.modules.BottleLinear(size, hidden_size)
-        self.w_2 = onmt.modules.BottleLinear(hidden_size, size)
-        self.layer_norm = onmt.modules.BottleLayerNorm(size)
+        self.w_1 = BottleLinear(size, hidden_size)
+        self.w_2 = BottleLinear(hidden_size, size)
+        self.layer_norm = BottleLayerNorm(size)
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
 
@@ -53,7 +55,7 @@ class TransformerEncoderLayer(nn.Module):
         """
         super(TransformerEncoderLayer, self).__init__()
 
-        self.self_attn = onmt.modules.MultiHeadedAttention(
+        self.self_attn = MultiHeadedAttention(
             head_count, size, p=dropout)
         self.feed_forward = PositionwiseFeedForward(size,
                                                     hidden_size,
@@ -120,9 +122,9 @@ class TransformerDecoderLayer(nn.Module):
             hidden_size(int): the second-layer of the PositionwiseFeedForward.
         """
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = onmt.modules.MultiHeadedAttention(
+        self.self_attn = MultiHeadedAttention(
                 head_count, size, p=dropout)
-        self.context_attn = onmt.modules.MultiHeadedAttention(
+        self.context_attn = MultiHeadedAttention(
                 head_count, size, p=dropout)
         self.feed_forward = PositionwiseFeedForward(size,
                                                     hidden_size,
@@ -197,7 +199,7 @@ class TransformerDecoder(nn.Module):
         # Set up a separated copy attention layer, if needed.
         self._copy = False
         if copy_attn:
-            self.copy_attn = onmt.modules.GlobalAttention(
+            self.copy_attn = GlobalAttention(
                 hidden_size, attn_type=attn_type)
             self._copy = True
 

@@ -7,11 +7,11 @@ import torch.nn.init as init
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-import onmt.modules
-from onmt.modules.WeightNorm import WeightNormConv2d
-from onmt.Models import EncoderBase
-from onmt.Models import DecoderState
-from onmt.Utils import aeq
+from .. import modules
+from ..modules.WeightNorm import WeightNormConv2d
+from ..Models import EncoderBase
+from ..Models import DecoderState
+from ..Utils import aeq
 
 
 SCALE_WEIGHT = 0.5 ** 0.5
@@ -118,13 +118,13 @@ class CNNDecoder(nn.Module):
         self.attn_layers = nn.ModuleList()
         for i in range(self.num_layers):
             self.attn_layers.append(
-                onmt.modules.ConvMultiStepAttention(self.hidden_size))
+                modules.ConvMultiStepAttention(self.hidden_size))
 
         # CNNDecoder has its own attention mechanism.
         # Set up a separated copy attention layer, if needed.
         self._copy = False
         if copy_attn:
-            self.copy_attn = onmt.modules.GlobalAttention(
+            self.copy_attn = modules.GlobalAttention(
                 hidden_size, attn_type=attn_type)
             self._copy = True
 

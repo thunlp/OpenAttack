@@ -3,9 +3,9 @@ import torch.nn.functional as F
 import torch
 import torch.cuda
 
-import onmt
-from onmt.Utils import aeq
-
+from ..Utils import aeq
+from .. import IO
+from .. import Loss
 
 class CopyGenerator(nn.Module):
     """
@@ -32,7 +32,7 @@ class CopyGenerator(nn.Module):
 
         # Original probabilities.
         logits = self.linear(hidden)
-        logits[:, self.tgt_dict.stoi[onmt.IO.PAD_WORD]] = -float('inf')
+        logits[:, self.tgt_dict.stoi[IO.PAD_WORD]] = -float('inf')
         prob = F.softmax(logits)
 
         # Probability of copying p(z=1) batch.
@@ -76,7 +76,7 @@ class CopyGeneratorCriterion(object):
         return loss
 
 
-class CopyGeneratorLossCompute(onmt.Loss.LossComputeBase):
+class CopyGeneratorLossCompute(Loss.LossComputeBase):
     """
     Copy Generator Loss Computation.
     """

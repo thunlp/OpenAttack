@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from onmt.modules import BottleLinear, Elementwise
-from onmt.Utils import aeq
+from .UtilClass import BottleLinear, Elementwise
+from ..Utils import aeq
 
 
 class PositionalEncoding(nn.Module):

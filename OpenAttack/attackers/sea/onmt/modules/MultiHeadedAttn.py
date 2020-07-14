@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from onmt.Utils import aeq
-from onmt.modules.UtilClass import BottleLinear, \
+from ..Utils import aeq
+from .UtilClass import BottleLinear, \
                     BottleLayerNorm, BottleSoftmax
 
 

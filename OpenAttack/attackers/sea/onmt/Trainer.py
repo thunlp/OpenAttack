@@ -15,9 +15,7 @@ import math
 import torch
 import torch.nn as nn
 
-import onmt
-import onmt.modules
-
+from . import IO
 
 class Statistics(object):
     """
@@ -105,8 +103,8 @@ class Trainer(object):
             dec_state = None
             _, src_lengths = batch.src
 
-            src = onmt.IO.make_features(batch, 'src')
-            tgt_outer = onmt.IO.make_features(batch, 'tgt')
+            src = IO.make_features(batch, 'src')
+            tgt_outer = IO.make_features(batch, 'tgt')
             report_stats.n_src_words += src_lengths.sum()
 
             for j in range(0, target_size-1, trunc_size):
@@ -148,8 +146,8 @@ class Trainer(object):
 
         for batch in self.valid_iter:
             _, src_lengths = batch.src
-            src = onmt.IO.make_features(batch, 'src')
-            tgt = onmt.IO.make_features(batch, 'tgt')
+            src = IO.make_features(batch, 'src')
+            tgt = IO.make_features(batch, 'tgt')
 
             # F-prop through the model.
             outputs, attns, _ = self.model(src, tgt, src_lengths)
@@ -186,7 +184,7 @@ class Trainer(object):
         checkpoint = {
             'model': model_state_dict,
             'generator': generator_state_dict,
-            'vocab': onmt.IO.save_vocab(fields),
+            'vocab': IO.save_vocab(fields),
             'opt': opt,
             'epoch': epoch,
             'optim': self.optim
