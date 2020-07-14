@@ -4,20 +4,10 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
 from tqdm import tqdm
 
-
 def make_model():
     class MyClassifier(OpenAttack.Classifier):
         def __init__(self):
             self.model = SentimentIntensityAnalyzer()
-
-        def get_pred(self, input_):
-            ret = []
-            for sent in input_:
-                res = self.model.polarity_scores(sent)
-                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 1e-6)
-                ret.append(0 if prob < 0.5 else 1)
-            return np.array(ret)
-
         def get_prob(self, input_):
             ret = []
             for sent in input_:
@@ -25,10 +15,6 @@ def make_model():
                 prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 1e-6)
                 ret.append(np.array([1 - prob, prob]))
             return np.array(ret)
-
-        def get_grad(self, input_, labels):
-            raise OpenAttack.exceptions.ClassifierNotSupportException(self)
-
     return MyClassifier()
 
 
