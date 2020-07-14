@@ -6,6 +6,7 @@ from . import IO
 from . import ModelConstructor
 from . import modules
 from .Utils import use_gpu
+from .Beam import GNMTGlobalScorer, Beam
 
 
 class Translator(object):
