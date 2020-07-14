@@ -26,10 +26,18 @@ class PytorchClassifier(ClassifierBase):
         self.config = DEFAULT_CONFIG.copy()
         self.config["device"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.config.update(kwargs)
+        self.to(self.config["device"])
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
         super().__init__(**self.config)
         self.model.to(self.config["device"])
+    
+    def to(self, device):
+        if isinstance(device, str):
+            import torch
+            device = torch.device(device)
+        self.config["device"] = device
+        self.model.to(device)
 
     def get_pred(self, input_):
         import torch
