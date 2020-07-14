@@ -1,3 +1,6 @@
+"""
+GloVe Word Embedding
+"""
 import numpy as np
 import os, pickle
 from OpenAttack.utils import WordVector, make_zip_downloader

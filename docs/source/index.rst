@@ -58,6 +58,7 @@ OpenAttack has a wide range of uses, including:
    TextProcessor <apis/text_processor>
    AttackEval <apis/attack_eval>
    Exceptions <apis/exceptions>
+   data <apis/data>
    utils <apis/utils>
 
 Indices and tables
