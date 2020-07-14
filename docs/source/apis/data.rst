@@ -2,79 +2,79 @@
 data
 =====================
 
-CounterFit
-=====================
-.. automodule:: OpenAttack.data.counter_fit
+.. py:data:: CounterFit
 
-Dataset.SST
-===================
-.. automodule:: OpenAttack.data.data_sst
+    .. automodule:: OpenAttack.data.counter_fit
 
-Dataset.SST.sample
-===================
-.. automodule:: OpenAttack.data.data_sst_sample
+.. py:data:: Dataset.SST
+    
+    .. automodule:: OpenAttack.data.data_sst
 
-DCES
-===================
-.. automodule:: OpenAttack.data.dces
+.. py:data:: Dataset.SST.sample
+    
+    .. automodule:: OpenAttack.data.data_sst_sample
 
-Glove
-=====================
-.. automodule:: OpenAttack.data.glove
+.. py:data:: DCES
 
-GNAE
-=====================
-.. automodule:: OpenAttack.data.gnae
+    .. automodule:: OpenAttack.data.dces
 
-SGNAE
-=====================
-.. automodule:: OpenAttack.data.sgnae
+.. py:data:: Glove
 
-HOWNET
-=====================
-.. automodule:: OpenAttack.data.hownet
+    .. automodule:: OpenAttack.data.glove
 
-NLTKPerceptronPosTagger
-=======================
-.. automodule:: OpenAttack.data.nltk_perceptron_pos_tagger
+.. py:data:: GNAE
 
-NLTKSentTokenizer
-=======================
-.. automodule:: OpenAttack.data.nltk_senttokenizer
+    .. automodule:: OpenAttack.data.gnae
 
-NLTKWordnet
-=======================
-.. automodule:: OpenAttack.data.nltk_wordnet
+.. py:data:: SGNAE
 
-NLTKWordnetDelemma
-=======================
-.. automodule:: OpenAttack.data.nltk_wordnet_delemma
+    .. automodule:: OpenAttack.data.sgnae
 
-SCPN
-=======================
-.. automodule:: OpenAttack.data.scpn
+.. py:data:: HOWNET
 
-StanfordNER
-=======================
-.. automodule:: OpenAttack.data.stanford_ner
+    .. automodule:: OpenAttack.data.hownet
 
-StanfordParser
-=======================
-.. automodule:: OpenAttack.data.stanford_parser
+.. py:data:: NLTKPerceptronPosTagger
+
+    .. automodule:: OpenAttack.data.nltk_perceptron_pos_tagger
+
+.. py:data:: NLTKSentTokenizer
+
+    .. automodule:: OpenAttack.data.nltk_senttokenizer
+
+.. py:data:: NLTKWordnet
+
+    .. automodule:: OpenAttack.data.nltk_wordnet
+
+.. py:data:: NLTKWordnetDelemma
+
+    .. automodule:: OpenAttack.data.nltk_wordnet_delemma
+
+.. py:data:: SCPN
+
+    .. automodule:: OpenAttack.data.scpn
+
+.. py:data:: StanfordNER
+
+    .. automodule:: OpenAttack.data.stanford_ner
+
+.. py:data:: StanfordParser
+
+    .. automodule:: OpenAttack.data.stanford_parser
 
 
-TranslationModels
-=======================
-.. automodule:: OpenAttack.data.translation_models
+.. py:data:: TranslationModels
 
-TREEBANK
-=======================
-.. automodule:: OpenAttack.data.treebank
+    .. automodule:: OpenAttack.data.translation_models
 
-UniversalSentenceEncoder
-===========================
-.. automodule:: OpenAttack.data.universal_sentence_encoder
+.. py:data:: TREEBANK
 
-Victim.BiLSTM.SST
-============================
-.. automodule:: OpenAttack.data.victim_bilstm
+    .. automodule:: OpenAttack.data.treebank
+
+.. py:data:: UniversalSentenceEncoder
+
+    .. automodule:: OpenAttack.data.universal_sentence_encoder
+
+.. py:data:: Victim.BiLSTM.SST
+
+    .. automodule:: OpenAttack.data.victim_bilstm

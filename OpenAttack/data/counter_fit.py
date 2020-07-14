@@ -1,3 +1,9 @@
+"""
+:type: OpenAttack.utils.WordVector
+:size: 61.998MB
+
+Counter-fitting Word Vectors to Linguistic Constraints.  `[pdf] <https://www.aclweb.org/anthology/N16-1018.pdf>`_
+"""
 import numpy as np
 import os
 from OpenAttack.utils import WordVector, make_zip_downloader
