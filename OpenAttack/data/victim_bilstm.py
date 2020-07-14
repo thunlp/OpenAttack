@@ -4,6 +4,8 @@ DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/bilstm
 def LOAD(path):
     import torch
     import torch.nn as nn
+    import OpenAttack
+
     class Model(nn.Module):
         def __init__(self, input_dim=300, output_dim=2, hidden_size=128, bidirectional=True):
             super(Model, self).__init__()
@@ -32,6 +34,11 @@ def LOAD(path):
             
             out = self.clsf(lstm_out)   # (batch, 2)
             return self.softmax(out)
-    ret = Model()
-    ret.load_state_dict( torch.load(path, map_location=lambda storage, loc: storage) )
-    return ret.eval()
+    model = Model()
+    model.load_state_dict( torch.load(path, map_location=lambda storage, loc: storage) )
+    
+    word_vector = OpenAttack.DataManager.load("Glove")
+
+    return OpenAttack.classifiers.PytorchClassifier(model, 
+        word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 
+        token_unk= "UNK", require_length=True, device="cpu")

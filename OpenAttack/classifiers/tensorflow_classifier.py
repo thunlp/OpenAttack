@@ -28,9 +28,18 @@ class TensorflowClassifier(ClassifierBase):
         self.config = DEFAULT_CONFIG.copy()
         self.config["device"] = tf.device( "/gpu:0" if tf.test.is_gpu_available() else "/cpu:0" )
         self.config.update(kwargs)
+        self.to(self.config["device"])
+
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
         super().__init__(**self.config)
+    
+    def to(self, device):
+        if isinstance(device, str):
+            import tensorflow as tf
+            self.config["device"] = tf.device(device)
+        else:
+            self.config["device"] = device
 
     def get_pred(self, input_):
         import tensorflow as tf
