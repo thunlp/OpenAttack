@@ -1,5 +1,4 @@
 # OpenAttack
 
-![Test](https://github.com/Fanchao-Qi/TAADToolbox/workflows/Test/badge.svg?branch=master)
-
+![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master)
 test
