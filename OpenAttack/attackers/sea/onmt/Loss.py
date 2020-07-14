@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 from . import IO
-from . import Statistics
+from .Trainer import Statistics
 
 
 class LossComputeBase(nn.Module):
