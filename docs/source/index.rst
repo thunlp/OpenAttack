@@ -46,6 +46,20 @@ OpenAttack has a wide range of uses, including:
    Attacker <module/attacker>
    AttackEval <module/attack_eval>
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: APIs
+
+   DataManager <apis/data_manager>
+   Attacker <apis/attacker>
+   Substitute <apis/substitute>
+   Metric <apis/metric>
+   TextProcessor <apis/text_processor>
+   AttackEval <apis/attack_eval>
+   Exceptions <apis/exceptions>
+   utils <apis/utils>
+
 Indices and tables
 ==================
 

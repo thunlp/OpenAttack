@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..utils import check_parameters, detokenizer
-from ..exceptions import WordEmbeddingRequired, WordNotInDictionaryException, TokensNotAligned
+from ..exceptions import NoEmbeddingException, WordNotInDictionaryException, TokensNotAligned
 from ..attacker import Attacker
 
 DEFAULT_CONFIG = {
@@ -23,7 +23,7 @@ class FDAttacker(Attacker):
         if self.config["substitute"] is None:
             self.config["substitute"] = CounterFittedSubstitute()
         if ((self.config["embedding"] is None) or (self.config["wordid"] is None)):
-            raise WordEmbeddingRequired()
+            raise NoEmbeddingException()
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
         self.processor = self.config["processor"]
         self.embedding = self.config["embedding"]
