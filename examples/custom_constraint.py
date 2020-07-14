@@ -7,8 +7,8 @@ class AttackEvalConstraint(OpenAttack.attack_evals.DefaultAttackEval):
     
     def measure(self, sentA, sentB):
         info = super().measure(sentA, sentB)
-        if info["succeed"] and info["Mistakes"] >= self.mistake_limit:
-            info["succeed"] = False
+        if info["Succeed"] and info["Grammatical Errors"] >= self.mistake_limit:
+            info["Succeed"] = False
         return info
 
 def main():
@@ -21,7 +21,7 @@ def main():
                 token_unk= "UNK", require_length=True, device="cpu")
     attacker = OpenAttack.attackers.PWWSAttacker()
     attack_eval = AttackEvalConstraint(attacker, clsf)
-    print( attack_eval.eval(dataset) )
+    attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":
     main()

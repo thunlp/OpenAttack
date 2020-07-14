@@ -7,13 +7,8 @@ class MyClassifier(OpenAttack.Classifier):
         self.model = SentimentIntensityAnalyzer()
 
     def get_pred(self, input_):
-        ret = []
-        for sent in input_:
-            res = self.model.polarity_scores(sent)
-            prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 2e-6)
-            ret.append(0 if prob < 0.5 else 1)
-        return np.array(ret)
-
+        return self.get_prob(input_).argmax(axis=1)
+        
     def get_prob(self, input_):
         ret = []
         for sent in input_:
@@ -29,9 +24,9 @@ def main():
     dataset = OpenAttack.load("Dataset.SST.sample")[:10]
 
     clsf = MyClassifier()
-    attacker = OpenAttack.attackers.GeneticAttacker()
+    attacker = OpenAttack.attackers.PWWSAttacker()
     attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
-    print( attack_eval.eval(dataset) )
+    attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":
     main()

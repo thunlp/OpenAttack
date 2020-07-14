@@ -57,7 +57,7 @@ def main():
                 token_unk= "UNK", require_length=True, device="cpu")
     attacker = MyAttacker()
     attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
-    print( attack_eval.eval(dataset) )
+    attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":
     main()

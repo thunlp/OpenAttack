@@ -62,9 +62,9 @@ class AttackEvalBase(AttackEval):
     
     def measure(self, input_, attack_result):
         if attack_result is None:
-            return { "succeed": False }
+            return { "Succeed": False }
 
-        info = { "succeed": True }
+        info = { "Succeed": True }
 
         if self.__config["levenstein"]:
             va = input_
@@ -72,19 +72,19 @@ class AttackEvalBase(AttackEval):
             if self.__config["word_distance"]:
                 va = self.__get_tokens(va)
                 vb = self.__get_tokens(vb)
-            info["EditDistance"] =  self.__levenshtein(va, vb)
+            info["Edit Distance"] =  self.__levenshtein(va, vb)
         
         if self.__config["mistake"]:
-            info["Mistakes"] = self.__get_mistakes(attack_result)
+            info["Grammatical Errors"] = self.__get_mistakes(attack_result)
         
         if self.__config["fluency"]:
-            info["Fluency"] = self.__get_fluency(attack_result)
+            info["Fluency (ppl)"] = self.__get_fluency(attack_result)
             
         if self.__config["semantic"]:
-            info["Semantic"] = self.__get_semantic(input_, attack_result)
+            info["Semantic Similarity"] = self.__get_semantic(input_, attack_result)
 
         if self.__config["modification_rate"]:
-            info["ModificationRate"] = self.__get_modification(input_, attack_result)
+            info["Word Modif. Rate"] = self.__get_modification(input_, attack_result)
         return info
         
     def update(self, info):
@@ -95,66 +95,66 @@ class AttackEvalBase(AttackEval):
         if self.__config["success_rate"]:
             if "succeed" not in self.__result:
                 self.__result["succeed"] = 0
-            if info["succeed"]:
+            if info["Succeed"]:
                 self.__result["succeed"] += 1
         
         # early stop
-        if not info["succeed"]:
-            return
+        if not info["Succeed"]:
+            return info
 
         if self.__config["levenstein"]:
             if "edit" not in self.__result:
                 self.__result["edit"] = 0
-            self.__result["edit"] += info["EditDistance"]
+            self.__result["edit"] += info["Edit Distance"]
         
         if self.__config["mistake"]:
             if "mistake" not in self.__result:
                 self.__result["mistake"] = 0
-            self.__result["mistake"] += info["Mistakes"]
+            self.__result["mistake"] += info["Grammatical Errors"]
 
         if self.__config["fluency"]:
             if "fluency" not in self.__result:
                 self.__result["fluency"] = 0
-            self.__result["fluency"] += info["Fluency"]
+            self.__result["fluency"] += info["Fluency (ppl)"]
 
         if self.__config["semantic"]:
             if "semantic" not in self.__result:
                 self.__result["semantic"] = 0
-            self.__result["semantic"] += info["Semantic"]
+            self.__result["semantic"] += info["Semantic Similarity"]
         
         if self.__config["modification_rate"]:
             if "modification" not in self.__result:
                 self.__result["modification"] = 0
-            self.__result["modification"] += info["ModificationRate"]
+            self.__result["modification"] += info["Word Modif. Rate"]
         return info
         
     def get_result(self):
         ret = {}
-        ret["total"] = self.__result["total"]
+        ret["Total Attacked Instances"] = self.__result["total"]
         if self.__config["success_rate"]:
-            ret["succeed"] = self.__result["succeed"]
-            ret["success_rate"] = ret["succeed"] / ret["total"]
+            ret["Successful Instances"] = self.__result["succeed"]
+            ret["Attack Success Rate"] = self.__result["succeed"] / self.__result["total"]
         if self.__result["succeed"] > 0:
             if self.__config["levenstein"]:
                 if "edit" not in self.__result:
                     self.__result["edit"] = 0
-                ret["levenstein"] = self.__result["edit"] / ret["succeed"]
+                ret["Avg. Levenshtein Edit Distance"] = self.__result["edit"] / self.__result["succeed"]
             if self.__config["mistake"]:
                 if "mistake" not in self.__result:
                     self.__result["mistake"] = 0
-                ret["mistake"] = self.__result["mistake"] / ret["succeed"]
+                ret["Avg. Grammatical Errors"] = self.__result["mistake"] / self.__result["succeed"]
             if self.__config["fluency"]:
                 if "fluency" not in self.__result:
                     self.__result["fluency"] = 0
-                ret["fluency"] = self.__result["fluency"] / ret["succeed"]
+                ret["Avg. Fluency (ppl)"] = self.__result["fluency"] / self.__result["succeed"]
             if self.__config["semantic"]:
                 if "semantic" not in self.__result:
                     self.__result["semantic"] = 0
-                ret["semantic"] = self.__result["semantic"] / ret["succeed"]
+                ret["Avg. Semantic Similarity"] = self.__result["semantic"] / self.__result["succeed"]
             if self.__config["modification_rate"]:
                 if "modification" not in self.__result:
                     self.__result["modification"] = 0
-                ret["modification_rate"] = self.__result["modification"] / ret["succeed"]
+                ret["Avg. Word Modif. Rate"] = self.__result["modification"] / self.__result["succeed"]
         return ret
 
     def clear(self):
