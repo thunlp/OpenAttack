@@ -7,6 +7,9 @@ class TextProcessor(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_tokens(self, sentence):
+        """
+        Tokens
+        """
         pass
 
     @abc.abstractmethod
