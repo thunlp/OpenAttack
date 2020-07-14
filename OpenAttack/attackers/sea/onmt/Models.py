@@ -6,10 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence as pack
 from torch.nn.utils.rnn import pad_packed_sequence as unpack
 
 from .Utils import aeq
-from .modules.SRU import SRU
-from .modules.GlobalAttention import GlobalAttention
-from .modules.Gate import ContextGateFactory
-from .modules.StackedRNN import StackedGRU, StackedLSTM
+
 
 class EncoderBase(nn.Module):
     """
@@ -68,6 +65,7 @@ class RNNEncoder(EncoderBase):
         if rnn_type == "SRU":
             # SRU doesn't support PackedSequence.
             self.no_pack_padded_seq = True
+            from .modules.SRU import SRU
             self.rnn = SRU(
                     input_size=embeddings.embedding_size,
                     hidden_size=hidden_size,
@@ -127,6 +125,7 @@ class RNNDecoderBase(nn.Module):
         # Set up the context gate.
         self.context_gate = None
         if context_gate is not None:
+            from .modules.Gate import ContextGateFactory
             self.context_gate = ContextGateFactory(
                 context_gate, self._input_size,
                 hidden_size, hidden_size, hidden_size
@@ -134,6 +133,7 @@ class RNNDecoderBase(nn.Module):
 
         # Set up the standard attention.
         self._coverage = coverage_attn
+        from .modules.GlobalAttention import GlobalAttention
         self.attn = GlobalAttention(
             hidden_size, coverage=coverage_attn,
             attn_type=attn_type
@@ -142,6 +142,7 @@ class RNNDecoderBase(nn.Module):
         # Set up a separated copy attention layer, if needed.
         self._copy = False
         if copy_attn:
+            from .modules.GlobalAttention import GlobalAttention
             self.copy_attn = GlobalAttention(
                 hidden_size, attn_type=attn_type
             )
@@ -287,6 +288,7 @@ class StdRNNDecoder(RNNDecoderBase):
         """
         # Use pytorch version when available.
         if rnn_type == "SRU":
+            from .modules.SRU import SRU
             return SRU(
                     input_size, hidden_size,
                     num_layers=num_layers,
@@ -376,6 +378,7 @@ class InputFeedRNNDecoder(RNNDecoderBase):
                    hidden_size, num_layers, dropout):
         assert not rnn_type == "SRU", "SRU doesn't support input feed! " \
                 "Please set -input_feed 0!"
+        from .modules.StackedRNN import StackedGRU, StackedLSTM
         if rnn_type == "LSTM":
             stacked_cell = StackedLSTM
         else:
