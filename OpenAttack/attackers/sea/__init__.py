@@ -2,6 +2,7 @@ import os
 import pickle
 import numpy as np
 import collections
+from tqdm import tqdm
 from ...utils import check_parameters
 from ...text_processors import DefaultTextProcessor
 from ...attacker import Attacker
@@ -120,7 +121,7 @@ class SEAAttacker(Attacker):
         right_val = val_for_onmt
         right_preds = clsf.get_pred(right_val)
 
-        for i, sentence in enumerate(right_val):
+        for i, sentence in tqdm(enumerate(right_val)):
             if sentence in flips:
                 continue
             fs = find_flips(sentence, clsf, ps, tokenizer, topk=config["topk"], threshold=config["threshold"])
