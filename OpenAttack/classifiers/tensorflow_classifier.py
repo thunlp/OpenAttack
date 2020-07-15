@@ -40,6 +40,7 @@ class TensorflowClassifier(ClassifierBase):
             self.config["device"] = tf.device(device)
         else:
             self.config["device"] = device
+        return self
 
     def get_pred(self, input_):
         import tensorflow as tf

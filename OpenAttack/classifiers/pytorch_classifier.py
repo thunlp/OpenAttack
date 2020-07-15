@@ -38,6 +38,7 @@ class PytorchClassifier(ClassifierBase):
             device = torch.device(device)
         self.config["device"] = device
         self.model.to(device)
+        return self
 
     def get_pred(self, input_):
         import torch
