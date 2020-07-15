@@ -1,6 +1,6 @@
 """
 :type: OpenAttack.utils.WordVector
-:size: 61.998MB
+:Size: 61.998MB
 
 Counter-fitting Word Vectors to Linguistic Constraints.  `[pdf] <https://www.aclweb.org/anthology/N16-1018.pdf>`_
 """

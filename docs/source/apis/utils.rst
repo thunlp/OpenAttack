@@ -33,5 +33,8 @@ WordVector
 .. autoclass:: OpenAttack.utils.WordVector
     :members:
 
+BertClassifier
+----------------------
 
-
+.. autoclass:: OpenAttack.utils.BertClassifier
+    :members:
