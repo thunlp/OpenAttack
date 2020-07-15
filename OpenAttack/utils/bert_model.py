@@ -66,10 +66,11 @@ class BertModel():
 
 class BertClassifier(Classifier):
     def __init__(self, model_path, num_labels, max_len = 100, device="cpu"):
-        self.model = BertModel(model_path, num_labels, max_len, device)
+        self.__model = BertModel(model_path, num_labels, max_len, device)
     
     def to(self, device):
-        return self.model.to(device)
+        self.__model.to(device)
+        return self
     
     def get_grad(self, input_, labels):
-        return self.model.predict(input_, labels)
+        return self.__model.predict(input_, labels)
