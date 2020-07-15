@@ -5,6 +5,10 @@ from ..data_manager import DataManager
 
 
 class DefaultTextProcessor(TextProcessor):
+    """
+    An implementation of :class:`OpenAttack.TextProcessor`. See "Module Reference" for class definition.
+    """
+
     def __init__(self):
         self.nltk = __import__("nltk")
         self.__tokenize = None
@@ -23,6 +27,12 @@ class DefaultTextProcessor(TextProcessor):
         return tokenize
 
     def get_tokens(self, sentence):
+        """
+        :Data Requirements: :any:`NLTKSentTokenizer` , :any:`NLTKPerceptronPosTagger`
+
+        This method ``nltk.WordPunctTokenizer()`` for word tokenization and 
+        ``nltk.tag.PerceptronTagger()`` to generate POS tag in "Penn tagset".
+        """
         if self.__tokenize is None:
             self.__tokenize = self.__make_tokenizer( DataManager.load("NLTKSentTokenizer") )
         if self.__tag is None:
@@ -30,6 +40,9 @@ class DefaultTextProcessor(TextProcessor):
         return self.__tag(self.__tokenize(sentence))
 
     def get_lemmas(self, token_and_pos):
+        """
+        :Data Requirements: :any:`NLTKWordnet`
+        """
         if self.__lemmatize is None:
             self.__lemmatize = DataManager.load("NLTKWordnet").lemma
         if not isinstance(token_and_pos, list):
@@ -38,6 +51,9 @@ class DefaultTextProcessor(TextProcessor):
             return [self.__lemmatize(token, pos) for token, pos in token_and_pos]
 
     def get_delemmas(self, lemma_and_pos):
+        """
+        :Data Requirements: :any:`NLTKWordnetDelemma`
+        """
         if self.__delemmatize is None:
             self.__delemmatize = DataManager.load("NLTKWordnetDelemma")
         if not isinstance(lemma_and_pos, list):
@@ -56,6 +72,9 @@ class DefaultTextProcessor(TextProcessor):
             ]
 
     def get_ner(self, sentence):
+        """
+        :Data Requirements: :any:`StanfordNER` , :any:`NLTKSentTokenizer`
+        """
         if self.__ner is None:
             self.__ner = DataManager.load("StanfordNER")
         if self.__tokenize is None:
@@ -153,11 +172,17 @@ class DefaultTextProcessor(TextProcessor):
         return ret
 
     def get_parser(self, sentence):
+        """
+        :Data Requirements: :any:`StanfordParser`
+        """
         if self.__parser is None:
             self.__parser = DataManager.load("StanfordParser")
         return str(list(self.__parser(sentence))[0])
 
     def get_wsd(self, tokens_and_pos):
+        """
+        :Data Requirements: :any:`NLTKWordnet`
+        """
         if self.__wordnet is None:
             self.__wordnet = DataManager.load("NLTKWordnet")
 

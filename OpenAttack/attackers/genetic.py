@@ -49,6 +49,22 @@ DEFAULT_CONFIG = {
 
 class GeneticAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
+        :param int pop_size: Genetic algorithm popluation size. **Default:** 20
+        :param int max_iter: Maximum generations of genetic algorithm. **Default:** 20
+        :param float neighbour_threshold: Threshold used in substitute module. **Default:** 0.5
+        :param int top_n1: Maximum candidates of word substitution. **Default:** 20
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
+
+        :Classifier Capacity: Probability
+
+        Generating Natural Language Adversarial Examples. Moustafa Alzantot, Yash Sharma, Ahmed Elgohary, Bo-Jhang Ho, Mani Srivastava, Kai-Wei Chang. EMNLP 2018.
+        `[pdf] <https://www.aclweb.org/anthology/D18-1316.pdf>`__
+        `[code] <https://github.com/nesl/nlp_adversarial_examples>`__
+        
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:

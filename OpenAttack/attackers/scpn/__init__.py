@@ -42,6 +42,38 @@ def reverse_bpe(sent):
 
 class SCPNAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param list templates: A list of templates used in SCPNAttacker. **Default:** ten manually selected templates.
+        :param torch.device device: The device to load SCPN models (pytorch). **Default:** Use "cpu" if cuda is not available else "cuda".
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
+        
+        :Package Requirements:
+            * torch
+        :Data Requirements: :any:`SCPN`
+        :Classifier Capacity: Blind
+
+        Adversarial Example Generation with Syntactically Controlled Paraphrase Networks. Mohit Iyyer, John Wieting, Kevin Gimpel, Luke Zettlemoyer. NAACL-HLT 2018.
+        `[pdf] <https://www.aclweb.org/anthology/N18-1170.pdf>`__
+        `[code] <https://github.com/miyyer/scpn>`__
+
+        The default templates are:
+        
+        .. code-block:: python
+           
+            DEFAULT_TEMPLATES = [
+                '( ROOT ( S ( NP ) ( VP ) ( . ) ) ) EOP',
+                '( ROOT ( S ( VP ) ( . ) ) ) EOP',
+                '( ROOT ( NP ( NP ) ( . ) ) ) EOP',
+                '( ROOT ( FRAG ( SBAR ) ( . ) ) ) EOP',
+                '( ROOT ( S ( S ) ( , ) ( CC ) ( S ) ( . ) ) ) EOP',
+                '( ROOT ( S ( LST ) ( VP ) ( . ) ) ) EOP',
+                '( ROOT ( SBARQ ( WHADVP ) ( SQ ) ( . ) ) ) EOP',
+                '( ROOT ( S ( PP ) ( , ) ( NP ) ( VP ) ( . ) ) ) EOP',
+                '( ROOT ( S ( ADVP ) ( NP ) ( VP ) ( . ) ) ) EOP',
+                '( ROOT ( S ( SBAR ) ( , ) ( NP ) ( VP ) ( . ) ) ) EOP'
+            ]
+        
+        """
         self.models = __import__("models", globals={
             "__name__":__name__,
             "__package__": __package__,

@@ -5,7 +5,7 @@ Installation
 Using Source Code
 -------------------
 
-You can install OpenAttack by cloning github repo and run ``python setup.py install``.
+You can install OpenAttack by cloning github repository and run ``python setup.py install``.
 
 .. code-block:: sh
 
@@ -13,7 +13,7 @@ You can install OpenAttack by cloning github repo and run ``python setup.py inst
     cd OpenAttack
     python setup.py install
 
-xxx
+After running the above script successfully, you can use demp.py to check that OpenAttack works well.
 
 .. code-block:: sh
 
@@ -22,6 +22,9 @@ xxx
 
 Mandatory Requirements
 --------------------------
+
+There are only three mandatory packages required by OpenAttack. They will be automatically installed
+during running `python setup.py install`.
 
 * **tqdm** >= 4.45.0
 * **nltk** >= 3.5
@@ -41,4 +44,4 @@ You can install them manually when needed.
 * **OpenHowNet**
 * **editdistance**
 * **language_tool_python**
-
+* **torchtext** == 0.1.1 *(The latest version of torchtext is not supported now. This will be improved in the futrue.)*
