@@ -6,10 +6,10 @@ WordSubstitute
 ---------------
 
 .. autoclass:: OpenAttack.substitutes.base.WordSubstitute
-    :members:
+    :members: __call__
 
 CharSubstitute
 ---------------
 
 .. autoclass:: OpenAttack.substitutes.base.CharSubstitute
-    :members:
+    :members: __call__
