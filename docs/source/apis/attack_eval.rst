@@ -6,7 +6,7 @@ AttackEvalBase
 -----------------
 
 .. autoclass:: OpenAttack.attack_evals.AttackEvalBase(OpenAttack.AttackEval)
-    :members:
+    :members: __init__, measure, update, get_result, clear
 
 DefaultAttackEval
 -------------------

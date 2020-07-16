@@ -3,4 +3,4 @@ AttackEval
 =====================
 
 .. autoclass:: OpenAttack.AttackEval
-    :members:
+    :members: __init__, eval, eval_results
