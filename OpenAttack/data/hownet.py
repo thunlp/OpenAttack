@@ -1,3 +1,12 @@
+"""
+:type: OpenHowNet.HowNetDict
+:Package Requirements: OpenHowNet
+
+OpenHowNet.
+`[code] <https://github.com/thunlp/OpenHowNet>`__
+`[page] <https://openhownet.thunlp.org/>`__
+"""
+
 NAME = "HOWNET"
 
 

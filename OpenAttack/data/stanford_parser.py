@@ -1,3 +1,10 @@
+"""
+:type: function
+:Size: 603.979MB
+
+Model files for Stanford Parser.
+`[page] <https://nlp.stanford.edu/software/lex-parser.shtml>`__
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 

@@ -1,3 +1,10 @@
+"""
+:type: function
+:Size: 21.164MB
+
+Model files for Stanford NER tagger.
+`[page] <https://nlp.stanford.edu/software/CRF-NER.html>`__
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 

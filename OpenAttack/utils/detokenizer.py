@@ -1,4 +1,11 @@
 def detokenizer(tokens):
+    """
+    :param list tokens: A list of tokens
+    :return: A detokenized sentence.
+    :rtype: str
+
+    Detokenizer used in attackers. This function will be moved to `TextProcessor` in the future.
+    """
     all_tuple = True
     for it in tokens:
         if not isinstance(it, tuple):

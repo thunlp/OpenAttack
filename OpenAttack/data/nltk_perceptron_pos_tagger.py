@@ -1,3 +1,10 @@
+"""
+:type: function
+:Size: 2.41MB
+
+Model files for pos tagger in nltk.
+`[code] <https://github.com/sloria/textblob-aptagger>`__
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 

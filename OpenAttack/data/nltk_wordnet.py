@@ -1,3 +1,10 @@
+"""
+:type: nltk.WordNetCorpusReader
+:Size: 10.283MB
+
+Model files for wordnet in nltk.
+`[page] <http://wordnet.princeton.edu/>`__
+"""
 from OpenAttack.utils import make_zip_downloader
 
 NAME = "NLTKWordnet"

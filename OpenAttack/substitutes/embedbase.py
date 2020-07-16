@@ -7,7 +7,7 @@ DEFAULT_CONFIG = {"cosine": False}
 
 class EmbedBasedSubstitute(Substitute):
     """
-    :param bool cosine: If true, use cosine distance :math:`(1 - cos(v_a, v_b))`. **Default:** False.
+    :param bool cosine: If true, uses cosine distance :math:`(1 - cos(v_a, v_b))`, otherwise uses Euclidian distance :math:`norm_2(v_a - v_b)`. **Default:** False.
     :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
     :param dict word2id: A dict maps word to index.
 

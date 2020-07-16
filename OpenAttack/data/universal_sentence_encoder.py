@@ -1,3 +1,9 @@
+"""
+:type: str
+:Size: 916.57MB
+
+Model files for Universal Sentence Encoder in tensorflow_hub.
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 

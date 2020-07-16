@@ -1,3 +1,9 @@
+"""
+:type: function
+:Size: 158.351KB
+
+Model files for nltk punkt sentence tokenizer.
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 
