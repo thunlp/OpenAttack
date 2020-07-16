@@ -66,7 +66,7 @@ UATAttacker
 --------------
 
 .. autoclass:: OpenAttack.attackers.UATAttacker(OpenAttack.Attacker)
-    :members: __init__
+    :members: __init__, get_triggers
 
 VIPERAttacker
 --------------

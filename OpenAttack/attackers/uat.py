@@ -22,6 +22,15 @@ TRAIN_CONFIG = {
 
 class UATAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param list triggers: A list of trigger words.
+
+        :Classifier Capacity: Gradient
+
+        Universal Adversarial Triggers for Attacking and Analyzing NLP. Eric Wallace, Shi Feng, Nikhil Kandpal, Matt Gardner, Sameer Singh. EMNLP-IJCNLP 2019. 
+        `[pdf] <https://arxiv.org/pdf/1908.07125.pdf>`__
+        `[code] <https://github.com/Eric-Wallace/universal-triggers>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
@@ -47,6 +56,18 @@ class UATAttacker(Attacker):
 
     @classmethod
     def get_triggers(self, clsf, dataset, **kwargs):
+        """
+        :param Classifier clsf: The classifier that you want to attack.
+        :param list dataset: A list of input sentences and labels ``[(sentence, label) ...]``.
+        :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
+        :param dict word2id: A dict that maps tokens to ids.
+        :param int epoch: Maximum epochs to get the universal adversarial triggers.
+        :param int barch_size: Batch size.
+        :param int trigger_len: The number of triggers.
+        :param int beam_size: Beam search size used in UATAttacker.
+        :return: Returns a list of triggers which can be directly used in ``__init__``
+        :rtype: list
+        """
         config = TRAIN_CONFIG.copy()
         config.update(kwargs)
         check_parameters(TRAIN_CONFIG.keys(), config)
