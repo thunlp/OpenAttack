@@ -14,6 +14,18 @@ DEFAULT_CONFIG = {
 
 class PWWSAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param float threshold: Threshold used in substitute module. **Default:** 0.5
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`WordNetSubstitute`
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
+        :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
+
+        :Classifier Capacity: Probability
+
+        Generating Natural Language Adversarial Examples through Probability Weighted Word Saliency. Shuhuai Ren, Yihe Deng, Kun He, Wanxiang Che. ACL 2019.
+        `[pdf] <https://www.aclweb.org/anthology/P19-1103.pdf>`__
+        `[code] <https://github.com/JHL-HUST/PWWS/>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:
