@@ -16,11 +16,14 @@ pos_set = set(pos_list)
 
 class HowNetSubstitute(WordSubstitute):
     """
+    :Package Requirements: OpenHowNet
+    :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
+
     An implementation of :class:`OpenAttack.WordSubstitute`.
 
     OpenHowNet substitute.
 
-    :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
+    
     """
 
     def __init__(self):

@@ -1,9 +1,3 @@
-"""
-    由wordnet提供的近义词
-    require:
-    DataManager.download("SpacyECW")
-    DataManager.download("WordnetSynsets")
-"""
 from .base import WordSubstitute
 from ..data_manager import DataManager
 from ..exceptions import UnknownPOSException
@@ -32,11 +26,12 @@ def get_pos(pos_tag):
 
 class WordNetSubstitute(WordSubstitute):
     """
+    :Data Requirements: :any:`NLTKWordnet`
+
     An implementation of :class:`OpenAttack.WordSubstitute`.
 
     OpenWordNet substitute.
 
-    :Data Requirements: :any:`NLTKWordnet`
     """
     def __init__(self):
         # self.nlp = spacy.load('en_core_web_sm')

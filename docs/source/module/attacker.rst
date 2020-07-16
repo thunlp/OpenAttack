@@ -3,4 +3,4 @@ Attacker
 ==================
 
 .. autoclass:: OpenAttack.Attacker
-    :members:
+    :members: __call__

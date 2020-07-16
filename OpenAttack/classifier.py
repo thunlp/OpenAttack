@@ -28,7 +28,7 @@ class Classifier(metaclass=abc.ABCMeta):
         """
         :param list input_: A list of sentences of which we want to get the gradients.
         :param list labels: A list of types based on which we want to get the gradients.
-        :return: The result is a tuple of 2 numpy.array. The first numpy.array is same as the return of get_prob and the second numpy.array is gradients on the model input, not the input_. So the shape of the second numpy.array is the same model input.
+        :return: The result is a tuple of 2 numpy.array. The first numpy.array is same as the return of get_prob and the second numpy.array is gradients on the model's input, not the input\_. So the shape of the second numpy.array is the same model input.
         :rtype: tuple
 
         """

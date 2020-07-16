@@ -19,10 +19,3 @@ OpenAttack has a wide range of uses, including:
 5. Conducting adversarial training to improve robustness of a machine learning model by enriching the training data with generated adversarial examples.
 
 
-
-----------------
-Features
-----------------
-
-* Feature 1
-* Feature 2

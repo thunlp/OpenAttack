@@ -31,11 +31,12 @@ def get_hex_string(ch):
 
 class DcesSubstitute(CharSubstitute):
     """
+    :Data Requirements: :any:`DCES`
+    
     An implementation of :class:`OpenAttack.CharSubstitute`.
 
     DCES substitute used in Viper Attacker.
 
-    :Data Requirements: :any:`DCES`
     """
 
     def __init__(self):

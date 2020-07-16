@@ -115,13 +115,6 @@ TranslationModels
 
     .. automodule:: OpenAttack.data.translation_models
 
-TREEBANK
--------------
-
-.. py:data:: TREEBANK
-
-    .. automodule:: OpenAttack.data.treebank
-
 UniversalSentenceEncoder
 --------------------------
 

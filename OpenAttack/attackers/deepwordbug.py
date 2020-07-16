@@ -21,8 +21,8 @@ class DeepWordBugAttacker(Attacker):
     def __init__(self, **kwargs):
         """
         :param string unk: Unknown token used in Classifier. **Default:** 'unk'
-        :param string scoring: Scoring function used to compute word importance. **Default:** :any:`replaceone`
-        :param string transformer: Transform function to modify a word. **Default:** :any:`homoglyph`
+        :param string scoring: Scoring function used to compute word importance, ``["replaceone", "temporal", "tail", "combined"]``. **Default:** replaceone
+        :param string transformer: Transform function to modify a word, ``["homoglyph", "swap"]``. **Default:** homoglyph
 
         :Package Requirements:
             * torch
