@@ -1,3 +1,11 @@
+"""
+:Size: 1.22GB
+:Package Requirements:
+    * pytorch
+
+Pretrained translation models. See :py:data:`TranslationModels` for detail. 
+"""
+
 from OpenAttack.utils import make_zip_downloader
 import os
 
