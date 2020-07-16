@@ -36,9 +36,19 @@ class InvokeLimitWrapper(Classifier):
         return self.clsf.get_grad(input_, labels)
 
 class InvokeLimitedAttackEval(DefaultAttackEval):
+    """
+    Evaluate attackers and classifiers with invoke limitation.
+    """
     def __init__(self, attacker, classifier, invoke_limit=100,
                     average_invoke=False, progress_bar=True, **kwargs):
-        super().__init__(attacker, classifier, **kwargs)
+        """
+        :param Attacker attacker: The attacker you use.
+        :param Classifier classifier: The classifier you want to attack.
+        :param int invoke_limit: Limitation of invoke for each instance.
+        :param bool average_invoke: If true, returns "Avg. Victim Model Queries".
+        :param kwargs: Other parameters, see :py:class:`.DefaultAttackEval` for detail.
+        """
+        super().__init__(attacker, classifier, progress_bar=progress_bar, **kwargs)
         self.attacker = attacker
         self.classifier = InvokeLimitWrapper(classifier, invoke_limit)
         self.progress_bar = progress_bar

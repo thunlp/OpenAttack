@@ -5,7 +5,17 @@ from ..utils import visualizer, result_visualizer
 from ..exceptions import ClassifierNotSupportException
 
 class DefaultAttackEval(AttackEvalBase):
+    """
+    This class is a default implementation of AttackEval.
+    """
     def __init__(self, attacker, classifier, running_time=True, progress_bar=True, **kwargs):
+        """
+        :param Attacker attacker: The attacker you use.
+        :param Classifier classifier: The classifier you want to attack.
+        :param bool running_time: If true, returns "Avg. Running Time" in summary. **Default:** True
+        :param bool progress_bar: Dispaly a progress bar(tqdm). **Default:** True
+        :param kwargs: Other parameters, see :py:class:`.AttackEvalBase` for detail.
+        """
         super().__init__(**kwargs)
         self.attacker = attacker
         self.classifier = classifier
@@ -13,6 +23,16 @@ class DefaultAttackEval(AttackEvalBase):
         self.__running_time = running_time
     
     def eval(self, dataset, total_len=None, visualize=False):
+        """
+        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :type dataset: list or generator
+        :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
+        :param bool visualize: Display a visualized result for each instance and the summary.
+        :return: Returns a dict of the summary.
+        :rtype: dict
+
+        In this method, ``eval_results`` is called and gets the result for each instance iteratively.
+        """
         self.clear()
         if isinstance(dataset, list):
             total_len = len(dataset)
@@ -68,6 +88,12 @@ class DefaultAttackEval(AttackEvalBase):
         return self.update(info)
 
     def eval_results(self, dataset):
+        """
+        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :type dataset: list or generator
+        :return: A generator which generates the result for each instance, *(x_orig, x_adv, y_adv, info)*.
+        :rtype: generator
+        """
         self.clear()
         for sent in dataset:
             if isinstance(sent, tuple):
