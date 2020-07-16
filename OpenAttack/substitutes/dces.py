@@ -33,7 +33,7 @@ class DcesSubstitute(CharSubstitute):
     """
     :Data Requirements: :any:`DCES`
     
-    An implementation of :class:`OpenAttack.CharSubstitute`.
+    An implementation of :py:class:`.CharSubstitute`.
 
     DCES substitute used in Viper Attacker.
 

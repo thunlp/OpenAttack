@@ -6,13 +6,13 @@ GPT2LM
 --------
 
 .. autoclass:: OpenAttack.metric.GPT2LM
-    :members:
+    :members: __init__, __call__
 
 UniversalSentenceEncoder
 -------------------------
 
 .. autoclass:: OpenAttack.metric.UniversalSentenceEncoder
-    :members:
+    :members: __init__, __call__
 
 levenshtein
 -------------

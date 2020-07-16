@@ -19,7 +19,7 @@ class HowNetSubstitute(WordSubstitute):
     :Package Requirements: OpenHowNet
     :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
 
-    An implementation of :class:`OpenAttack.WordSubstitute`.
+    An implementation of :py:class:`.WordSubstitute`.
 
     OpenHowNet substitute.
 

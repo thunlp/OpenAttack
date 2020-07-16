@@ -12,6 +12,8 @@ class EmbedBasedSubstitute(Substitute):
     :param dict word2id: A dict maps word to index.
 
     A base class for all embedding-based substitute methods.
+    
+    An implementation of :py:class:`.WordSubstitute`.
     """
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()

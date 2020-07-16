@@ -28,7 +28,7 @@ class WordNetSubstitute(WordSubstitute):
     """
     :Data Requirements: :any:`NLTKWordnet`
 
-    An implementation of :class:`OpenAttack.WordSubstitute`.
+    An implementation of :py:class:`.WordSubstitute`.
 
     OpenWordNet substitute.
 

@@ -1,5 +1,11 @@
 import numpy as np
 def levenshtein(a, b):
+    """
+    :param list a: The first list.
+    :param list b: The second list.
+
+    Both parameters can be str or list, str for char-level edit distance while list for token-level edit distance.
+    """
     la = len(a)
     lb = len(b)
     f = np.zeros((la + 1, lb + 1), dtype=np.uint64)

@@ -16,7 +16,7 @@ H = {'a': 'â', 'b': 'ḃ', 'c': 'ĉ', 'd': 'ḑ', 'e': 'ê', 'f': 'ḟ', 'g': '
 
 class EcesSubstitute(CharSubstitute):
     """
-    An implementation of :class:`OpenAttack.CharSubstitute`.
+    An implementation of :py:class:`.CharSubstitute`.
 
     ECES substitute used in Viper Attacker.
     """

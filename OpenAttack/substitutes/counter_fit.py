@@ -7,7 +7,7 @@ class CounterFittedSubstitute(EmbedBasedSubstitute):
     :param bool cosine: If true, use cosine distance. **Default:** False.
     :Data Requirements: :py:data:`.CounterFit`
 
-    An implementation of :class:`OpenAttack.WordSubstitute`.
+    An implementation of :py:class:`.WordSubstitute`.
 
     Counter-fitting Word Vectors to Linguistic Constraints.
     `[pdf] <https://www.aclweb.org/anthology/N16-1018.pdf>`__
