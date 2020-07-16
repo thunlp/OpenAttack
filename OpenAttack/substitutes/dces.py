@@ -30,13 +30,19 @@ def get_hex_string(ch):
 
 
 class DcesSubstitute(CharSubstitute):
+    """
+    An implementation of :class:`OpenAttack.CharSubstitute`.
+
+    DCES substitute used in Viper Attacker.
+
+    :Data Requirements: :any:`DCES`
+    """
 
     def __init__(self):
         self.vec_colnames, self.descs, self.neigh = DataManager.load("DCES")
         # load
 
     def __call__(self, char, threshold):  # 原字符，topn
-
         c = get_hex_string(char)
         # 二进制编码
 

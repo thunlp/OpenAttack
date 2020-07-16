@@ -1,6 +1,13 @@
-import numpy as np
+"""
+:Size: 632.887KB
+:Package Requirements:
+    * pickle
+
+Vec-colnames and neighber matrix used in Substitute DECS. See :py:data:`DCES` for detail.
+"""
+
 import os
-from OpenAttack.utils import WordVector, make_zip_downloader
+from OpenAttack.utils import make_zip_downloader
 
 NAME = "DCES"
 

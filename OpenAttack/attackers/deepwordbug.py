@@ -19,6 +19,19 @@ homos = {
 
 class DeepWordBugAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param string unk: Unknown token used in Classifier. **Default:** 'unk'
+        :param string scoring: Scoring function used to compute word importance. **Default:** :any:`replaceone`
+        :param string transformer: Transform function to modify a word. **Default:** :any:`homoglyph`
+
+        :Package Requirements:
+            * torch
+        :Classifier Capacity: Probability
+
+        Black-box Generation of Adversarial Text Sequences to Evade Deep Learning Classifiers. Ji Gao, Jack Lanchantin, Mary Lou Soffa, Yanjun Qi. IEEE SPW 2018.
+        `[pdf] <https://ieeexplore.ieee.org/document/8424632>`__
+        `[code] <https://github.com/QData/deepWordBug>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         self.scoring = self.config["scoring"]

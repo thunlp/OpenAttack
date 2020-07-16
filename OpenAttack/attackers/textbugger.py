@@ -18,6 +18,15 @@ DEFAULT_CONFIG = {
 
 class TextBuggerAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param bool blackbox: Classifier Capacity. True-probability; False-grad. **Default:** True.
+
+        :Data Requirements: :any:`NLTKSentTokenizer`
+        :Classifier Capacity: Blind or Probability
+
+        TEXTBUGGER: Generating Adversarial Text Against Real-world Applications. Jinfeng Li, Shouling Ji, Tianyu Du, Bo Li, Ting Wang. NDSS 2019.
+        `[pdf] <https://arxiv.org/pdf/1812.05271.pdf>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         self.nlp = DataManager.load("NLTKSentTokenizer")

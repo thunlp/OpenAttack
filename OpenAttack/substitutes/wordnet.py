@@ -31,7 +31,13 @@ def get_pos(pos_tag):
 
 
 class WordNetSubstitute(WordSubstitute):
+    """
+    An implementation of :class:`OpenAttack.WordSubstitute`.
 
+    OpenWordNet substitute.
+
+    :Data Requirements: :any:`NLTKWordnet`
+    """
     def __init__(self):
         # self.nlp = spacy.load('en_core_web_sm')
         # self.nlp = DataManager.load("SpacyECW")

@@ -1,4 +1,11 @@
-import numpy as np
+"""
+:Size: 55.041MB
+:Package Requirements:
+    * pytorch
+
+Pretrained GAN model on SNLI dataset used in attackers.gan. See :py:data:`GNAE` for detail.
+"""
+
 import os
 from OpenAttack.utils import make_zip_downloader
 
