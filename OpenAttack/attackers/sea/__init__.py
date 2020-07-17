@@ -103,6 +103,22 @@ class SEAAttacker(Attacker):
 
     @classmethod
     def get_rules(cls, clsf, sentence_list, **kwargs):
+        """
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
+        :param bool cuda: Use gpu or not. **Default:** :True.
+        :param int gpu_id: gpu_id. **Default:** :0.
+        :param int topk: The number of flips to find. **Default:** :200.
+        :param float threshold: The threshold used in finding flips module. **Default:** :-15.0.
+        :param float min_freq: Frequency threshold in finding rules module. **Default:** :0.005.
+        :param int ngram_size: The length of replaced part in rules. **Default:** :4.
+
+        :Package Requirements:
+            * torch
+            * torchtext
+            * editdistance
+        :Data Requirements: :any:`TranslationModels`
+
+        """
         from . import paraphrase_scorer
         from . import onmt_model
         from . import replace_rules

@@ -48,7 +48,7 @@ SEAAttacker
 --------------
 
 .. autoclass:: OpenAttack.attackers.SEAAttacker(OpenAttack.Attacker)
-    :members: __init__
+    :members: __init__, get_rules
 
 TextBuggerAttacker
 ---------------------
