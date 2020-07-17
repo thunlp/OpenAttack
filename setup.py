@@ -14,7 +14,7 @@ with  open("requirements.txt") as freq:
 
 setuptools.setup(
     name="OpenAttack",  # Replace with your own username
-    version="0.0.1",
+    version="1.0.0",
     author="THUNLP",
     author_email="thunlp@gmail.com",
     description="OpenAttack",
