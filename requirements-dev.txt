@@ -1,7 +1,7 @@
-nltk>=3.5
-numpy>=1.18.1
+nltk
+numpy
 black
-tqdm>=4.45.0
+tqdm
 torch>=1.5.0
 tensorflow>=2.0.0
 sphinx
