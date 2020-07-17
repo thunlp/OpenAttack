@@ -21,9 +21,8 @@ class HowNetSubstitute(WordSubstitute):
 
     An implementation of :py:class:`.WordSubstitute`.
 
-    OpenHowNet substitute.
+    Sememe-based word substitute based OpenHowNet.
 
-    
     """
 
     def __init__(self):
