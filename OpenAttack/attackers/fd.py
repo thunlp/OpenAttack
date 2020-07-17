@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..utils import check_parameters, detokenizer
-from ..exceptions import WordEmbeddingRequired, WordNotInDictionaryException, TokensNotAligned
+from ..exceptions import NoEmbeddingException, WordNotInDictionaryException, TokensNotAligned
 from ..attacker import Attacker
 
 DEFAULT_CONFIG = {
@@ -18,12 +18,27 @@ DEFAULT_CONFIG = {
 
 class FDAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
+        :param dict wordid: A dict that maps tokens to ids.
+        :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
+        :param token_unk: The word_id or the token for out-of-vocabulary words. **Default:** ``"<UNK>"``.
+        :type token_unk: int or str
+        :param float threshold: Threshold for substitute module. **Default:** 0.5.
+        :param int max_iter: Maximum number of iterations in FDAttacker.
+
+        :Classifier Capacity: Gradient
+
+        Crafting Adversarial Input Sequences For Recurrent Neural Networks. Nicolas Papernot, Patrick McDaniel, Ananthram Swami, Richard Harang. MILCOM 2016.
+        `[pdf] <https://arxiv.org/pdf/1604.08275.pdf>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:
             self.config["substitute"] = CounterFittedSubstitute()
         if ((self.config["embedding"] is None) or (self.config["wordid"] is None)):
-            raise WordEmbeddingRequired()
+            raise NoEmbeddingException()
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
         self.processor = self.config["processor"]
         self.embedding = self.config["embedding"]

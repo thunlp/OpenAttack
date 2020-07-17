@@ -1,5 +1,12 @@
-import numpy as np
-import os
+"""
+:type: tuple
+:Size: 54.854MB
+:Package Requirements:
+    * **pytorch**
+
+Pretrained GAN model on SST-2 dataset used in attackers.gan. See :py:data:`SGNAE` for detail.
+"""
+
 from OpenAttack.utils import make_zip_downloader
 
 NAME = "SGNAE"

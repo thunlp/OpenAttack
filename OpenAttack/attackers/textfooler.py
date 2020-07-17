@@ -51,6 +51,22 @@ DEFAULT_CONFIG = {
 
 class TextFoolerAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
+        :param float import_score_threshold: Threshold used to choose important word. **Default:** -1.
+        :param float sim_score_threshold: Threshold used to choose sentences of high semantic similarity. **Default:** 0.5
+        :param int sim_score_window: length used in score module. **Default:** 15
+        :param int synonym_num: Maximum candidates of word substitution. **Default:** 50
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute()`
+
+        :Classifier Capacity: Score
+
+        Is BERT Really Robust? A Strong Baseline for Natural Language Attack on Text Classification and Entailment. Di Jin, Zhijing Jin, Joey Tianyi Zhou, Peter Szolovits. AAAI 2020.
+        `[pdf] <https://arxiv.org/pdf/1907.11932v4>`__
+        `[code] <https://github.com/jind11/TextFooler>`__
+        
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:

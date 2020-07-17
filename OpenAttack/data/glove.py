@@ -1,3 +1,9 @@
+"""
+:type: OpenAttack.utils.WordVector
+:Size: 2.273GB
+
+GloVe Word Embedding `[page] <https://nlp.stanford.edu/projects/glove/>`__
+"""
 import numpy as np
 import os, pickle
 from OpenAttack.utils import WordVector, make_zip_downloader

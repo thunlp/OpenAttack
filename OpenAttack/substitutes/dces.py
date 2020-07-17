@@ -30,13 +30,20 @@ def get_hex_string(ch):
 
 
 class DcesSubstitute(CharSubstitute):
+    """
+    :Data Requirements: :any:`DCES`
+    
+    An implementation of :py:class:`.CharSubstitute`.
+
+    DCES substitute used in :py:class:`.VIPERAttacker`.
+
+    """
 
     def __init__(self):
         self.vec_colnames, self.descs, self.neigh = DataManager.load("DCES")
         # load
 
     def __call__(self, char, threshold):  # 原字符，topn
-
         c = get_hex_string(char)
         # 二进制编码
 

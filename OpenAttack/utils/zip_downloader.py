@@ -5,6 +5,9 @@ import io
 
 
 def make_zip_downloader(URL, file_list=None):
+    """
+    This function is used to make a zipfile downloader for data.
+    """
     if isinstance(file_list, str):
         file_list = [file_list]
 

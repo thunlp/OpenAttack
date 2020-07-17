@@ -1,3 +1,13 @@
+"""
+:type: OpenAttack.utils.BertClassifier
+:Size: 386.584MB
+:Package Requirements:
+    * transformers
+    * pytorch
+
+Pretrained BERT model on SST-2 dataset. See :py:data:`Dataset.SST` for detail.
+"""
+
 from OpenAttack.utils import make_zip_downloader, BertClassifier
 
 NAME = "Victim.BERT.SST"

@@ -15,6 +15,16 @@ pos_set = set(pos_list)
 
 
 class HowNetSubstitute(WordSubstitute):
+    """
+    :Package Requirements: OpenHowNet
+    :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
+
+    An implementation of :py:class:`.WordSubstitute`.
+
+    OpenHowNet substitute.
+
+    
+    """
 
     def __init__(self):
         self.hownet_dict = DataManager.load("HOWNET")

@@ -1,3 +1,14 @@
+"""
+:type: dict
+:Size: 1.22GB
+:Package Requirements:
+    * **pytorch**
+
+Pretrained translation models. See :py:data:`TranslationModels` for detail. 
+`[code] <https://github.com/OpenNMT/OpenNMT-py>`__
+`[page] <https://opennmt.net/>`__
+"""
+
 from OpenAttack.utils import make_zip_downloader
 import os
 

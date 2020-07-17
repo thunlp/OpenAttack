@@ -1,6 +1,9 @@
 # data manager
 from .data_manager import DataManager
 
+# text processor
+from .text_processor import TextProcessor
+
 # attacker
 from .attacker import Attacker
 from . import attackers

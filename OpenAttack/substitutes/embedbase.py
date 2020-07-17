@@ -6,6 +6,15 @@ DEFAULT_CONFIG = {"cosine": False}
 
 
 class EmbedBasedSubstitute(Substitute):
+    """
+    :param bool cosine: If true, uses cosine distance :math:`(1 - cos(v_a, v_b))`, otherwise uses Euclidian distance :math:`norm_2(v_a - v_b)`. **Default:** False.
+    :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
+    :param dict word2id: A dict maps word to index.
+
+    A base class for all embedding-based substitute methods.
+    
+    An implementation of :py:class:`.WordSubstitute`.
+    """
     def __init__(self, **kwargs):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)

@@ -1,3 +1,12 @@
+"""
+:type: PytorchClassifier
+:Size: 1.683MB
+:Package Requirements:
+    * pytorch
+
+Pretrained BiLSTM model on SST-2 dataset. See :py:data:`Dataset.SST` for detail.
+"""
+
 NAME = "Victim.BiLSTM.SST"
 DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/bilstm_sst.pth"
 

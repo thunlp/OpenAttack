@@ -20,6 +20,19 @@ DEFAULT_CONFIG = {
 
 class GANAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param bool sst: Use model trained on sst-2 dataset or snli. True: use sst-2 **Default:** False
+        :param detokenizer: Word list detokenizer used in this attacker. **Default:** :any:`utils.detokenizer`
+
+        :Package Requirements:
+            * torch
+        :Data Requirements: :any:`GNAE` :any:`SGNAE`
+        :Classifier Capacity: Probability
+
+        Generating Natural Adversarial Examples. Zhengli Zhao, Dheeru Dua, Sameer Singh. ICLR 2018.
+        `[pdf] <https://arxiv.org/pdf/1710.11342.pdf>`__
+        `[code] <https://github.com/zhengliz/natural-adversary>`__
+        """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config['sst'] is False:  # snli

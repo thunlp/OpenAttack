@@ -1,3 +1,10 @@
+"""
+:type: dict
+:Size: 150.386MB
+
+Models used in SCPNAttacker.
+`[page] <https://github.com/miyyer/scpn>`__
+"""
 from OpenAttack.utils import make_zip_downloader
 import os
 
