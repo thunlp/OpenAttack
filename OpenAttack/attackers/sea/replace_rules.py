@@ -1,4 +1,3 @@
-from __future__ import print_function
 import difflib
 import itertools
 import numpy as np
@@ -8,30 +7,16 @@ import collections
 import copy
 import sys
 from itertools import zip_longest as zip_longest
+from ...utils import detokenizer
 unicode = lambda x: x
 
 
-# add_after(x, a): z x b -> z x a b
-# remove_after(x, a): z x a -> z x
-# replace_after(x, y, r): a x y -> a x r
-# add before (x, a): z x -> z a x
-# remove_before(x, y): y x -> x
-# replace_before(x, y, r) : y x z -> r x z
-# replace (x, r): a x ->  a r
-# remove(x): a x y -> a y
-# add between (x, y, a): z x y -> z x a y
-# remove_between(x, y, z): x z y a -> x y a
-# replace_between(x, y, z, r): x z y a -> x r y a
-
 def clean_text(text, only_upper=False):
-    # should there be a str here?`
     text = '%s%s' % (text[0].upper(), text[1:])
     if only_upper:
         return text
     text = text.replace('|', 'UNK')
     text = re.sub('(^|\s)-($|\s)', r'\1@-@\2', text)
-    # text = re.sub(' (n?\'.) ', r'\1 ', text)
-    # fix apostrophe stuff according to tokenizer
     text = re.sub(' (n)(\'.) ', r'\1 \2 ', text)
     return text
 
@@ -78,13 +63,15 @@ class Tokenizer:
 
     def tokenize(self, texts):
         ret = []
-        processed = self.nlp.pipe(texts)
-        for text, p in zip(texts, processed):
-            token_sequence = [Token(x.text, x.pos_, x.tag_) for x in p]
+        for text in texts:
+            text_token =  self.nlp.get_tokens(text)
+            token_sequence = [Token(x[0], x[1], x[1]) for x in text_token]
             ret.append(token_sequence)
         return ret
+
     def tokenize_text(self, texts):
-        return [' '.join([a.text for a in x]) for x in self.nlp.tokenizer.pipe(texts)]
+        ret = [list(map(lambda x: x[0], self.nlp.get_tokens(text))) for text in texts]
+        return [detokenizer(r) for r in ret]
 
     def clean_for_model(self, texts):
         fn = lambda x: re.sub(r'\s+', ' ', re.sub(r'\s\'(\w{1, 3})', r"'\1", x).replace('@-@', '-').strip())
@@ -138,8 +125,8 @@ class ReplaceRule:
             else:
                 text = matched_pos[x.value].pop(0)
                 t_mid.append(text)
-        # t_mid = [x.text for x in self.replace_sequence]
-        ret_text = ' '.join(t_before + t_mid + t_after)
+
+        ret_text = detokenizer(t_before + t_mid + t_after)
         if fix_apostrophe:
             ret_text = ret_text.replace(' \'', '\'')
         if return_position:
@@ -159,7 +146,7 @@ class ReplaceRule:
         return np.array(idxs), new_texts
 
     def hash(self):
-        return ' '.join([op.hash() for op in self.op_sequence]) + ' -> ' + ' '.join([op.hash() for op in self.replace_sequence])
+        return detokenizer([op.hash() for op in self.op_sequence]) + ' -> ' + detokenizer([op.hash() for op in self.replace_sequence])
 
 class TextToReplaceRules:
     def __init__(self, nlp, from_dataset, flip_dataset=[], min_freq=.01, min_flip=0.01, ngram_size=4):
@@ -197,14 +184,14 @@ class TextToReplaceRules:
                 self.ngram_flip_freq[n] += 1
 
 
-    # def is_ngram_frequent(self, ngram):
+
 
     def is_param_ngram_frequent(self, ngram, flip=False):
         if type(ngram) != list:
             ngram = tuple([ngram.hash()])
         else:
             ngram = tuple([x.hash() for x in ngram])
-        # TODO: This won't work for word groups
+
         if flip:
             return self.ngram_flip_freq[ngram] >= self.min_flip
         else:
@@ -239,10 +226,7 @@ class TextToReplaceRules:
 
 
     def compute_rules(self, sentence, others, use_words=True, use_pos=True, use_tags=False, max_rule_length=3):
-        # print(sentence)
-        # print()
-        # print('\n\n'.join(others))
-        # if require_all is false, assume rule independence
+
         def get_params(token):
             to_ret = [OpToken('text', token.text)]
             if use_pos:
@@ -251,23 +235,15 @@ class TextToReplaceRules:
                 to_ret.append(OpToken('tag', token.tag))
             return tuple(to_ret)
 
-        # sentence = clean_text(sentence, only_upper=False)
-        # others = [clean_text(x) if x else x for x in others]
         doc = self.tokenizer.tokenize([unicode(sentence)])[0]
         other_docs = self.tokenizer.tokenize([unicode(x) for x in others])
-        # print([x.text for x in doc], [x.text for x in other_docs[0]])
-        # positions = self.get_positions(doc, self.ngram_size)
 
-        # doc = self.nlp(sentence)
+
         sentence = [x.text for x in doc]
-        # others = [x.split() for x in others]
-        # other_docs = list(self.nlp.pipe(others))
+
         others = [[x.text for x in d] for d in other_docs]
-        # fns = []
-        # if use_words:
-        #     fns.append(self.word_rep_fn)
-        # if use_pos:
-        #     fns.append(self.pos_rep_fn)
+
+
         all_rules = []
         n_doc = [Token('<s>', '<s>', '<s>')] + doc + [Token('</s>', '</s>', '</s>')]
         for other, other_doc in zip(others, other_docs):
@@ -277,25 +253,9 @@ class TextToReplaceRules:
             if len(ops) == 0:
                 all_rules.append([])
                 continue
-            start = ops[0][1] + 1
-            end = ops[-1][2] + 1
-            start_o = ops[0][3] + 1
-            end_o = ops[-1][4] + 1
-            reps = [n_doc[start:end], n_doc[start -1:end], n_doc[start: end + 1], n_doc[start - 1: end + 1]]
-            withs = [ n_other[start_o: end_o], n_other[start_o - 1: end_o], n_other[start_o: end_o + 1], n_other[start_o - 1: end_o + 1]]
-            # new = doc[:start - 1] + other_doc[start_o - 1:end_o - 1] + doc[end - 1:]
-            # if ' '.join([x.text for x in new]) != ' '.join([x.text for x in other_doc]):
-            #     print 'ERROR'
-            #     quit()
-            # print ' '.join(sentence), ' '.join(other)
-            # print number_ops
-            # for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-            #     si1, si2, sj1, sj2 = i1, i2, j1, j2
-            #     if tag == 'equal':
-            #         continue
-            #     # reps_prev = [fn(prev, is_start=is_start) for fn in fns]
-            #     print('{:7}   a[{}:{}] --> b[{}:{}] {!r:>8} --> {!r}'.format(tag, si1, si2, sj1, sj2, sentence[si1:si2], other[sj1:sj2]))
-            # print()
+            reps = [n_doc[op[1]:op[2]] for op in ops]
+            withs = [n_other[op[3]:op[4]] for op in ops]
+
             def check_pos(ops1, ops2):
                 counter = collections.Counter()
                 for o in ops2:
@@ -312,48 +272,25 @@ class TextToReplaceRules:
 
 
             this_rules = []
-            other_sentence = ' '.join(other)
+            other_sentence = detokenizer(other)
             for rep, withe in zip(reps, withs):
                 if len(rep) > self.ngram_size or len(rep) == 0:
                     continue
+                
                 tokens = [get_params(x) for x in rep]
+                
                 ngrams = [[y for y in x] for x in itertools.product(*tokens)]
                 tokens_o = [get_params(x) if x in rep else (OpToken('text', x.text),) for x in withe]
                 ngrams_o = [[y for y in x] for x in itertools.product(*tokens_o)]
 
-                # print(ngrams)
-                # print
-                # print(ngrams_o)
                 frequent = [x for x in ngrams if self.is_param_ngram_frequent(x)]
-                # print 'frequent other'
+                
+
                 frequent_other = [x for x in ngrams_o if self.is_param_ngram_frequent(x, flip=True) or x == []]
                 rules = [ReplaceRule(a, b) for a, b in (itertools.product(frequent, frequent_other)) if check_pos(a, b)]
-                # if len(rules):
-                #     print()
-                #     print('rep(', ' '.join([x.text for x in rep]), ',',  ' '.join([x.text for x in withe]), ')')
-                #     print('frequent')
-                # print('\n'.join([r.hash() for r in rules]))
-                # print("YO")
-                # print(rules[0].apply(doc)[1], other_sentence)
-                rules = [r for r in rules if r.apply(doc, fix_apostrophe=False)[1] == other_sentence]
-                # print('\n'.join([r.hash() for r in rules]))
-                # for r in rules:
-                #     if r.apply(doc)[1] != ' '.join(other):
-                #         print 'ERROR'
-                #         print r.hash()
-                #         print doc
-                #         print r.apply(doc)[1]
-                #         print ' '.join(other)
-                #         return r
+
                 ngrams = [[y for y in x] for x in itertools.product(*tokens)]
-                # for fr, to in zip(ng
-                # print [list(y.hash() for y in x) for x in ngrams if self.is_param_ngram_frequent(x)]
-                # print
-                # print
                 this_rules.extend(rules)
+
             all_rules.append(this_rules)
         return all_rules
-        # a = difflib.SequenceMatcher(a=t1.split(), b=t2.split())
-        # for tag, i1, i2, j1, j2 in a.get_opcodes():
-        #     if tag != 'equal':
-        # print('{:7}   a[{}:{}] --> b[{}:{}] {!r:>8} --> {!r}'.format(tag, i1, i2, j1, j2, t1.split()[i1:i2], t2.split()[j1:j2]))

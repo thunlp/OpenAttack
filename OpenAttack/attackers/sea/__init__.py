@@ -2,22 +2,33 @@ import os
 import pickle
 import numpy as np
 import collections
+from tqdm import tqdm
 from ...utils import check_parameters
 from ...text_processors import DefaultTextProcessor
 from ...attacker import Attacker
 from ...data_manager import DataManager
 
-DEFAULT_TO_PATHS = ['english_french_model_acc_71.05_ppl_3.71_e13.pt', 'translation_models/english_portuguese_model_acc_70.75_ppl_4.32_e13.pt']
-DEFAULT_BACK_PATHS = ['french_english_model_acc_68.51_ppl_4.43_e13.pt', 'translation_models/portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
+DEFAULT_TO_PATHS = ['english_french_model_acc_71.05_ppl_3.71_e13.pt', 'english_portuguese_model_acc_70.75_ppl_4.32_e13.pt']
+DEFAULT_BACK_PATHS = ['french_english_model_acc_68.51_ppl_4.43_e13.pt', 'portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
 
 DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
-    "TO_PATHS": DEFAULT_TO_PATHS,
-    "BACK_PATHS": DEFAULT_BACK_PATHS,
+    "rules": None,
+}
+
+TRAIN_CONFIG = {
+    "processor": DefaultTextProcessor(),
+    "gpu_id": 0,
+    "cuda": True,
+    "topk": 200, 
+    "threshold": -15,
+    "min_freq": 0.005,
+    "ngram_size": 4,
 }
 
 class SEAAttacker(Attacker):
     def __init__(self, **kwargs):
+
         self.paraphrase_scorer = __import__("paraphrase_scorer", globals={
             "__name__":__name__,
             "__package__": __package__,
@@ -34,11 +45,18 @@ class SEAAttacker(Attacker):
             "__name__":__name__,
             "__package__": __package__,
         }, level=1)
+
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG, self.config)
-        self.ps = self.paraphrase_scorer.ParaphraseScorer(gpu_id=0)
         self.tokenizer = self.replace_rules.Tokenizer(self.config["processor"])
+        self.x = self.config["rules"][0]
+        self.really_frequent_rules = self.config["rules"][1]
+        self.frequent_rules = self.config["rules"][2]
+        self.rule_flips = self.config["rules"][3]
+        self.token_right = self.config["rules"][4]
+
+
 
     def __call__(self, clsf, x_orig, target=None):
         x_orig = x_orig.lower()
@@ -47,20 +65,75 @@ class SEAAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        val_for_onmt = [self.onmt_model.clean_text(x_orig, only_upper=False)]
+
+
+        x_orig = [self.onmt_model.clean_text(x_orig.lower(), only_upper=False)]
+        x_orig = self.tokenizer.tokenize(x_orig)[0]
+        for r in self.x:
+            rid = self.really_frequent_rules[r]
+            rule = self.frequent_rules[rid]
+            for f in self.rule_flips[rid][:2]:
+                if self.token_right[f] != x_orig:
+                    continue
+                new = rule.apply(self.token_right[f])[1]
+                ans = clsf.get_pred([new])[0]
+                if targeted:
+                    if ans == target:
+                        return new, ans
+                else:
+                    if ans != target:
+                        return new, ans
+        
+        return None
+
+    @classmethod
+    def get_rules(cls, clsf, sentence_list, **kwargs):
+        from . import paraphrase_scorer
+        from . import onmt_model
+        from . import replace_rules
+        from . import rule_picking
+
+        def find_flips(instance, clsf, ps, tokenizer, topk=10, threshold=-10):
+            orig_pred = clsf.get_pred([instance])[0]
+            instance_for_onmt = onmt_model.clean_text(instance, only_upper=False)
+            paraphrases = ps.generate_paraphrases(instance_for_onmt, topk=topk, edit_distance_cutoff=5, threshold=threshold)
+            texts = tokenizer.clean_for_model(tokenizer.clean_for_humans([x[0] for x in paraphrases]))
+            preds = clsf.get_pred(texts)
+
+            fs = [(texts[i], paraphrases[i][1]) for i in np.where(preds != orig_pred)[0]]
+            return fs
+
+        config = TRAIN_CONFIG.copy()
+        config.update(kwargs)
+        check_parameters(TRAIN_CONFIG.keys(), config)
+
+        model_path = DataManager.load("TranslationModels")
+
+        to_paths = [model_path[x] for x in DEFAULT_TO_PATHS]
+        back_paths = [model_path[x] for x in DEFAULT_BACK_PATHS]
+        ps = paraphrase_scorer.ParaphraseScorer(to_paths=to_paths, back_paths=back_paths, gpu_id=config["gpu_id"], cuda=config["cuda"])
+        tokenizer = replace_rules.Tokenizer(config["processor"])
+
+        val_for_onmt = [onmt_model.clean_text(sentence.lower(), only_upper=False) for sentence in sentence_list]
+
         orig_scores = {}
         flips = collections.defaultdict(lambda: [])
-        right_val = [x_orig]
+        right_val = val_for_onmt
         right_preds = clsf.get_pred(right_val)
-        fs = self.find_flips(x_orig, clsf, topk=100, threshold=-10)
-        flips[x_orig].extend([x[0] for x in fs])
 
-        tr2 = self.replace_rules.TextToReplaceRules(self.config["processor"], right_val, [], min_freq=0.005, min_flip=0.00, ngram_size=4)
+        for i, sentence in tqdm(enumerate(right_val)):
+            if sentence in flips:
+                continue
+            fs = find_flips(sentence, clsf, ps, tokenizer, topk=config["topk"], threshold=config["threshold"])
+            flips[sentence].extend([x[0] for x in fs])
+
+        tr2 = replace_rules.TextToReplaceRules(config["processor"], right_val, [], 
+                                                    min_freq=config["min_freq"], min_flip=0.00, ngram_size=config["ngram_size"])
         frequent_rules = []
         rule_idx = {}
         rule_flips = {}
         for z, f in enumerate(flips):
-            rules = tr2.compute_rules(f, flips[f], use_pos=True, use_tags=True)
+            rules = tr2.compute_rules(f, flips[f], use_pos=True, use_tags=False)
             for rs in rules:
                 for r in rs:
                     if r.hash() not in rule_idx:
@@ -71,8 +144,9 @@ class SEAAttacker(Attacker):
                     i = rule_idx[r.hash()]
                     rule_flips[i].append(z)
 
-        token_right = self.tokenizer.tokenize(right_val)
+        token_right = tokenizer.tokenize(right_val)
         model_preds = {}
+
 
         rule_flips = {}
         rule_other_texts = {}
@@ -83,7 +157,7 @@ class SEAAttacker(Attacker):
             to_apply = [token_right[x] for x in idxs]
             applies, nt = r.apply_to_texts(to_apply, fix_apostrophe=False)
             applies = [idxs[x] for x in applies]
-            old_texts = [right_val[i] for i in applies]
+
             old_labels = right_preds[applies]
             to_compute = [x for x in nt if x not in model_preds]
             if to_compute:
@@ -98,13 +172,14 @@ class SEAAttacker(Attacker):
             rule_other_flips[i] = where_flipped
             rule_applies[i] = applies
         really_frequent_rules = [i for i in range(len(rule_flips)) if len(rule_flips[i]) > 1]
+
+
         threshold = -7.15
         orig_scores = {}
         for i, t in enumerate(right_val):
-            orig_scores[i] = self.ps.score_sentences(t, [t])[0]
+            orig_scores[i] = ps.score_sentences(t, [t])[0]
         ps_scores = {}
-        self.ps.last = None
-
+        ps.last = None
         rule_scores = []
         rejected = set()
         for idx, i in enumerate(really_frequent_rules):
@@ -122,7 +197,7 @@ class SEAAttacker(Attacker):
                     if n == '':
                         score = -40
                     else:
-                        score = self.ps.score_sentences(o, [n])[0]
+                        score = ps.score_sentences(o, [n])[0]
                     ps_scores[o][n] = min(0, score - orig)
                 scores[j] = ps_scores[o][n]
                 if ps_scores[o][n] < threshold:
@@ -134,15 +209,15 @@ class SEAAttacker(Attacker):
         rule_flip_scores = [rule_scores[i][rule_other_flips[really_frequent_rules[i]]] for i in range(len(rule_scores))]
         frequent_flips = [np.array(rule_applies[i])[rule_other_flips[i]] for i in really_frequent_rules]
         rule_precsupports = [len(rule_applies[i]) for i in really_frequent_rules]
-
         threshold=-7.15
-        disqualified = self.rule_picking.disqualify_rules(rule_scores, frequent_flips,
+
+        disqualified = rule_picking.disqualify_rules(rule_scores, frequent_flips,
                           rule_precsupports, 
                       min_precision=0.0, min_flips=6, 
                          min_bad_score=threshold, max_bad_proportion=.10,
                           max_bad_sum=999999)
 
-        x = self.rule_picking.choose_rules_coverage(rule_flip_scores, frequent_flips, None,
+        x = rule_picking.choose_rules_coverage(rule_flip_scores, frequent_flips, None,
                           None, len(right_preds),
                                 frequent_scores_on_all=None, k=10, metric='max',
                       min_precision=0.0, min_flips=0, exp=True,
@@ -150,29 +225,4 @@ class SEAAttacker(Attacker):
                           max_bad_sum=999999,
                          disqualified=disqualified,
                          start_from=[])
-        
-        for r in x:
-            rid = really_frequent_rules[r]
-            rule =  frequent_rules[rid]
-            for f in rule_flips[rid][:2]:
-                new = rule.apply(token_right[f])[1]
-                ans = clsf.get_pred([new])[0]
-                if targeted:
-                    if ans == target:
-                        return new, ans
-                else:
-                    if ans != target:
-                        return new, ans
-        return None
-
-
-
-    def find_flips(self, instance, clsf, topk=10, threshold=-10):
-        orig_pred = clsf.get_pred([instance])[0]
-        instance_for_onmt = self.onmt_model.clean_text(instance, only_upper=False)
-        paraphrases = self.ps.generate_paraphrases(instance_for_onmt, topk=topk, edit_distance_cutoff=4, threshold=threshold)
-        texts = self.tokenizer.clean_for_model(self.tokenizer.clean_for_humans([x[0] for x in paraphrases]))
-        preds = clsf.get_pred(texts)
-        fs = [(texts[i], paraphrases[i][1]) for i in np.where(preds != orig_pred)[0]]
-        return fs
-
+        return (x, really_frequent_rules, frequent_rules, rule_flips, token_right)
