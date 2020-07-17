@@ -3,6 +3,7 @@
 :Size: 1.116MB
 
 SST dataset which is used to train victim models.
+`[page] <https://nlp.stanford.edu/sentiment/>`__
 """
 
 NAME = "Dataset.SST"

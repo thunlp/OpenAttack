@@ -4,9 +4,13 @@ class GPT2LM:
         """
         :param bool use_tf: If true, uses tensorflow GPT-2 model.
         :Package Requirements:
-            * torch (if use_tf = False)
-            * tensorflow >= 2.0.0 (if use_tf = True)
-            * transformers
+            * **torch** (if use_tf = False)
+            * **tensorflow** >= 2.0.0 (if use_tf = True)
+            * **transformers**
+        
+        Language Models are Unsupervised Multitask Learners.
+        `[pdf] <https://d4mucfpksywv.cloudfront.net/better-language-models/language-models.pdf>`__
+        `[code] <https://github.com/openai/gpt-2>`__
         """
         import logging
         logging.getLogger("transformers").setLevel(logging.ERROR)

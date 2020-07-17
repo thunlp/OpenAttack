@@ -1,7 +1,6 @@
 """
+:type: tuple
 :Size: 632.887KB
-:Package Requirements:
-    * pickle
 
 Vec-colnames and neighber matrix used in Substitute DECS. See :py:data:`DCES` for detail.
 """

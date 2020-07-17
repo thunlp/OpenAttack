@@ -18,7 +18,7 @@ class EcesSubstitute(CharSubstitute):
     """
     An implementation of :py:class:`.CharSubstitute`.
 
-    ECES substitute used in Viper Attacker.
+    ECES substitute used in :py:class:`.VIPERAttacker`.
     """
 
     def __init__(self):

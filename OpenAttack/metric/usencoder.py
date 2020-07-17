@@ -5,10 +5,12 @@ class UniversalSentenceEncoder:
         """
         :Data Requirements: :py:data:`.UniversalSentenceEncoder`
         :Package Requirements:
-            * tensorflow >= 2.0.0
-            * tensorflow_hub
+            * **tensorflow** >= 2.0.0
+            * **tensorflow_hub**
         
         Universal Sentence Encoder in tensorflow_hub.
+        `[pdf] <https://arxiv.org/pdf/1803.11175>`__
+        `[page] <https://tfhub.dev/google/universal-sentence-encoder/4>`__
         """
         import logging
         import tensorflow as tf

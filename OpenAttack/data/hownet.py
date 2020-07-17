@@ -1,6 +1,7 @@
 """
 :type: OpenHowNet.HowNetDict
-:Package Requirements: OpenHowNet
+:Size: unknown
+:Package Requirements: * **OpenHowNet**
 
 OpenHowNet.
 `[code] <https://github.com/thunlp/OpenHowNet>`__

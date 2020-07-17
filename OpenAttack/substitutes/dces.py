@@ -35,7 +35,7 @@ class DcesSubstitute(CharSubstitute):
     
     An implementation of :py:class:`.CharSubstitute`.
 
-    DCES substitute used in Viper Attacker.
+    DCES substitute used in :py:class:`.VIPERAttacker`.
 
     """
 

@@ -1,7 +1,8 @@
 """
+:type: tuple
 :Size: 54.854MB
 :Package Requirements:
-    * pytorch
+    * **pytorch**
 
 Pretrained GAN model on SST-2 dataset used in attackers.gan. See :py:data:`SGNAE` for detail.
 """

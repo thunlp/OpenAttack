@@ -149,7 +149,7 @@ def left_bar_failed(x_orig, y_orig, max_len):
 
 def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=25, val_len=10):
     """
-    Visualization tools used in DefaultAttackEval
+    Visualization tools used in :py:class:`.DefaultAttackEval`.
     """
     cols = os.get_terminal_size().columns
     headline = "Sample: %d " % idx
@@ -193,7 +193,7 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=2
 
 def result_visualizer(result, stream_writer):
     """
-    Visualization tools used in DefaultAttackEval
+    Visualization tools used in :py:class:`.DefaultAttackEval`.
     """
     cols = os.get_terminal_size().columns
 

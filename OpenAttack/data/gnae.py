@@ -1,7 +1,8 @@
 """
+:type: tuple
 :Size: 55.041MB
 :Package Requirements:
-    * pytorch
+    * **pytorch**
 
 Pretrained GAN model on SNLI dataset used in attackers.gan. See :py:data:`GNAE` for detail.
 """
