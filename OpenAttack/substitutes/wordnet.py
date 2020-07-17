@@ -30,7 +30,7 @@ class WordNetSubstitute(WordSubstitute):
 
     An implementation of :py:class:`.WordSubstitute`.
 
-    OpenWordNet substitute.
+    WordNet synonym substitute.
 
     """
     def __init__(self):
