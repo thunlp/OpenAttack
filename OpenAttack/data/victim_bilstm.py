@@ -1,5 +1,5 @@
 """
-:type: torch.Module
+:type: PytorchClassifier
 :Size: 1.683MB
 :Package Requirements:
     * pytorch

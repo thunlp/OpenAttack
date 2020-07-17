@@ -23,7 +23,7 @@ class AttackEvalBase(AttackEval):
 
     In this class, there are four key methods that maybe useful for your extension.
 
-    * **measure:** Measures the basic indexes.
+    * **measure:** Measures the basic metrics.
     * **update:** Accumulates the measurement.
     * **get_result:** Calculates the final results.
     * **clear:** Clear all the Accumulated results.
@@ -103,7 +103,7 @@ class AttackEvalBase(AttackEval):
         :return: A dict contains all the results for this instance.
         :rtype: dict
 
-        In this method, we measure all the indexes which corresponding options are setted to True.
+        In this method, we measure all the metrics which corresponding options are setted to True.
         """
         if attack_result is None:
             return { "Succeed": False }

@@ -2,7 +2,7 @@
 Using A Custom Classifier
 ============================
 
-xxx
+In this example, we will show you how to adapt to your own classifer.
 
 .. code-block:: python
     :linenos:
