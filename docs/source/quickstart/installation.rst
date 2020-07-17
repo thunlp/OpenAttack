@@ -13,7 +13,7 @@ You can install OpenAttack by cloning github repository and run ``python setup.p
     cd OpenAttack
     python setup.py install
 
-After running the above script successfully, you can use demp.py to check that OpenAttack works well.
+After running the above script successfully, you can use demp.py to check if OpenAttack works well.
 
 .. code-block:: sh
 

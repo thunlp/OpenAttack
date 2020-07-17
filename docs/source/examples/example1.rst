@@ -72,4 +72,4 @@ Complete Code
         attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
         attack_eval.eval(dataset, visualize=True)
 
-xxxx
+Run ``python examples/workflow.py`` to see visualized results.

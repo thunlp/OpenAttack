@@ -2,7 +2,12 @@
 Evaluate A New Attacker
 ============================
 
-xxx
+Attacker is the core module of OpenAttack. In this example, we write a new attacker which swaps tokens
+with the same POS. This is a simple way to generate adversarial samples and it requires a capacity of "Blind".
+
+
+Initialize Attacker with Options
+----------------------------------
 
 .. code-block:: python
     :linenos:
@@ -12,7 +17,12 @@ xxx
             self.processor = processor
             self.max_iter = max_iter
 
-xxx
+We add two parameters for our new attacker, ``max_iter`` means the maximum number of iterations to swap tokens
+and ``processor`` is used for tokenization. Providing default value for each parameter is a good behavior in OpenAttack.
+This makes it easier for users to use, and also makes your new attacker easier to be integrated into OpenAttack.
+
+Randomly Swap Tokens with Same POS
+----------------------------------------
 
 .. code-block:: python
     :linenos:
@@ -31,7 +41,10 @@ xxx
         sent_token[pi], sent_token[pj] = sent_token[pj], sent_token[pi] # swap this pair
         return sent_token
 
-xxx
+In ``swap`` method, we record all pairs with the same POS in ``pairs`` list, then randomly choose one from it and make a swap.
+
+Major Procedures of Attack
+---------------------------------
 
 .. code-block:: python
     :linenos:
@@ -63,7 +76,14 @@ xxx
                     return (sent, preds[idx])
         return None
 
-xxx
+``target`` parameter can be either None or int. Int is for target attack while None for untargeted attack.
+We generate ``max_iter`` sentences, get predictions from classifier, 
+and check each prediction to find a succeed one then return.  If attacker is failed, ``__call__`` returns None.
+
+See :py:class:`.Attacker` for detail.
+
+Complete Code
+------------------------------
 
 .. code-block:: python
     :linenos:
@@ -117,5 +137,4 @@ xxx
         attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
         attack_eval.eval(dataset, visualize=True)
 
-
-xxxx
+Run ``python examples/custom_attacker.py`` to see visualized results.
