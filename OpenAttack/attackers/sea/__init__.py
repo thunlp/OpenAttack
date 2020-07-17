@@ -21,14 +21,29 @@ TRAIN_CONFIG = {
     "gpu_id": 0,
     "cuda": True,
     "topk": 200, 
-    "threshold": -15,
+    "threshold": -15.,
     "min_freq": 0.005,
     "ngram_size": 4,
 }
 
 class SEAAttacker(Attacker):
     def __init__(self, **kwargs):
+        """
+        :param tuple rules: A tuple of parameters related to rules used in SEAAttacker. The tuple is returned by classmethod get_rules(). **Default:** None.
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
 
+        :Package Requirements:
+            * torch
+            * torchtext
+            * editdistance
+        :Data Requirements: :any:`TranslationModels`
+        :Classifier Capacity: Decision
+
+        Semantically Equivalent Adversarial Rules for Debugging NLP Models. Marco Tulio Ribeiro, Sameer Singh, Carlos Guestrin. ACL 2018.
+        `[pdf] <https://aclweb.org/anthology/P18-1079>`__
+        `[code] <https://github.com/marcotcr/sears>`__
+
+        """
         self.paraphrase_scorer = __import__("paraphrase_scorer", globals={
             "__name__":__name__,
             "__package__": __package__,
@@ -88,6 +103,22 @@ class SEAAttacker(Attacker):
 
     @classmethod
     def get_rules(cls, clsf, sentence_list, **kwargs):
+        """
+        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
+        :param bool cuda: Use gpu or not. **Default:** :True.
+        :param int gpu_id: gpu_id. **Default:** :0.
+        :param int topk: The number of flips to find. **Default:** :200.
+        :param float threshold: The threshold used in finding flips module. **Default:** :-15.0.
+        :param float min_freq: Frequency threshold in finding rules module. **Default:** :0.005.
+        :param int ngram_size: The length of replaced part in rules. **Default:** :4.
+
+        :Package Requirements:
+            * torch
+            * torchtext
+            * editdistance
+        :Data Requirements: :any:`TranslationModels`
+
+        """
         from . import paraphrase_scorer
         from . import onmt_model
         from . import replace_rules
