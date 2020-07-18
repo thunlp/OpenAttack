@@ -1,6 +1,7 @@
 # OpenAttack
 
 ![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest)
 
 OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation. 
 
