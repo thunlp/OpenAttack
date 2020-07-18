@@ -2,6 +2,13 @@
 Attackers API
 ===================
 
+Attacker
+-----------
+
+.. autoclass:: OpenAttack.Attacker
+    :members: __call__
+
+
 DeepWordBugAttacker
 ----------------------
 

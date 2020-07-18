@@ -34,17 +34,6 @@ OpenAttack has a wide range of uses, including:
    Example 2: Classifier <examples/example2>
    Example 3: Attacker <examples/example3>
    Example 4: AttackEval <examples/example4>
-   
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Module Reference
-
-   TextProcessor <module/text_processor>
-   Substitute <module/substitute>
-   Classifier <module/classifier>
-   Attacker <module/attacker>
-   AttackEval <module/attack_eval>
 
 .. toctree::
    :maxdepth: 2

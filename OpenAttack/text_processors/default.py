@@ -6,7 +6,7 @@ from ..data_manager import DataManager
 
 class DefaultTextProcessor(TextProcessor):
     """
-    An implementation of :class:`OpenAttack.TextProcessor`. See "Module Reference" for class definition.
+    An implementation of :class:`OpenAttack.TextProcessor`.
     """
 
     def __init__(self):
