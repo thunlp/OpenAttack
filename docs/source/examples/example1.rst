@@ -1,5 +1,5 @@
 ========================
-OpenAttack Workflow
+Basic Usage
 ========================
 
 This example shows a basic workflow of OpenAttack which consists of four main steps:

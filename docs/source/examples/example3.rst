@@ -1,5 +1,5 @@
 ============================
-Evaluate A New Attacker
+Customized Attack Model
 ============================
 
 Attacker is the core module of OpenAttack. In this example, we write a new attacker which swaps tokens
