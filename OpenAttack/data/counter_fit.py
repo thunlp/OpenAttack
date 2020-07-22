@@ -9,7 +9,7 @@ import numpy as np
 import os
 from OpenAttack.utils import WordVector, make_zip_downloader
 
-NAME = "CounterFit"
+NAME = "AttackAssist.CounterFit"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")

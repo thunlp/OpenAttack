@@ -11,8 +11,8 @@ class TestTensorflow(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         OpenAttack.DataManager.set_path("./testdir")
-        OpenAttack.DataManager.download("NLTKSentTokenizer")
-        OpenAttack.DataManager.download("NLTKPerceptronPosTagger")
+        OpenAttack.DataManager.download("TProcess.NLTKSentTokenizer")
+        OpenAttack.DataManager.download("TProcess.NLTKPerceptronPosTagger")
         cls.dp = OpenAttack.text_processors.DefaultTextProcessor()
     
     @classmethod

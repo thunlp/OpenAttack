@@ -7,12 +7,12 @@ class TestDataManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         OpenAttack.DataManager.set_path("./testdir")
-        OpenAttack.DataManager.download("NLTKSentTokenizer")
-        OpenAttack.DataManager.download("NLTKPerceptronPosTagger")
-        OpenAttack.DataManager.download("NLTKWordnet")
-        OpenAttack.DataManager.download("NLTKWordnetDelemma")
-        OpenAttack.DataManager.download("StanfordNER")
-        OpenAttack.DataManager.download("StanfordParser")
+        OpenAttack.DataManager.download("TProcess.NLTKSentTokenizer")
+        OpenAttack.DataManager.download("TProcess.NLTKPerceptronPosTagger")
+        OpenAttack.DataManager.download("TProcess.NLTKWordNet")
+        OpenAttack.DataManager.download("TProcess.NLTKWordNetDelemma")
+        OpenAttack.DataManager.download("TProcess.StanfordNER")
+        OpenAttack.DataManager.download("TProcess.StanfordParser")
         cls.dp = OpenAttack.text_processors.DefaultTextProcessor()
     
     @classmethod

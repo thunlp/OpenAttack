@@ -8,7 +8,7 @@ Models used in SCPNAttacker.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "SCPN"
+NAME = "AttackAssist.SCPN"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/scpn.zip"
 DOWNLOAD = make_zip_downloader(URL)

@@ -1,5 +1,5 @@
 ============================================
-Evaluate Attacker with Custom Constraints
+Use Additional Constraints
 ============================================
 
 In this example, we write a new AttackEval to evaluate attackers with the constraint of grammatical errors.

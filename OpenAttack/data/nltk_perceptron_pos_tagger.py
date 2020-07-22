@@ -8,7 +8,7 @@ Model files for pos tagger in nltk.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "NLTKPerceptronPosTagger"
+NAME = "TProcess.NLTKPerceptronPosTagger"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/averaged_perceptron_tagger.pickle.zip"
 DOWNLOAD = make_zip_downloader(URL, "averaged_perceptron_tagger.pickle")

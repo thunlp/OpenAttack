@@ -21,7 +21,7 @@ class TextBuggerAttacker(Attacker):
         """
         :param bool blackbox: Classifier Capacity. True-probability; False-grad. **Default:** True.
 
-        :Data Requirements: :any:`NLTKSentTokenizer`
+        :Data Requirements: :py:data:`.TProcess.NLTKSentTokenizer`
         :Classifier Capacity: Blind or Probability
 
         TEXTBUGGER: Generating Adversarial Text Against Real-world Applications. Jinfeng Li, Shouling Ji, Tianyu Du, Bo Li, Ting Wang. NDSS 2019.
@@ -29,14 +29,10 @@ class TextBuggerAttacker(Attacker):
         """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.nlp = DataManager.load("NLTKSentTokenizer")
+        self.nlp = DataManager.load("TProcess.NLTKSentTokenizer")
         self.textprocesser = DefaultTextProcessor()
         self.counterfit = CounterFittedSubstitute()
         self.glove_vectors = None
-        # self.nlp = English()
-        # self.glove_vectors = DataManager.load("GloveVector")
-        # self.treebank = TreebankWordTokenizer()
-        # self.treebank = DataManager.load("TREEBANK")
 
     def __call__(self, clsf, x_orig, target=None):
         """

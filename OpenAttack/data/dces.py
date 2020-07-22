@@ -2,13 +2,13 @@
 :type: tuple
 :Size: 632.887KB
 
-Vec-colnames and neighber matrix used in Substitute DECS. See :py:data:`DCES` for detail.
+Vec-colnames and neighber matrix used in Substitute DECS. See :py:class:`.DCESSubstitute` for detail.
 """
 
 import os
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "DCES"
+NAME = "AttackAssist.DCES"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/DCES.zip"
 DOWNLOAD = make_zip_downloader(URL)

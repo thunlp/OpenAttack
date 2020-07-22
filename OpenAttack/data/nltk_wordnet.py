@@ -7,7 +7,7 @@ Model files for wordnet in nltk.
 """
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "NLTKWordnet"
+NAME = "TProcess.NLTKWordNet"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/wordnet.zip"
 DOWNLOAD = make_zip_downloader(URL)

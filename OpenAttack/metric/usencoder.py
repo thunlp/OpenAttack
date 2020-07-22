@@ -3,7 +3,7 @@ import numpy as np
 class UniversalSentenceEncoder:
     def __init__(self):
         """
-        :Data Requirements: :py:data:`.UniversalSentenceEncoder`
+        :Data Requirements: :py:data:`.AttackAssist.UniversalSentenceEncoder`
         :Package Requirements:
             * **tensorflow** >= 2.0.0
             * **tensorflow_hub**
@@ -19,7 +19,7 @@ class UniversalSentenceEncoder:
         tf.get_logger().setLevel(logging.ERROR)
         import tensorflow_hub as hub
         from ..data_manager import DataManager
-        self.embed = hub.load( DataManager.load("UniversalSentenceEncoder") )
+        self.embed = hub.load( DataManager.load("AttackAssist.UniversalSentenceEncoder") )
 
     def __call__(self, sentA, sentB):
         """

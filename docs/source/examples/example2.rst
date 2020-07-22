@@ -1,5 +1,5 @@
 ============================
-Using A Custom Classifier
+Customized Victim Model
 ============================
 
 In this example, we will show you how to adapt to your own classifer.

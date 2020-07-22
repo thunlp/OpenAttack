@@ -1,13 +1,3 @@
-"""
-    find the nearest neighbours in the list of unicode characters by finding characters
-    with the largest number of matching tokens in the text description.
-    根据unicode description找到描述相似的字符
-    __call__函数参数：原字符，相似字符数量
-    返回值：（字符，prob）列表，prob基本为均分，和为1
-    require:
-    DataManager.download("DCES")
-"""
-
 from .base import CharSubstitute
 from ..data_manager import DataManager
 # from ..exceptions import
@@ -29,9 +19,9 @@ def get_hex_string(ch):
     return '{:04x}'.format(ord(ch)).upper()  # 获得字符16进制编码
 
 
-class DcesSubstitute(CharSubstitute):
+class DCESSubstitute(CharSubstitute):
     """
-    :Data Requirements: :any:`DCES`
+    :Data Requirements: :py:data:`.AttackAssist.DCES`
     
     An implementation of :py:class:`.CharSubstitute`.
 
@@ -40,7 +30,7 @@ class DcesSubstitute(CharSubstitute):
     """
 
     def __init__(self):
-        self.vec_colnames, self.descs, self.neigh = DataManager.load("DCES")
+        self.vec_colnames, self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
         # load
 
     def __call__(self, char, threshold):  # 原字符，topn

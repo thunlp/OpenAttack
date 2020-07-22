@@ -30,15 +30,15 @@ OpenAttack has a wide range of uses, including:
    :hidden:
    :caption: Examples
 
-   Example 1: Workflow <examples/example1>
-   Example 2: Classifier <examples/example2>
-   Example 3: Attacker <examples/example3>
-   Example 4: AttackEval <examples/example4>
+   Example 1: Basic Usage <examples/example1>
+   Example 2: Customized Victim Model <examples/example2>
+   Example 3: Customized Attack Model <examples/example3>
+   Example 4: Use Additional Constraints <examples/example4>
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: APIs
+   :caption: Modules
 
    DataManager <apis/data_manager>
    Attacker <apis/attacker>
@@ -47,7 +47,6 @@ OpenAttack has a wide range of uses, including:
    TextProcessor <apis/text_processor>
    AttackEval <apis/attack_eval>
    Classifier <apis/classifier>
-   Exceptions <apis/exceptions>
    data <apis/data>
    utils <apis/utils>
 

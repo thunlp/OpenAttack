@@ -14,7 +14,7 @@ H = {'a': 'â', 'b': 'ḃ', 'c': 'ĉ', 'd': 'ḑ', 'e': 'ê', 'f': 'ḟ', 'g': '
      'S': 'Ŝ', 'T': 'Ť', 'U': 'Û', 'V': 'Ṽ', 'W': 'Ŵ', 'X': 'Ẍ', 'Y': 'Ŷ', 'Z': 'Ẑ'}
 
 
-class EcesSubstitute(CharSubstitute):
+class ECESSubstitute(CharSubstitute):
     """
     An implementation of :py:class:`.CharSubstitute`.
 

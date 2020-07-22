@@ -1,6 +1,6 @@
 from ..attacker import Attacker
-from ..substitutes import DcesSubstitute
-from ..substitutes import EcesSubstitute
+from ..substitutes import DCESSubstitute
+from ..substitutes import ECESSubstitute
 import numpy as np
 import random
 
@@ -19,9 +19,9 @@ class VIPERAttacker(Attacker):
         :param float prob: The probability of changing a char in a sentence. **Default:** 0.3
         :param int topn: Number of substitutes while using DCES substitute. **Default:** 12
         :param int generations: Maximum number of sentences generated per attack. **Default:** 120
-        :param bool eces: Use dces substitute or eces substitute. **Default:** True
+        :param bool eces: Use DCES substitute or ECES substitute. **Default:** True
 
-        :Data Requirements: :any:`DCES`
+        :Data Requirements: :py:data:`.AttackAssist.DCES`
         :Classifier Capacity: Blind
 
         Text Processing Like Humans Do: Visually Attacking and Shielding NLP Systems. Steffen Eger, Gözde Gül ¸Sahin, Andreas Rücklé, Ji-Ung Lee, Claudia Schulz, Mohsen Mesgar, Krishnkant Swarnkar, Edwin Simpson, Iryna Gurevych. NAACL-HLT 2019.
@@ -30,8 +30,8 @@ class VIPERAttacker(Attacker):
         """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-        self.dces = DcesSubstitute()
-        self.eces = EcesSubstitute()
+        self.dces = DCESSubstitute()
+        self.eces = ECESSubstitute()
         self.mydict = {}
         self.topn = self.config["topn"]
         self.prob = self.config["prob"]

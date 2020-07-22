@@ -8,7 +8,7 @@ Model files for Stanford Parser.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "StanfordParser"
+NAME = "TProcess.StanfordParser"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/stanford_parser_small.zip"
 DOWNLOAD = make_zip_downloader(URL)

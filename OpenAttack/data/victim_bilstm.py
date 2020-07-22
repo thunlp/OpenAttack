@@ -1,6 +1,7 @@
 """
 :type: PytorchClassifier
 :Size: 1.683MB
+:Data Requirements: :py:data:`.AttackAssist.GloVe`
 :Package Requirements:
     * pytorch
 
@@ -46,7 +47,7 @@ def LOAD(path):
     model = Model()
     model.load_state_dict( torch.load(path, map_location=lambda storage, loc: storage) )
     
-    word_vector = OpenAttack.DataManager.load("Glove")
+    word_vector = OpenAttack.DataManager.load("AttackAssist.GloVe")
 
     return OpenAttack.classifiers.PytorchClassifier(model, 
         word2id=word_vector.word2id, embedding=word_vector.get_vecmatrix(), 

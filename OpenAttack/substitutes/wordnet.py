@@ -26,7 +26,7 @@ def get_pos(pos_tag):
 
 class WordNetSubstitute(WordSubstitute):
     """
-    :Data Requirements: :any:`NLTKWordnet`
+    :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
 
     An implementation of :py:class:`.WordSubstitute`.
 
@@ -34,9 +34,7 @@ class WordNetSubstitute(WordSubstitute):
 
     """
     def __init__(self):
-        # self.nlp = spacy.load('en_core_web_sm')
-        # self.nlp = DataManager.load("SpacyECW")
-        self.wn = DataManager.load("NLTKWordnet")
+        self.wn = DataManager.load("TProcess.NLTKWordNet")
 
     def __call__(self, word, pos_tag, threshold=None):
         if pos_tag is None:

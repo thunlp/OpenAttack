@@ -9,7 +9,7 @@ Model files for Universal Sentence Encoder in tensorflow_hub.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "UniversalSentenceEncoder"
+NAME = "AttackAssist.UniversalSentenceEncoder"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/usencoder.zip"
 DOWNLOAD = make_zip_downloader(URL)

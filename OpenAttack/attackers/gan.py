@@ -26,7 +26,7 @@ class GANAttacker(Attacker):
 
         :Package Requirements:
             * torch
-        :Data Requirements: :any:`GNAE` :any:`SGNAE`
+        :Data Requirements: :py:data:`.AttackAssist.GAN` :py:data:`.AttackAssist.SGAN`
         :Classifier Capacity: Probability
 
         Generating Natural Adversarial Examples. Zhengli Zhao, Dheeru Dua, Sameer Singh. ICLR 2018.
@@ -36,10 +36,10 @@ class GANAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config['sst'] is False:  # snli
-            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("GNAE")
+            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("AttackAssist.GAN")
             self.maxlen = 10
         else:
-            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("SGNAE")
+            self.word2idx, self.autoencoder, self.inverter, self.gan_gen, self.gan_disc = DataManager.load("AttackAssist.SGAN")
             self.maxlen = 100
         self.idx2word = {v: k for k, v in self.word2idx.items()}
         self.gan_gen = self.gan_gen.cpu()
