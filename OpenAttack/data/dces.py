@@ -2,7 +2,7 @@
 :type: tuple
 :Size: 632.887KB
 
-Vec-colnames and neighber matrix used in Substitute DECS. See :py:data:`DCES` for detail.
+Vec-colnames and neighber matrix used in Substitute DECS. See :py:class:`.DCESSubstitute` for detail.
 """
 
 import os

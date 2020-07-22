@@ -116,7 +116,7 @@ class SEAAttacker(Attacker):
             * torch
             * torchtext
             * editdistance
-        :Data Requirements: :any:`.AttackAssist.TranslationModels`
+        :Data Requirements: :py:data:`.AttackAssist.TranslationModels`
 
         """
         from . import paraphrase_scorer

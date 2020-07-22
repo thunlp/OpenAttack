@@ -10,63 +10,63 @@ AttackAssist
 CounterFit
 ------------
 
-.. py:data:: CounterFit
+.. py:data:: AttackAssist.CounterFit
 
     .. automodule:: OpenAttack.data.counter_fit
 
 DCES
 ------
 
-.. py:data:: DCES
+.. py:data:: AttackAssist.DCES
 
     .. automodule:: OpenAttack.data.dces
+
+GAN
+-----
+
+.. py:data:: AttackAssist.GAN
+
+    .. automodule:: OpenAttack.data.gan
 
 GloVe
 -------
 
-.. py:data:: GloVe
+.. py:data:: AttackAssist.GloVe
 
     .. automodule:: OpenAttack.data.glove
 
-GNAE
-------
-
-.. py:data:: GNAE
-
-    .. automodule:: OpenAttack.data.gnae
-
-HOWNET
+HowNet
 --------
 
-.. py:data:: HOWNET
+.. py:data:: AttackAssist.HowNet
 
     .. automodule:: OpenAttack.data.hownet
 
 SCPN
 ------
 
-.. py:data:: SCPN
+.. py:data:: AttackAssist.SCPN
 
     .. automodule:: OpenAttack.data.scpn
 
-SGNAE
--------
+SGAN
+------
 
-.. py:data:: SGNAE
+.. py:data:: AttackAssist.SGAN
 
-    .. automodule:: OpenAttack.data.sgnae
+    .. automodule:: OpenAttack.data.sgan
 
 TranslationModels
 -------------------
 
-.. py:data:: TranslationModels
+.. py:data:: AttackAssist.TranslationModels
 
     .. automodule:: OpenAttack.data.translation_models
 
 UniversalSentenceEncoder
 --------------------------
 
-.. py:data:: UniversalSentenceEncoder
+.. py:data:: AttackAssist.UniversalSentenceEncoder
 
     .. automodule:: OpenAttack.data.universal_sentence_encoder
 
@@ -78,14 +78,14 @@ Dataset
 SST
 -----
 
-.. py:data:: SST
+.. py:data:: Dataset.SST
 
     .. automodule:: OpenAttack.data.data_sst
 
 SST.sample
 ------------
 
-.. py:data:: SST.sample
+.. py:data:: Dataset.SST.sample
 
     .. automodule:: OpenAttack.data.data_sst_sample
 
@@ -97,42 +97,42 @@ TProcess
 NLTKPerceptronPosTagger
 -------------------------
 
-.. py:data:: NLTKPerceptronPosTagger
+.. py:data:: TProcess.NLTKPerceptronPosTagger
 
     .. automodule:: OpenAttack.data.nltk_perceptron_pos_tagger
 
 NLTKSentTokenizer
 -------------------
 
-.. py:data:: NLTKSentTokenizer
+.. py:data:: TProcess.NLTKSentTokenizer
 
     .. automodule:: OpenAttack.data.nltk_senttokenizer
 
-NLTKWordnet
+NLTKWordNet
 -------------
 
-.. py:data:: NLTKWordnet
+.. py:data:: TProcess.NLTKWordNet
 
     .. automodule:: OpenAttack.data.nltk_wordnet
 
-NLTKWordnetDelemma
+NLTKWordNetDelemma
 --------------------
 
-.. py:data:: NLTKWordnetDelemma
+.. py:data:: TProcess.NLTKWordNetDelemma
 
     .. automodule:: OpenAttack.data.nltk_wordnet_delemma
 
 StanfordNER
 -------------
 
-.. py:data:: StanfordNER
+.. py:data:: TProcess.StanfordNER
 
     .. automodule:: OpenAttack.data.stanford_ner
 
 StanfordParser
 ----------------
 
-.. py:data:: StanfordParser
+.. py:data:: TProcess.StanfordParser
 
     .. automodule:: OpenAttack.data.stanford_parser
 
@@ -144,14 +144,14 @@ Victim
 BERT.SST
 ----------
 
-.. py:data:: BERT.SST
+.. py:data:: Victim.BERT.SST
 
     .. automodule:: OpenAttack.data.victim_bert
 
 BiLSTM.SST
 ------------
 
-.. py:data:: BiLSTM.SST
+.. py:data:: Victim.BiLSTM.SST
 
     .. automodule:: OpenAttack.data.victim_bilstm
 

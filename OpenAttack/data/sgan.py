@@ -4,12 +4,12 @@
 :Package Requirements:
     * **pytorch**
 
-Pretrained GAN model on SST-2 dataset used in attackers.gan. See :py:data:`SGNAE` for detail.
+Pretrained GAN model on SST-2 dataset used in :py:class:`.GANAttacker`. See :py:class:`.GANAttacker` for detail.
 """
 
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "AttackAssist.SGNAE"
+NAME = "AttackAssist.SGAN"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/SGNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 

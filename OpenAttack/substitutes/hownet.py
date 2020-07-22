@@ -1,10 +1,3 @@
-"""
-    由hownet提供的近义词。
-    进一步工作：以义原数量排序
-    require:
-    DataManager.download("HOWNET")
-    DataManager.download("WNL")
-"""
 from .base import WordSubstitute
 from ..data_manager import DataManager
 from ..exceptions import UnknownPOSException
@@ -17,7 +10,7 @@ pos_set = set(pos_list)
 class HowNetSubstitute(WordSubstitute):
     """
     :Package Requirements: OpenHowNet
-    :Data Requirements: :py:data:`.AttackAssist.HOWNET` :py:data:`TProcess.NLTKWordnet`
+    :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`TProcess.NLTKWordNet`
 
     An implementation of :py:class:`.WordSubstitute`.
 
@@ -26,8 +19,8 @@ class HowNetSubstitute(WordSubstitute):
     """
 
     def __init__(self):
-        self.hownet_dict = DataManager.load("AttackAssist.HOWNET")
-        self.wn = DataManager.load("TProcess.NLTKWordnet")
+        self.hownet_dict = DataManager.load("AttackAssist.HowNet")
+        self.wn = DataManager.load("TProcess.NLTKWordNet")
         self.en_word_list = self.hownet_dict.get_en_words()
         # self.hownet_dict = OpenHowNet.HowNetDict()
         # self.wnl = WordNetLemmatizer()

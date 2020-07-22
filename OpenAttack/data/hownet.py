@@ -8,7 +8,7 @@ OpenHowNet.
 `[page] <https://openhownet.thunlp.org/>`__
 """
 
-NAME = "AttackAssist.HOWNET"
+NAME = "AttackAssist.HowNet"
 
 
 def DOWNLOAD(path):

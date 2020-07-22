@@ -33,12 +33,6 @@ result_visualizer
 
 .. autofunction:: OpenAttack.utils.result_visualizer
 
-BertModel
------------
-
-.. autoclass:: OpenAttack.utils.BertModel
-    :members:
-
 BertClassifier
 ----------------
 

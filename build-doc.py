@@ -109,7 +109,7 @@ def make_data(path):
         opt += cat + "\n" + ("=" * (2 + len(cat))) + "\n\n"
         for data in cats[cat]:
             opt += data["name"] + "\n" + ("-" * (2 + len(data["name"]))) + "\n\n"
-            opt += ".. py:data:: " + data["name"] + "\n\n"
+            opt += ".. py:data:: " + cat + "." + data["name"] + "\n\n"
             opt += "    .. automodule:: OpenAttack.data." + data["package"] + "\n\n"
     open(path, "w", encoding="utf-8").write(opt)
     return opt

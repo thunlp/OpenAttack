@@ -22,16 +22,16 @@ CounterFittedSubstitute
 .. autoclass:: OpenAttack.substitutes.CounterFittedSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
     :members:
 
-DcesSubstitute
+DCESSubstitute
 ----------------
 
-.. autoclass:: OpenAttack.substitutes.DcesSubstitute(OpenAttack.substitutes.CharSubstitute)
+.. autoclass:: OpenAttack.substitutes.DCESSubstitute(OpenAttack.substitutes.CharSubstitute)
     :members:
 
-EcesSubstitute
+ECESSubstitute
 ----------------
 
-.. autoclass:: OpenAttack.substitutes.EcesSubstitute(OpenAttack.substitutes.CharSubstitute)
+.. autoclass:: OpenAttack.substitutes.ECESSubstitute(OpenAttack.substitutes.CharSubstitute)
     :members:
 
 EmbedBasedSubstitute

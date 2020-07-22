@@ -4,13 +4,13 @@
 :Package Requirements:
     * **pytorch**
 
-Pretrained GAN model on SNLI dataset used in attackers.gan. See :py:data:`GNAE` for detail.
+Pretrained GAN model on SNLI dataset used in :py:class:`.GANAttacker`. See :py:class:`.GANAttacker` for detail.
 """
 
 import os
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "AttackAssist.GNAE"
+NAME = "AttackAssist.GAN"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/GNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 

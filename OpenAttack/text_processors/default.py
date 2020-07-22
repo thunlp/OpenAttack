@@ -41,10 +41,10 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_lemmas(self, token_and_pos):
         """
-        :Data Requirements: :py:data:`.TProcess.NLTKWordnet`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
         """
         if self.__lemmatize is None:
-            self.__lemmatize = DataManager.load("TProcess.NLTKWordnet").lemma
+            self.__lemmatize = DataManager.load("TProcess.NLTKWordNet").lemma
         if not isinstance(token_and_pos, list):
             return self.__lemmatize(token_and_pos[0], token_and_pos[1])
         else:
@@ -52,10 +52,10 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_delemmas(self, lemma_and_pos):
         """
-        :Data Requirements: :py:data:`.TProcess.NLTKWordnetDelemma`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordNetDelemma`
         """
         if self.__delemmatize is None:
-            self.__delemmatize = DataManager.load("TProcess.NLTKWordnetDelemma")
+            self.__delemmatize = DataManager.load("TProcess.NLTKWordNetDelemma")
         if not isinstance(lemma_and_pos, list):
             token, pos = lemma_and_pos
             return (
@@ -181,10 +181,10 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_wsd(self, tokens_and_pos):
         """
-        :Data Requirements: :py:data:`.TProcess.NLTKWordnet`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
         """
         if self.__wordnet is None:
-            self.__wordnet = DataManager.load("TProcess.NLTKWordnet")
+            self.__wordnet = DataManager.load("TProcess.NLTKWordNet")
 
         def lesk(sentence, word, pos):
             sent = set(sentence)
