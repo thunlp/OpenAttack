@@ -1,11 +1,11 @@
-from ..substitute import Substitute
+from .base import WordSubstitute
 from ..exceptions import NoEmbeddingException, WordNotInDictionaryException
 import numpy as np
 
 DEFAULT_CONFIG = {"cosine": False}
 
 
-class EmbedBasedSubstitute(Substitute):
+class EmbedBasedSubstitute(WordSubstitute):
     """
     :param bool cosine: If true, uses cosine distance :math:`(1 - cos(v_a, v_b))`, otherwise uses Euclidian distance :math:`norm_2(v_a - v_b)`. **Default:** False.
     :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
