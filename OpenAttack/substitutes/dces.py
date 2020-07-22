@@ -21,7 +21,7 @@ def get_hex_string(ch):
 
 class DCESSubstitute(CharSubstitute):
     """
-    :Data Requirements: :py:data:`AttackAssist.DCES`
+    :Data Requirements: :py:data:`.AttackAssist.DCES`
     
     An implementation of :py:class:`.CharSubstitute`.
 
