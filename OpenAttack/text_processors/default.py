@@ -28,23 +28,23 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_tokens(self, sentence):
         """
-        :Data Requirements: :any:`NLTKSentTokenizer` , :any:`NLTKPerceptronPosTagger`
+        :Data Requirements: :py:data:`TProcess.NLTKSentTokenizer` , :py:data:`.TProcess.NLTKPerceptronPosTagger`
 
-        This method ``nltk.WordPunctTokenizer()`` for word tokenization and 
+        This method uses ``nltk.WordPunctTokenizer()`` for word tokenization and 
         ``nltk.tag.PerceptronTagger()`` to generate POS tag in "Penn tagset".
         """
         if self.__tokenize is None:
-            self.__tokenize = self.__make_tokenizer( DataManager.load("NLTKSentTokenizer") )
+            self.__tokenize = self.__make_tokenizer( DataManager.load("TProcess.NLTKSentTokenizer") )
         if self.__tag is None:
-            self.__tag = DataManager.load("NLTKPerceptronPosTagger")
+            self.__tag = DataManager.load("TProcess.NLTKPerceptronPosTagger")
         return self.__tag(self.__tokenize(sentence))
 
     def get_lemmas(self, token_and_pos):
         """
-        :Data Requirements: :any:`NLTKWordnet`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordnet`
         """
         if self.__lemmatize is None:
-            self.__lemmatize = DataManager.load("NLTKWordnet").lemma
+            self.__lemmatize = DataManager.load("TProcess.NLTKWordnet").lemma
         if not isinstance(token_and_pos, list):
             return self.__lemmatize(token_and_pos[0], token_and_pos[1])
         else:
@@ -52,10 +52,10 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_delemmas(self, lemma_and_pos):
         """
-        :Data Requirements: :any:`NLTKWordnetDelemma`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordnetDelemma`
         """
         if self.__delemmatize is None:
-            self.__delemmatize = DataManager.load("NLTKWordnetDelemma")
+            self.__delemmatize = DataManager.load("TProcess.NLTKWordnetDelemma")
         if not isinstance(lemma_and_pos, list):
             token, pos = lemma_and_pos
             return (
@@ -73,12 +73,12 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_ner(self, sentence):
         """
-        :Data Requirements: :any:`StanfordNER` , :any:`NLTKSentTokenizer`
+        :Data Requirements: :py:data:`.TProcess.StanfordNER` , :py:data:`.TProcess.NLTKSentTokenizer`
         """
         if self.__ner is None:
-            self.__ner = DataManager.load("StanfordNER")
+            self.__ner = DataManager.load("TProcess.StanfordNER")
         if self.__tokenize is None:
-            self.__tokenize = DataManager.load("NLTKSentTokenizer")
+            self.__tokenize = DataManager.load("TProcess.NLTKSentTokenizer")
 
         ret = []
         if isinstance(sentence, list):  # list of tokens
@@ -173,18 +173,18 @@ class DefaultTextProcessor(TextProcessor):
 
     def get_parser(self, sentence):
         """
-        :Data Requirements: :any:`StanfordParser`
+        :Data Requirements: :py:data:`.TProcess.StanfordParser`
         """
         if self.__parser is None:
-            self.__parser = DataManager.load("StanfordParser")
+            self.__parser = DataManager.load("TProcess.StanfordParser")
         return str(list(self.__parser(sentence))[0])
 
     def get_wsd(self, tokens_and_pos):
         """
-        :Data Requirements: :any:`NLTKWordnet`
+        :Data Requirements: :py:data:`.TProcess.NLTKWordnet`
         """
         if self.__wordnet is None:
-            self.__wordnet = DataManager.load("NLTKWordnet")
+            self.__wordnet = DataManager.load("TProcess.NLTKWordnet")
 
         def lesk(sentence, word, pos):
             sent = set(sentence)

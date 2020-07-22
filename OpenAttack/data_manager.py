@@ -77,6 +77,34 @@ class DataManager(object):
         return cls.data_reference[data_name]
     
     @classmethod
+    def loadDataset(cls, data_name, cached=True):
+        """
+        This method is equivalent to ``DataManager.load("Dataset." + data_name)``.
+        """
+        return cls.load("Dataset." + data_name, cached=cached)
+    
+    @classmethod
+    def loadVictim(cls, data_name, cached=True):
+        """
+        This method is equivalent to ``DataManager.load("Victim." + data_name)``.
+        """
+        return cls.load("Victim." + data_name, cached=cached)
+    
+    @classmethod
+    def loadTProcess(cls, data_name, cached=True):
+        """
+        This method is equivalent to ``DataManager.load("TProcess." + data_name)``.
+        """
+        return cls.load("TProcess." + data_name, cached=cached)
+    
+    @classmethod
+    def loadAttackAssist(cls, data_name, cached=True):
+        """
+        This method is equivalent to ``DataManager.load("AttackAssist." + data_name)``.
+        """
+        return cls.load("AttackAssist." + data_name, cached=cached)
+    
+    @classmethod
     def setAutoDownload(cls, enabled=True):
         """
         :param bool enabled: Change if DataManager automatically download the data when loading.

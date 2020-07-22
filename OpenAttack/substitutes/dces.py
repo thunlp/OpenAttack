@@ -5,7 +5,7 @@
     __call__函数参数：原字符，相似字符数量
     返回值：（字符，prob）列表，prob基本为均分，和为1
     require:
-    DataManager.download("DCES")
+    DataManager.download("AttackAssist.DCES")
 """
 
 from .base import CharSubstitute
@@ -31,7 +31,7 @@ def get_hex_string(ch):
 
 class DcesSubstitute(CharSubstitute):
     """
-    :Data Requirements: :any:`DCES`
+    :Data Requirements: :py:data:`AttackAssist.DCES`
     
     An implementation of :py:class:`.CharSubstitute`.
 
@@ -40,7 +40,7 @@ class DcesSubstitute(CharSubstitute):
     """
 
     def __init__(self):
-        self.vec_colnames, self.descs, self.neigh = DataManager.load("DCES")
+        self.vec_colnames, self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
         # load
 
     def __call__(self, char, threshold):  # 原字符，topn

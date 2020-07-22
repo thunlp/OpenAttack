@@ -17,7 +17,7 @@ pos_set = set(pos_list)
 class HowNetSubstitute(WordSubstitute):
     """
     :Package Requirements: OpenHowNet
-    :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
+    :Data Requirements: :py:data:`.AttackAssist.HOWNET` :py:data:`TProcess.NLTKWordnet`
 
     An implementation of :py:class:`.WordSubstitute`.
 
@@ -26,8 +26,8 @@ class HowNetSubstitute(WordSubstitute):
     """
 
     def __init__(self):
-        self.hownet_dict = DataManager.load("HOWNET")
-        self.wn = DataManager.load("NLTKWordnet")
+        self.hownet_dict = DataManager.load("AttackAssist.HOWNET")
+        self.wn = DataManager.load("TProcess.NLTKWordnet")
         self.en_word_list = self.hownet_dict.get_en_words()
         # self.hownet_dict = OpenHowNet.HowNetDict()
         # self.wnl = WordNetLemmatizer()

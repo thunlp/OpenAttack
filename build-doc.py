@@ -72,16 +72,45 @@ def make_data_manager(path):
     return opt
 
 def make_data(path):
-    opt = "=====================\ndata\n=====================\n\n"
+    opt = "=====================\nAll data\n=====================\n\n"
     opt += ".. _label-apis-data:\n\n"
 
     import pkgutil
+    cats = {
+
+    }
     for data in pkgutil.iter_modules(OpenAttack.data.__path__):
         data = data.module_finder.find_loader(data.name)[0].load_module()
         if hasattr(data, "NAME") and (data.NAME in OpenAttack.DataManager.AVAILABLE_DATAS):
-            opt += data.NAME + "\n" + ("-" * (2 + len(data.NAME))) + "\n\n"
-            opt += ".. py:data:: " + data.NAME + "\n\n"
-            opt += "    .. automodule:: OpenAttack.data." + data.__name__ + "\n\n"
+            name = data.NAME
+            if name == "test":
+                continue
+            cat = name.split(".")
+            if len(cat) == 1:
+                continue
+            name = ".".join(cat[1:])
+            cat = cat[0]
+            pack = data.__name__
+
+            if cat not in cats:
+                cats[cat] = []
+            cats[cat].append({
+                "name": name,
+                "package":  pack
+            })
+    
+    first = True
+    for cat in cats.keys():
+        if first:
+            first = False
+        else:
+            opt += "-" * 36 + "\n\n"
+        
+        opt += cat + "\n" + ("=" * (2 + len(cat))) + "\n\n"
+        for data in cats[cat]:
+            opt += data["name"] + "\n" + ("-" * (2 + len(data["name"]))) + "\n\n"
+            opt += ".. py:data:: " + data["name"] + "\n\n"
+            opt += "    .. automodule:: OpenAttack.data." + data["package"] + "\n\n"
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 

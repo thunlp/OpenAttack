@@ -7,7 +7,7 @@ Model files for nltk punkt sentence tokenizer.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "NLTKSentTokenizer"
+NAME = "TProcess.NLTKSentTokenizer"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/punkt.english.pickle.zip"
 DOWNLOAD = make_zip_downloader(URL, "english.pickle")

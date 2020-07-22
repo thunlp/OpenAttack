@@ -8,7 +8,7 @@ import numpy as np
 import os, pickle
 from OpenAttack.utils import WordVector, make_zip_downloader
 
-NAME = "Glove"
+NAME = "AttackAssist.GloVe"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/glove.zip"
 DOWNLOAD = make_zip_downloader(URL)

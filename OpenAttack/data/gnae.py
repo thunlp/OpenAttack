@@ -10,7 +10,7 @@ Pretrained GAN model on SNLI dataset used in attackers.gan. See :py:data:`GNAE` 
 import os
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "GNAE"
+NAME = "AttackAssist.GNAE"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/GNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 

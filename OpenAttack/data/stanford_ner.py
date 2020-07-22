@@ -8,7 +8,7 @@ Model files for Stanford NER tagger.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "StanfordNER"
+NAME = "TProcess.StanfordNER"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/stanford_ner_small.zip"
 DOWNLOAD = make_zip_downloader(URL)

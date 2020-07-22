@@ -26,7 +26,7 @@ def main():
     print("Build model")
     clsf = make_model()
 
-    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
+    dataset = OpenAttack.DataManager.loadDataset("SST.sample")[:10]
 
     print("Start attack")
     options = {

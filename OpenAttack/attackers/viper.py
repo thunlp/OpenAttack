@@ -21,7 +21,7 @@ class VIPERAttacker(Attacker):
         :param int generations: Maximum number of sentences generated per attack. **Default:** 120
         :param bool eces: Use dces substitute or eces substitute. **Default:** True
 
-        :Data Requirements: :any:`DCES`
+        :Data Requirements: :py:data:`.AttackAssist.DCES`
         :Classifier Capacity: Blind
 
         Text Processing Like Humans Do: Visually Attacking and Shielding NLP Systems. Steffen Eger, Gözde Gül ¸Sahin, Andreas Rücklé, Ji-Ung Lee, Claudia Schulz, Mohsen Mesgar, Krishnkant Swarnkar, Edwin Simpson, Iryna Gurevych. NAACL-HLT 2019.

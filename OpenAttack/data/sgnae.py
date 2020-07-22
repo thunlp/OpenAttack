@@ -9,7 +9,7 @@ Pretrained GAN model on SST-2 dataset used in attackers.gan. See :py:data:`SGNAE
 
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "SGNAE"
+NAME = "AttackAssist.SGNAE"
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/SGNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 

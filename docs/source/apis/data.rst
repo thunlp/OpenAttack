@@ -1,8 +1,11 @@
 =====================
-data
+All data
 =====================
 
 .. _label-apis-data:
+
+AttackAssist
+==============
 
 CounterFit
 ------------
@@ -11,20 +14,6 @@ CounterFit
 
     .. automodule:: OpenAttack.data.counter_fit
 
-Dataset.SST
--------------
-
-.. py:data:: Dataset.SST
-
-    .. automodule:: OpenAttack.data.data_sst
-
-Dataset.SST.sample
---------------------
-
-.. py:data:: Dataset.SST.sample
-
-    .. automodule:: OpenAttack.data.data_sst_sample
-
 DCES
 ------
 
@@ -32,10 +21,10 @@ DCES
 
     .. automodule:: OpenAttack.data.dces
 
-Glove
+GloVe
 -------
 
-.. py:data:: Glove
+.. py:data:: GloVe
 
     .. automodule:: OpenAttack.data.glove
 
@@ -52,6 +41,58 @@ HOWNET
 .. py:data:: HOWNET
 
     .. automodule:: OpenAttack.data.hownet
+
+SCPN
+------
+
+.. py:data:: SCPN
+
+    .. automodule:: OpenAttack.data.scpn
+
+SGNAE
+-------
+
+.. py:data:: SGNAE
+
+    .. automodule:: OpenAttack.data.sgnae
+
+TranslationModels
+-------------------
+
+.. py:data:: TranslationModels
+
+    .. automodule:: OpenAttack.data.translation_models
+
+UniversalSentenceEncoder
+--------------------------
+
+.. py:data:: UniversalSentenceEncoder
+
+    .. automodule:: OpenAttack.data.universal_sentence_encoder
+
+------------------------------------
+
+Dataset
+=========
+
+SST
+-----
+
+.. py:data:: SST
+
+    .. automodule:: OpenAttack.data.data_sst
+
+SST.sample
+------------
+
+.. py:data:: SST.sample
+
+    .. automodule:: OpenAttack.data.data_sst_sample
+
+------------------------------------
+
+TProcess
+==========
 
 NLTKPerceptronPosTagger
 -------------------------
@@ -81,20 +122,6 @@ NLTKWordnetDelemma
 
     .. automodule:: OpenAttack.data.nltk_wordnet_delemma
 
-SCPN
-------
-
-.. py:data:: SCPN
-
-    .. automodule:: OpenAttack.data.scpn
-
-SGNAE
--------
-
-.. py:data:: SGNAE
-
-    .. automodule:: OpenAttack.data.sgnae
-
 StanfordNER
 -------------
 
@@ -109,38 +136,22 @@ StanfordParser
 
     .. automodule:: OpenAttack.data.stanford_parser
 
-test
-------
+------------------------------------
 
-.. py:data:: test
+Victim
+========
 
-    .. automodule:: OpenAttack.data.test
+BERT.SST
+----------
 
-TranslationModels
--------------------
-
-.. py:data:: TranslationModels
-
-    .. automodule:: OpenAttack.data.translation_models
-
-UniversalSentenceEncoder
---------------------------
-
-.. py:data:: UniversalSentenceEncoder
-
-    .. automodule:: OpenAttack.data.universal_sentence_encoder
-
-Victim.BERT.SST
------------------
-
-.. py:data:: Victim.BERT.SST
+.. py:data:: BERT.SST
 
     .. automodule:: OpenAttack.data.victim_bert
 
-Victim.BiLSTM.SST
--------------------
+BiLSTM.SST
+------------
 
-.. py:data:: Victim.BiLSTM.SST
+.. py:data:: BiLSTM.SST
 
     .. automodule:: OpenAttack.data.victim_bilstm
 

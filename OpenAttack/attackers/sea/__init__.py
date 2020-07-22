@@ -36,7 +36,7 @@ class SEAAttacker(Attacker):
             * torch
             * torchtext
             * editdistance
-        :Data Requirements: :any:`TranslationModels`
+        :Data Requirements: :py:data:`.AttackAssist.TranslationModels`
         :Classifier Capacity: Decision
 
         Semantically Equivalent Adversarial Rules for Debugging NLP Models. Marco Tulio Ribeiro, Sameer Singh, Carlos Guestrin. ACL 2018.
@@ -116,7 +116,7 @@ class SEAAttacker(Attacker):
             * torch
             * torchtext
             * editdistance
-        :Data Requirements: :any:`TranslationModels`
+        :Data Requirements: :any:`.AttackAssist.TranslationModels`
 
         """
         from . import paraphrase_scorer
@@ -138,7 +138,7 @@ class SEAAttacker(Attacker):
         config.update(kwargs)
         check_parameters(TRAIN_CONFIG.keys(), config)
 
-        model_path = DataManager.load("TranslationModels")
+        model_path = DataManager.load("AttackAssist.TranslationModels")
 
         to_paths = [model_path[x] for x in DEFAULT_TO_PATHS]
         back_paths = [model_path[x] for x in DEFAULT_BACK_PATHS]

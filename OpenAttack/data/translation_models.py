@@ -12,7 +12,7 @@ Pretrained translation models. See :py:data:`TranslationModels` for detail.
 from OpenAttack.utils import make_zip_downloader
 import os
 
-NAME = "TranslationModels"
+NAME = "AttackAssist.TranslationModels"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/translation_models.zip"
 DOWNLOAD = make_zip_downloader(URL)

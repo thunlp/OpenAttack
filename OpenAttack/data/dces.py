@@ -8,7 +8,7 @@ Vec-colnames and neighber matrix used in Substitute DECS. See :py:data:`DCES` fo
 import os
 from OpenAttack.utils import make_zip_downloader
 
-NAME = "DCES"
+NAME = "AttackAssist.DCES"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/DCES.zip"
 DOWNLOAD = make_zip_downloader(URL)

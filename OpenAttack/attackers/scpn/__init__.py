@@ -49,7 +49,7 @@ class SCPNAttacker(Attacker):
         
         :Package Requirements:
             * torch
-        :Data Requirements: :any:`SCPN`
+        :Data Requirements: :py:data:`.AttackAssist.SCPN`
         :Classifier Capacity: Blind
 
         Adversarial Example Generation with Syntactically Controlled Paraphrase Networks. Mohit Iyyer, John Wieting, Kevin Gimpel, Luke Zettlemoyer. NAACL-HLT 2018.
@@ -99,7 +99,7 @@ class SCPNAttacker(Attacker):
         self.processor = self.config["processor"]
 
         # Use DataManager Here
-        model_path = DataManager.load("SCPN")
+        model_path = DataManager.load("AttackAssist.SCPN")
         pp_model = self.torch.load(model_path["scpn.pt"], map_location=self.device)
         parse_model = self.torch.load(model_path["parse_generator.pt"], map_location=self.device)
         pp_vocab, rev_pp_vocab = pickle.load(open(model_path["parse_vocab.pkl"], 'rb'))
