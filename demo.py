@@ -31,12 +31,13 @@ def main():
     print("Start attack")
     options = {
         "success_rate": True,
-        "fluency": False,
-        "mistake": False,
-        "semantic": False,
+        "fluency": True,
+        "mistake": True,
+        "semantic": True,
         "levenstein": True,
         "word_distance": False,
         "modification_rate": True,
+        "running_time": True,
 
         "invoke_limit": 500,
         "average_invoke": True

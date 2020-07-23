@@ -35,7 +35,7 @@ Override Measure Method
 In this step, ``measure`` method is overriden.
 It invokes the original ``measure`` method to get measurements and checks if grammatical erros is grater than ``mistake_limit``.
 
-You can see :py:class:`.AttackEvalBase` for more information.
+You can see :py:class:`.DefaultAttackEval` for more information.
 
 Complete Code
 --------------------------
