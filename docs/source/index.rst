@@ -22,8 +22,8 @@ OpenAttack has a wide range of uses, including:
    :hidden:
    :caption: Getting Started
 
-   Installation <quickstart/installation>
    Introduction <quickstart/introduction>
+   Installation <quickstart/installation>
 
 .. toctree::
    :maxdepth: 1

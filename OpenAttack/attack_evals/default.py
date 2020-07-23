@@ -1,26 +1,75 @@
-from . import AttackEvalBase
+from ..attack_eval import AttackEval
 import json, sys, time
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer
+from ..utils import visualizer, result_visualizer, check_parameters
 from ..exceptions import ClassifierNotSupportException
+from ..text_processors import DefaultTextProcessor
 
-class DefaultAttackEval(AttackEvalBase):
+DEFAULT_CONFIG = {
+    "processor": DefaultTextProcessor(),
+    "language_tool": None,
+    "language_model": None,
+    "sentence_encoder": None,
+
+    "success_rate": True,
+    "fluency": False,
+    "mistake": False,
+    "semantic": False,
+    "levenstein": False,
+    "word_distance": False,
+    "modification_rate": False,
+    "running_time": True,
+}
+
+class DefaultAttackEval(AttackEval):
     """
-    This class is a default implementation of AttackEval.
+    DefaultAttackEval is the default implementation of AttackEval that provides basic evaluation functions.
+
+    In this class, there are four key methods that maybe useful for your extension.
+
+    * **measure:** Measures the basic metrics.
+    * **update:** Accumulates the measurement.
+    * **get_result:** Calculates the final results.
+    * **clear:** Clear all the Accumulated results.
+
+    The workflow is: ``clear -> measure -> update -> measure -> update -> ... -> get_result``.
+    You can override these four methods to add your custom measurement.
+
+    See :doc:`Example 4 </examples/example4>` for detail.
+
     """
-    def __init__(self, attacker, classifier, running_time=True, progress_bar=True, **kwargs):
+    def __init__(self, attacker, classifier, progress_bar=True, **kwargs):
         """
         :param Attacker attacker: The attacker you use.
         :param Classifier classifier: The classifier you want to attack.
         :param bool running_time: If true, returns "Avg. Running Time" in summary. **Default:** True
         :param bool progress_bar: Dispaly a progress bar(tqdm). **Default:** True
-        :param kwargs: Other parameters, see :py:class:`.AttackEvalBase` for detail.
+        :param bool success_rate: If true, returns "Attack Success Rate". **Default:** True
+        :param bool fluency: If true, returns "Avg. Fluency (ppl)". **Default:** False
+        :param bool mistake: If true, returns "Avg. Grammatical Errors". **Default:** False
+        :param bool semantic: If true, returns "Avg. Semantic Similarity". **Default:** False
+        :param bool levenstein: If true, returns "Avg. Levenshtein Edit Distance". **Default:** False
+        :param bool word_distance: If true, applies token-level levenstein edit distance. **Default:** False
+        :param bool modification_rate: If true, returns "Avg. Word Modif. Rate". **Default:** False
+        :param TextProcessor processor: Text processor used in DefaultAttackEval. **Default:** :any:`DefaultTextProcessor`
+
+        :Package Requirements:
+            * **language_tool_python** (for `mistake` option)
+            * **Java** (for `mistake` option)
+            * **transformers** (for `fluency` option)
+            * **tensorflow** >= 2.0.0 (for `semantic` option)
+            * **tensorflow_hub** (for `semantic` option)
+
+        :Data Requirements:
+            * :py:data:`.UniversalSentenceEncoder` (for `semantic` option)
         """
-        super().__init__(**kwargs)
+        self.__config = DEFAULT_CONFIG.copy()
+        self.__config.update(kwargs)
+        check_parameters(DEFAULT_CONFIG.keys(), self.__config)
+        self.clear()
         self.attacker = attacker
         self.classifier = classifier
         self.__progress_bar = progress_bar
-        self.__running_time = running_time
     
     def eval(self, dataset, total_len=None, visualize=False):
         """
@@ -67,7 +116,7 @@ class DefaultAttackEval(AttackEvalBase):
                     visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write)
         
         res = self.get_result()
-        if self.__running_time:
+        if self.__config["running_time"]:
             res["Avg. Running Time"] = (time.time() - time_start) / counter
 
         if visualize:
@@ -108,3 +157,164 @@ class DefaultAttackEval(AttackEvalBase):
                     yield (sent, None, None, self.__update(sent, None) )
                 else:
                     yield (sent, res[0], res[1], self.__update(sent, res[0]))
+    
+    def __levenshtein(self, sentA, sentB):
+        from ..metric import levenshtein
+        return levenshtein(sentA, sentB)
+    
+    def __get_tokens(self, sent):
+        return list(map(lambda x: x[0], self.__config["processor"].get_tokens(sent)))
+    
+    def __get_mistakes(self, sent):
+        if self.__config["language_tool"] is None:
+            import language_tool_python
+            self.__config["language_tool"] = language_tool_python.LanguageTool('en-US')
+        
+        return len(self.__config["language_tool"].check(sent))
+    
+    def __get_fluency(self, sent):
+        if self.__config["language_model"] is None:
+            from ..metric import GPT2LM
+            self.__config["language_model"] = GPT2LM()
+        
+        if len(sent.strip()) == 0:
+            return 1
+        return self.__config["language_model"](sent)
+    
+    def __get_semantic(self, sentA, sentB):
+        if self.__config["sentence_encoder"] is None:
+            from ..metric import UniversalSentenceEncoder
+            self.__config["sentence_encoder"] = UniversalSentenceEncoder()
+        
+        return self.__config["sentence_encoder"](sentA, sentB)
+    
+    def __get_modification(self, sentA, sentB):
+        from ..metric import modification
+        tokenA = self.__get_tokens(sentA)
+        tokenB = self.__get_tokens(sentB)
+        return modification(tokenA, tokenB)
+    
+    def measure(self, input_, attack_result):
+        """
+        :param str input_: The original sentence.
+        :param attack_result: The adversarial sentence which is generated by attackers. If is None, means attacker failed to generate an adversarial sentence.
+        :type attack_result: str or None
+        :return: A dict contains all the results for this instance.
+        :rtype: dict
+
+        In this method, we measure all the metrics which corresponding options are setted to True.
+        """
+        if attack_result is None:
+            return { "Succeed": False }
+
+        info = { "Succeed": True }
+
+        if self.__config["levenstein"]:
+            va = input_
+            vb = attack_result
+            if self.__config["word_distance"]:
+                va = self.__get_tokens(va)
+                vb = self.__get_tokens(vb)
+            info["Edit Distance"] =  self.__levenshtein(va, vb)
+        
+        if self.__config["mistake"]:
+            info["Grammatical Errors"] = self.__get_mistakes(attack_result)
+        
+        if self.__config["fluency"]:
+            info["Fluency (ppl)"] = self.__get_fluency(attack_result)
+            
+        if self.__config["semantic"]:
+            info["Semantic Similarity"] = self.__get_semantic(input_, attack_result)
+
+        if self.__config["modification_rate"]:
+            info["Word Modif. Rate"] = self.__get_modification(input_, attack_result)
+        return info
+        
+    def update(self, info):
+        """
+        :param dict info: The result returned by ``measure`` method.
+        :return: Just return the parameter **info**.
+        :rtype: dict
+
+        In this method, we accumulate the results from ``measure`` method.
+        """
+        if "total" not in self.__result:
+            self.__result["total"] = 0
+        self.__result["total"] += 1
+
+        if self.__config["success_rate"]:
+            if "succeed" not in self.__result:
+                self.__result["succeed"] = 0
+            if info["Succeed"]:
+                self.__result["succeed"] += 1
+        
+        # early stop
+        if not info["Succeed"]:
+            return info
+
+        if self.__config["levenstein"]:
+            if "edit" not in self.__result:
+                self.__result["edit"] = 0
+            self.__result["edit"] += info["Edit Distance"]
+        
+        if self.__config["mistake"]:
+            if "mistake" not in self.__result:
+                self.__result["mistake"] = 0
+            self.__result["mistake"] += info["Grammatical Errors"]
+
+        if self.__config["fluency"]:
+            if "fluency" not in self.__result:
+                self.__result["fluency"] = 0
+            self.__result["fluency"] += info["Fluency (ppl)"]
+
+        if self.__config["semantic"]:
+            if "semantic" not in self.__result:
+                self.__result["semantic"] = 0
+            self.__result["semantic"] += info["Semantic Similarity"]
+        
+        if self.__config["modification_rate"]:
+            if "modification" not in self.__result:
+                self.__result["modification"] = 0
+            self.__result["modification"] += info["Word Modif. Rate"]
+        return info
+        
+    def get_result(self):
+        """
+        :return: The results which is accumulated previously.
+        :rtype: dict
+
+        This method summarizes and returns to previous accumulated results.
+        """
+        ret = {}
+        ret["Total Attacked Instances"] = self.__result["total"]
+        if self.__config["success_rate"]:
+            ret["Successful Instances"] = self.__result["succeed"]
+            ret["Attack Success Rate"] = self.__result["succeed"] / self.__result["total"]
+        if self.__result["succeed"] > 0:
+            if self.__config["levenstein"]:
+                if "edit" not in self.__result:
+                    self.__result["edit"] = 0
+                ret["Avg. Levenshtein Edit Distance"] = self.__result["edit"] / self.__result["succeed"]
+            if self.__config["mistake"]:
+                if "mistake" not in self.__result:
+                    self.__result["mistake"] = 0
+                ret["Avg. Grammatical Errors"] = self.__result["mistake"] / self.__result["succeed"]
+            if self.__config["fluency"]:
+                if "fluency" not in self.__result:
+                    self.__result["fluency"] = 0
+                ret["Avg. Fluency (ppl)"] = self.__result["fluency"] / self.__result["succeed"]
+            if self.__config["semantic"]:
+                if "semantic" not in self.__result:
+                    self.__result["semantic"] = 0
+                ret["Avg. Semantic Similarity"] = self.__result["semantic"] / self.__result["succeed"]
+            if self.__config["modification_rate"]:
+                if "modification" not in self.__result:
+                    self.__result["modification"] = 0
+                ret["Avg. Word Modif. Rate"] = self.__result["modification"] / self.__result["succeed"]
+        return ret
+
+    def clear(self):
+        """
+        Clear all the accumulated results.
+        """
+        self.__result = {}
