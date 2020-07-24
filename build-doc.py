@@ -11,6 +11,15 @@ def getSubClasses(module, clss):
             continue
     return ret
 
+def getDocMembers(clss):
+    ret = []
+    for kw in dir(clss):
+        if kw.startswith("_"):
+            continue
+        if clss.__dict__[kw].__doc__ is not None:
+            ret.append(kw)
+    return ret
+
 def make_attacker(path):
     addition_members = {
         "SEAAttacker": ["get_rules"],
@@ -156,6 +165,10 @@ def make_text_processor(path):
     return opt
 
 def make_utils(path):
+    additional_members = {
+        "Dataset": ["__init__"] + getDocMembers(OpenAttack.utils.Dataset),
+        "DataInstance": ["__init__"] + getDocMembers(OpenAttack.utils.DataInstance),
+    }
     opt = "=====================\nutils API\n=====================\n\n"
     for name in OpenAttack.utils.__dir__():
         if name.startswith("__"):
@@ -168,7 +181,7 @@ def make_utils(path):
             opt += ".. autofunction:: OpenAttack.utils." + name + "\n\n"
         else:
             opt += ".. autoclass:: OpenAttack.utils." + name + "\n"
-            opt += "    :members:\n\n"
+            opt += "    :members: " + (", ".join(additional_members[name]) if name in additional_members else "") + "\n\n"
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 
