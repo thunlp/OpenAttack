@@ -9,9 +9,9 @@ class Dataset(object):
         if data_list is not None:
             unsolved = []
             for data in data_list:
-                if isinstance(data, dict) and ("id" in data):
-                    self.__data[ data["id"] ] = DataInstance(**data)
-                    self.__next_idx = max(self.__next_idx, data["id"] + 1)
+                if isinstance(data, dict) and ("idx" in data):
+                    self.__data[ data["idx"] ] = DataInstance(**data)
+                    self.__next_idx = max(self.__next_idx, data["idx"] + 1)
                 elif isinstance(data, DataInstance) and data.id is not None:
                     self.__data[ data.id ] = data.copy() if copy else data
                     self.__next_idx = max(self.__next_idx, data.id + 1)
@@ -29,7 +29,7 @@ class Dataset(object):
                         data, idx=self.__next_idx
                     )
                 elif isinstance(data, dict):
-                    data["id"] = self.__next_idx
+                    data["idx"] = self.__next_idx
                     self.__data[self.__next_idx] = DataInstance(
                         ** data
                     )
@@ -161,11 +161,19 @@ class Dataset(object):
                     inst.id = None
                 ret.append(inst)
         return Dataset(ret, copy=False)
+    
+    def __setitem__(self, index, val):
+        if not isinstance(index, int):
+            raise TypeError("Key '%s' is not supported." % repr(index))
+        if isinstance(val, DataInstance):
+            val = val.copy()
+            val.id = index
+            self.__data[index] = val
+        else:
+            raise TypeError("Object '%s' is not allowd." % repr(val))
 
     def __getitem__(self, index):
         if isinstance(index, int) and not isinstance(index, bool):
-            if index < 0:
-                index += self.__len__()
             if index in self.__data:
                 return self.__data[index]
             raise KeyError(index)
@@ -173,13 +181,9 @@ class Dataset(object):
             st = index.start if index.start is not None else 0
             stop = index.stop if index.stop is not None else self.__next_idx
             step = index.step if index.step is not None else 1
-            if st < 0:
-                st += self.__len__()
-            if stop < 0:
-                stop += self.__len__()
-            if st < stop and step < 0:
+            if st < 0 or stop < 0:
                 return Dataset()
-            if st > stop:
+            if st >= stop or step <= 0:
                 return Dataset()
 
             if step > 0:
@@ -189,14 +193,14 @@ class Dataset(object):
                         ret.append(self.__data[st])
                     st += step
             
-            return Dataset(ret, copy=True)
+            return Dataset(ret, copy=False)
         elif isinstance(index, bool):
             if index:
-                return self.correct(ignore_unknown=True, keep_ids=True, copy=True)
+                return self.correct(ignore_unknown=True, keep_ids=True, copy=False)
             else:
-                return self.wrong(ignore_unknown=True, keep_ids=True, copy=True)
+                return self.wrong(ignore_unknown=True, keep_ids=True, copy=False)
         elif index is None:
-            return self.filter_pred(None, keep_ids=True, copy=True)
+            return self.filter_pred(None, keep_ids=True, copy=False)
         else:
             raise KeyError(index)
     
@@ -252,19 +256,23 @@ class Dataset(object):
     def __iadd__(self, val):
         return self.extend(val, copy=True, inplace=True)
 
-    def __delitem__(self, name):
+    def __delitem__(self, index):
         if isinstance(index, int):
             if index in self.__data:
                 del self.__data[index]
             raise KeyError(index)
         elif isinstance(index, slice):
-            st = index.start
-            ret = []
-            while st < index.stop:
+            st = index.start if index.start is not None else 0
+            stop = index.stop if index.stop is not None else self.__next_idx
+            step = index.step if index.step is not None else 1
+            if st < 0 or stop < 0:
+                return
+            if st >= stop or step <= 0:
+                return
+            while st < stop:
                 if st in self.__data:
                     del self.__data[st]
-                st += index.step
-            return Dataset(ret, copy=True)
+                st += step
         elif isinstance(index, bool):
             for inst in self.__check(index, ignore_unknown=True, keep_ids=True, copy=False):
                 del self.__data[inst.id]
@@ -317,6 +325,28 @@ class Dataset(object):
             return Dataset(ret, copy=False)
         else:
             return self
+    
+    def copy(self):
+        return Dataset( self.data() )
+    
+    def reset_index(self, inplace=False):
+        ret = []
+        for kw, val in self.__data.items():
+            if inplace:
+                inst = val
+            else:
+                inst = val.copy()
+            ret.append(inst)
+            inst.id = None
+        
+        if inplace:
+            self.__data = {}
+            self.__next_idx = 0
+            for inst in ret:
+                self.append(inst)
+            return self
+        else:
+            return Dataset(ret)
 
 
 class DataInstance(object):
@@ -333,12 +363,15 @@ class DataInstance(object):
     ]
     def __find_key(self, kwargs, keys, default=None):
         ret = None
+        okw = None
         for kw in keys:
             if kw in kwargs:
                 if ret is None:
                     ret = kwargs[kw]
+                    okw = kw
                 else:
-                    raise DuplicatedParameterException(kw)
+                    if kwargs[kw] != ret:
+                        raise DuplicatedParameterException("%s = %d; %s = %d" % (okw, ret, kw, kwargs[kw]))
         if ret is None:
             ret = default
         return ret
