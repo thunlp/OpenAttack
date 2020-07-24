@@ -3,7 +3,17 @@ import random
 from ..exceptions import DuplicatedParameterException, UnknownDataLabelException, UnknownDataFormatException
 
 class Dataset(object):
+    """
+
+    ``Dataset`` is an useful module that helps you to manage your data. It has a similar
+    interface to list, supports "append", "extend", "slice" and "merge" methods.
+
+    """
     def __init__(self, data_list=None, copy=True):
+        """
+        :param list data_list: This can be a list of :py:class:`.DataInstance`, a list of dict, a list of sentences or a list of tuples of type `(sentence, target)`. **Default:** None
+        :param bool copy: Create a copy of :py:class:`.DataInstance` s in data_list. **Default:** True
+        """
         self.__data = {}
         self.__next_idx = 0
         if data_list is not None:
@@ -43,6 +53,11 @@ class Dataset(object):
             pass
 
     def append(self, data_instance):
+        """
+        :param DataInstance data_instance: The :py:class:`.DataInstance` which you want to append.
+        :return: Index of this new data instance.
+        :rtype: int
+        """
         ret_id = self.__next_idx
         data_instance = data_instance.copy()
 
@@ -52,6 +67,11 @@ class Dataset(object):
         return ret_id
     
     def remove(self, index):
+        """
+        :param int index: The index of data instance that you want to remove.
+        :return: Returns False if index is not found, otherwise True.
+        :rtype: bool
+        """
         if isinstance(index, DataInstance):
             data = index
             index, data.index = data.index, None
@@ -62,6 +82,12 @@ class Dataset(object):
             return False
     
     def iter(self, shuffle=False, copy=True):
+        """
+        :param bool shuffle: Shuffle dataset. **Default:** False
+        :param bool copy: Generates copy of data instances. **Default:** True
+        :return: Returns iterator of all data instances.
+        :rtype: generator
+        """
         keys = list(self.__data.keys())
         if shuffle:
             random.shuffle(keys)
@@ -77,6 +103,16 @@ class Dataset(object):
         return self.iter(shuffle=False, copy=False)
     
     def eval(self, clsf, batch_size=1, copy=True, ignore_known=True):
+        """
+        :param Classifier clsf: classifier.
+        :param int batch_size: Number of instances in a batch. **Default:** 1
+        :param bool copy: Generate a copy for result. **Default:** True
+        :param bool ignore_known: Ignore the data instances which already has a predicted label. **Default:** True
+        :return: Results with predictions.
+        :rtype: Dataset
+
+        This method evaluates your classifier on the dataset and generates a result.
+        """
         ret = []
         def update(batch):
             batch_x = [ inst.x for inst in batch ]
@@ -123,12 +159,36 @@ class Dataset(object):
         return Dataset(ret, copy=False)
     
     def correct(self, ignore_unknown=True, keep_ids=True, copy=True):
+        """
+        :param bool ignore_unknown: Ignore the data instances which has no predicted label.
+        :param bool keep_ids: Keep index of instances in the result. **Default:** True
+        :param bool copy: If true, returns a copy of dataset. **Default:** True
+        :rtype: Dataset
+
+        This method returns a subset of the dataset which predicted label is equal to true label.
+        """
         return self.__check(True, ignore_unknown, keep_ids, copy)
     
     def wrong(self, ignore_unknown=True, keep_ids=True, copy=True):
+        """
+        :param bool ignore_unknown: Ignore the data instances which has no predicted label.
+        :param bool keep_ids: Keep index of instances in the result. **Default:** True
+        :param bool copy: If true, returns a copy of dataset. **Default:** True
+        :rtype: Dataset
+
+        This method returns a subset of the dataset which predicted label is not equal to true label.
+        """
         return self.__check(False, ignore_unknown, keep_ids, copy)
     
     def sample(self, num, keep_ids=True, copy=True):
+        """
+        :param int num: Number of sampling results.
+        :param bool keep_ids: Keep index of instances in the result. **Default:** True
+        :param bool copy: If true, returns a copy of dataset. **Default:** True
+        :rtype: Dataset
+
+        This method randomly samples ``num`` instances from the dataset.
+        """
         keys = list(self.__data.keys())
         random.shuffle(keys)
         keys = keys[:num]
@@ -145,6 +205,13 @@ class Dataset(object):
         return Dataset(ret, copy=False)
     
     def filter_label(self, label, keep_ids=True, copy=True):
+        """
+        :param int label: The ground truth label which you want to keep.
+        :param bool keep_ids: Keep index of instances in the result. **Default:** True
+        :param bool copy: If true, returns a copy of dataset. **Default:** True
+        :return: Returns a subset of the dataset, consists of instances that ground truth label is equal to ``label``.
+        :rtype: Dataset
+        """
         ret = []
         for kw, val in self.__data.items():
             if val.y == label:
@@ -155,6 +222,13 @@ class Dataset(object):
         return Dataset(ret, copy=False)
     
     def filter_pred(self, label, keep_ids=True, copy=True):
+        """
+        :param int label: The predicted label which you want to keep.
+        :param bool keep_ids: Keep index of instances in the result. **Default:** True
+        :param bool copy: If true, returns a copy of dataset. **Default:** True
+        :return: Returns a subset of the dataset, consists of instances that predicted label is equal to ``label``.
+        :rtype: Dataset
+        """
         ret = []
         for kw, val in self.__data.items():
             if val.pred == label:
@@ -207,6 +281,15 @@ class Dataset(object):
             raise KeyError(index)
     
     def extend(self, dataset_b, copy=True, inplace=True):
+        """
+        :param Dataset dataset_b: Another dataset.
+        :param bool copy: Use the copy of ``dataset_b``. **Default:** True
+        :param bool inplace: If true, returns self, otherwise returns a new :py:class:`.Dataset` **Default:** True
+        :return: Returns a dataset of result.
+        :rtype: Dataset
+
+        This method would reset indexes of ``dataset_b``.
+        """
         assert isinstance(dataset_b, Dataset)
         ret = []
         for inst in dataset_b:
@@ -228,6 +311,15 @@ class Dataset(object):
             return Dataset(ret, copy=False)
     
     def merge(self, dataset_b, copy=True, inplace=True):
+        """
+        :param Dataset dataset_b: Another dataset.
+        :param bool copy: Use the copy of ``dataset_b``. **Default:** True
+        :param bool inplace: If true, returns self, otherwise returns a new :py:class:`.Dataset` **Default:** True
+        :return: Returns a dataset of result.
+        :rtype: Dataset
+
+        This method merges two dataset and keeps indexes of all instances. If indexes are conflicted, the instance in ``dataset_b`` would be ignored.
+        """
         assert isinstance(dataset_b, Dataset)
         ret = []
         for inst in dataset_b:
@@ -295,12 +387,25 @@ class Dataset(object):
         return Dataset(ret, copy=False)
     
     def data(self, copy=True):
+        """
+        :param bool copy: Use the copy of dataset. **Default:** True
+        :return: A list contains all instances of this dataset.
+        :rtype: list
+
+        This method returns a dict which is JSON-serializable, and can be used to initialize :py:class:`.Dataset`. See :py:meth:`.Dataset.__init__`.
+        """
         ret = []
         for kw, val in self.__data.items():
             ret.append(val.data(copy=copy))
         return ret
     
     def clear_pred(self, copy=False):
+        """
+        :param bool copy: Use the copy of dataset. If false, it would modify in place. **Default:** False
+        :rtype: Dataset
+
+        This method clears the predicted label for all instances (sets it to None), and returns the result dataset.
+        """
         ret = []
         for kw, val in self.__data.items():
             if copy:
@@ -315,6 +420,12 @@ class Dataset(object):
             return self
     
     def clear_label(self, copy=False):
+        """
+        :param bool copy: Use the copy of dataset. If false, it would modify in place. **Default:** False
+        :rtype: Dataset
+
+        This method clears the ground truth label for all instances (sets it to None), and returns the result dataset.
+        """
         ret = []
         for kw, val in self.__data.items():
             if copy:
@@ -329,9 +440,20 @@ class Dataset(object):
             return self
     
     def copy(self):
+        """
+        :return: Returns a copy of this dataset.
+        :rtype: Dataset
+        """
         return Dataset( self.data() )
     
     def reset_index(self, inplace=False):
+        """
+        :param bool inplace: If true, resets in place, otherwise works on a copy of dataset. **Default:** False
+        :return: A result dataset.
+        :rtype: Dataset
+
+        This method resets indexes of all instances to ``0 ... len(dataset) - 1``
+        """
         ret = []
         for kw, val in self.__data.items():
             if inplace:
@@ -379,6 +501,14 @@ class DataInstance(object):
         return ret
 
     def __init__(self, *args, **kwargs):
+        """
+        :param str x: Original input sentence.
+        :param int y: Ground truth label of input x. **Default:** None
+        :param int pred: Predicted label. **Default:** None
+        :param int target: Target label in attacker, leaves None for untargeted attack. **Default:** None
+        :param int id: Index of data instance in dataset, leaves None for standalone data instance. **Default:** None
+        :param dict meta: Meta data of this instance.
+        """
         for i, val in enumerate(args):
             if i >= len(self.__KEY_ORDER):
                 raise TypeError("__init__() takes %d positional argument but %d were given" % (len(self.__KEY_ORDER), len(args)))
@@ -504,6 +634,11 @@ class DataInstance(object):
         return val is not None
 
     def copy(self):
+        """
+        :rtype: DataInstance
+
+        This method returns a copy of itself.
+        """
         return DataInstance(
             x_orig=self.__x_orig,
             y_orig=self.__y_orig,
@@ -514,6 +649,11 @@ class DataInstance(object):
         )
     
     def data(self, copy=True):
+        """
+        :rtype: dict
+
+        This method returns a dict contains all information of this instance.
+        """
         ret = { "x_orig": self.__x_orig }
         if self.__y_orig is not None:
             ret["y_orig"] = self.__y_orig
