@@ -73,7 +73,7 @@ class DefaultAttackEval(AttackEval):
     
     def eval(self, dataset, total_len=None, visualize=False):
         """
-        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
         :type dataset: list or generator
         :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
         :param bool visualize: Display a visualized result for each instance and the summary.
@@ -138,9 +138,9 @@ class DefaultAttackEval(AttackEval):
 
     def eval_results(self, dataset):
         """
-        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
-        :type dataset: list or generator
-        :return: A generator which generates the result for each instance, *(x_orig, x_adv, y_adv, info)*.
+        :param dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
+        :type dataset: Dataset or generator
+        :return: A generator which generates the result for each instance, *(DataInstance, x_adv, y_adv, info)*.
         :rtype: generator
         """
         self.clear()
@@ -148,9 +148,13 @@ class DefaultAttackEval(AttackEval):
             assert isinstance(data, DataInstance)
             res = self.attacker(self.classifier, data.x, data.target)
             if res is None:
-                yield (data, None, None, self.__update(data.x, None))
+                info = self.__update(data.x, None)
             else:
-                yield (data, res[0], res[1], self.__update(data.x, res[0]))
+                info = self.__update(data.x, res[0])
+            if not info["Succeed"]:
+                yield (data, None, None, info)
+            else:
+                yield (data, res[0], res[1], info)
     
     def __levenshtein(self, sentA, sentB):
         from ..metric import levenshtein
@@ -314,6 +318,11 @@ class DefaultAttackEval(AttackEval):
         self.__result = {}
     
     def generate_adv(self, dataset, total_len=None):
+        """
+        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
+        :return: A :py:class:`.Dataset` consists of adversarial samples.
+        :rtype: Dataset
+        """
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
 
