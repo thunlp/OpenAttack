@@ -1,7 +1,7 @@
 from ..attack_eval import AttackEval
 import json, sys, time
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer, check_parameters, DataInstance
+from ..utils import visualizer, result_visualizer, check_parameters, DataInstance, Dataset
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
 
@@ -82,7 +82,6 @@ class DefaultAttackEval(AttackEval):
 
         In this method, ``eval_results`` is called and gets the result for each instance iteratively.
         """
-        self.clear()
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
         
@@ -92,7 +91,8 @@ class DefaultAttackEval(AttackEval):
             return tqdm.write(x, end="")
 
         time_start = time.time()
-        for x_orig, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+            x_orig = data.x
             counter += 1
             if visualize:
                 try:
@@ -148,9 +148,9 @@ class DefaultAttackEval(AttackEval):
             assert isinstance(data, DataInstance)
             res = self.attacker(self.classifier, data.x, data.target)
             if res is None:
-                yield (data.x, None, None, self.__update(data.x, None))
+                yield (data, None, None, self.__update(data.x, None))
             else:
-                yield (data.x, res[0], res[1], self.__update(data.x, res[0]))
+                yield (data, res[0], res[1], self.__update(data.x, res[0]))
     
     def __levenshtein(self, sentA, sentB):
         from ..metric import levenshtein
@@ -312,3 +312,23 @@ class DefaultAttackEval(AttackEval):
         Clear all the accumulated results.
         """
         self.__result = {}
+    
+    def generate_adv(self, dataset, total_len=None):
+        if hasattr(dataset, "__len__"):
+            total_len = len(dataset)
+
+        ret = []
+        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+            if x_adv is not None:
+                ret.append(DataInstance (
+                    x=x_adv,
+                    y=data.y,
+                    pred=y_adv,
+                    meta={
+                        "original": data.x,
+                        "info": info
+                    }
+                ))
+        return Dataset(ret)
+            
+            

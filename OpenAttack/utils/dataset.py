@@ -460,9 +460,9 @@ class DataInstance(object):
         if self.__id is not None:
             ret += " index=%d" % self.__id
         if len(self.__x_orig) > 20:
-            ret += " x='%s...'" % self.__x_orig[:18]
+            ret += " x=%s..." % self.__x_orig[:18]
         else:
-            ret += " x='%s'" % self.__x_orig
+            ret += " x=%s" % self.__x_orig
 
         if self.__y_orig is not None:
             ret += " y=%d" % self.__y_orig
@@ -480,7 +480,7 @@ class DataInstance(object):
         else:
             ret += "\n"
 
-        ret += "x:\t'%s'\n" % self.__x_orig
+        ret += "x:\t%s\n" % self.__x_orig
         if self.__y_orig is not None:
             ret += "y:\t%d\n" % self.__y_orig
         else:

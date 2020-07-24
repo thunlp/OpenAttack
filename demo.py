@@ -31,9 +31,9 @@ def main():
     print("Start attack")
     options = {
         "success_rate": True,
-        "fluency": True,
-        "mistake": True,
-        "semantic": True,
+        "fluency": False,
+        "mistake": False,
+        "semantic": False,
         "levenstein": True,
         "word_distance": False,
         "modification_rate": True,
