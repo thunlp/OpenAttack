@@ -78,7 +78,6 @@ class Dataset(object):
     
     def eval(self, clsf, batch_size=1, copy=True, ignore_known=True):
         ret = []
-        batch = []
         def update(batch):
             batch_x = [ inst.x for inst in batch ]
             res = clsf.get_pred(batch_x)
@@ -87,8 +86,9 @@ class Dataset(object):
                     inst = inst.copy()
                     ret.append(inst)
                 inst.pred = res[i]
-            batch = []
             return
+        
+        batch = []
         for kw, val in self.__data.items():
             if ignore_known and val.pred is not None:
                 if copy:
@@ -98,8 +98,10 @@ class Dataset(object):
             if len(batch) < batch_size:
                 continue
             update(batch)
+            batch = []
         if len(batch) > 0:
             update(batch)
+            batch = []
         if copy:
             return Dataset(ret, copy=False)
         else:
