@@ -1,5 +1,5 @@
 """
-:type: tuple, three lists, `(train, valid, test)`.
+:type: a tuple of three :py:class:`.Dataset` s, `(train, valid, test)`.
 :Size: 1.116MB
 
 SST dataset which is used to train victim models.

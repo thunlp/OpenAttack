@@ -278,7 +278,7 @@ class DefaultAttackEval(AttackEval):
         
     def get_result(self):
         """
-        :return: The results which is accumulated previously.
+        :return: The results which were accumulated previously.
         :rtype: dict
 
         This method summarizes and returns to previous accumulated results.

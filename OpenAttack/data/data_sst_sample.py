@@ -1,5 +1,5 @@
 """
-:type: list, a list of sentence
+:type: Dataset
 :Size: 112.519KB
 
 A subset of :py:data:`.Dataset.SST`, used to evaluate attackers and classifiers.
