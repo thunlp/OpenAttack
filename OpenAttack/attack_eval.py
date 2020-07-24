@@ -16,7 +16,7 @@ class AttackEval(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def eval(self, dataset):
         """
-        :param list dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :param list dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`
         :return: A dict contains the results.
         :rtype: dict
         """
@@ -25,7 +25,7 @@ class AttackEval(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def eval_results(self, dataset):
         """
-        :param list dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :param list dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
         :return: A `generator` generates result for every instance in dataset.
         :rtype: generator
         """
