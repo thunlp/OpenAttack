@@ -79,7 +79,7 @@ class Dataset(object):
     def eval(self, clsf, batch_size=1, copy=True, ignore_known=True):
         ret = []
         batch = []
-        def update():
+        def update(batch):
             batch_x = [ inst.x for inst in batch ]
             res = clsf.get_pred(batch_x)
             for i, inst in enumerate(batch):
@@ -97,9 +97,9 @@ class Dataset(object):
             batch.append(val)
             if len(batch) < batch_size:
                 continue
-            update()
+            update(batch)
         if len(batch) > 0:
-            update()
+            update(batch)
         if copy:
             return Dataset(ret, copy=False)
         else:
