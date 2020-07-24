@@ -448,10 +448,11 @@ class DataInstance(object):
             super().__delattr__(name)
         elif name in self.__meta:
             del self.__meta[name]
-        raise AttributeError(
-            "'%s' object has no attribute '%s'\nmeta: %s"
-            % (self.__class__.__name__, name, self.__meta.__repr__())
-        )
+        else:
+            raise AttributeError(
+                "'%s' object has no attribute '%s'\nmeta: %s"
+                % (self.__class__.__name__, name, self.__meta.__repr__())
+            )
 
     def __repr__(self):
         ret = "<%s" % self.__class__.__name__
