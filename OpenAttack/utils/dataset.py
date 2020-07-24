@@ -425,6 +425,7 @@ class DataInstance(object):
         elif name in self.__KEY_MAP["target"]:
             self.__target = value
         elif name in self.__KEY_MAP["meta"]:
+            assert isinstance(value, dict)
             self.__meta = value
         elif name.startswith("_"):
             super().__setattr__(name, value)

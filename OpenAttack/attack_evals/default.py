@@ -1,7 +1,7 @@
 from ..attack_eval import AttackEval
 import json, sys, time
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer, check_parameters
+from ..utils import visualizer, result_visualizer, check_parameters, DataInstance
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
 
@@ -83,7 +83,7 @@ class DefaultAttackEval(AttackEval):
         In this method, ``eval_results`` is called and gets the result for each instance iteratively.
         """
         self.clear()
-        if isinstance(dataset, list):
+        if hasattr(dataset, "__len__"):
             total_len = len(dataset)
         
         counter = 0
@@ -144,19 +144,13 @@ class DefaultAttackEval(AttackEval):
         :rtype: generator
         """
         self.clear()
-        for sent in dataset:
-            if isinstance(sent, tuple):
-                res = self.attacker(self.classifier, sent[0], sent[1])
-                if res is None:
-                    yield (sent[0], None, None, self.__update(sent[0], None) )
-                else:
-                    yield (sent[0], res[0], res[1], self.__update(sent[0], res[0]))
+        for data in dataset:
+            assert isinstance(data, DataInstance)
+            res = self.attacker(self.classifier, data.x, data.target)
+            if res is None:
+                yield (data.x, None, None, self.__update(data.x, None))
             else:
-                res = self.attacker(self.classifier, sent)
-                if res is None:
-                    yield (sent, None, None, self.__update(sent, None) )
-                else:
-                    yield (sent, res[0], res[1], self.__update(sent, res[0]))
+                yield (data.x, res[0], res[1], self.__update(data.x, res[0]))
     
     def __levenshtein(self, sentA, sentB):
         from ..metric import levenshtein
