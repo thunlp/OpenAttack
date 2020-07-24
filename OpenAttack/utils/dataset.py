@@ -163,7 +163,6 @@ class Dataset(object):
         return Dataset(ret, copy=False)
 
     def __getitem__(self, index):
-        print("##### %s" % index)
         if isinstance(index, int) and not isinstance(index, bool):
             if index < 0:
                 index += self.__len__()
@@ -179,9 +178,9 @@ class Dataset(object):
             if stop < 0:
                 stop += self.__len__()
             if st < stop and step < 0:
-                return []
+                return Dataset()
             if st > stop:
-                return []
+                return Dataset()
 
             if step > 0:
                 ret = []
@@ -425,8 +424,8 @@ class DataInstance(object):
         ret = "<%s" % self.__class__.__name__
         if self.__id is not None:
             ret += " index=%d" % self.__id
-        if len(self.__x_orig) > 10:
-            ret += " x='%s...'" % self.__x_orig[:8]
+        if len(self.__x_orig) > 20:
+            ret += " x='%s...'" % self.__x_orig[:18]
         else:
             ret += " x='%s'" % self.__x_orig
 
@@ -434,6 +433,8 @@ class DataInstance(object):
             ret += " y=%d" % self.__y_orig
         if self.__pred is not None:
             ret += " pred=%d" % self.__pred
+        if self.__meta is not None:
+            ret += " meta=%s" % self.__meta.__repr__() 
         ret += ">"
         return ret
 
