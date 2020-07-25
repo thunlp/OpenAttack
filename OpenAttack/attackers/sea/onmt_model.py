@@ -5,7 +5,6 @@ import numpy as np
 import re
 import sys
 import torchtext
-from ...utils import detokenizer
 from collections import Counter, defaultdict
 
 
@@ -143,7 +142,7 @@ class OnmtModel(object):
                     this_mappings.append(mapping)
 
             mappings.append(this_mappings)
-        out.extend([[detokenizer(x) for x in y] for y in predBatch])
+        out.extend([[" ".join(x) for x in y] for y in predBatch])
         scores.extend([x[:self.translator.opt.n_best] for x in predScore])
         self.translator.opt.beam_size = prev_beam_size
         if return_from_mapping:

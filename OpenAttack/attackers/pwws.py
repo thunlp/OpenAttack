@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import WordNetSubstitute
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException
 
@@ -61,13 +61,13 @@ class PWWSAttacker(Attacker):
         for i in range(len(H)):
             idx, wd, _ = H[i]
             ret_sent[idx] = wd
-            pred = clsf.get_pred([detokenizer(ret_sent)])[0]
+            pred = clsf.get_pred([self.config["processor"].detokenizer(ret_sent)])[0]
             if targeted:
                 if pred == target:
-                    return (detokenizer(ret_sent), pred)
+                    return (self.config["processor"].detokenizer(ret_sent), pred)
             else:
                 if pred != target:
-                    return (detokenizer(ret_sent), pred)
+                    return (self.config["processor"].detokenizer(ret_sent), pred)
         return None
 
 
@@ -78,8 +78,8 @@ class PWWSAttacker(Attacker):
             left = sent[:i]
             right = sent[i + 1:]
             x_i_hat = left + [self.config["token_unk"]] + right
-            x_hat_raw.append(detokenizer(x_i_hat))
-        x_hat_raw.append(detokenizer(sent))
+            x_hat_raw.append(self.config["processor"].detokenizer(x_i_hat))
+        x_hat_raw.append(self.config["processor"].detokenizer(sent))
         res = clsf.get_prob(x_hat_raw)[:, target]
         if not targeted:
             res = res[-1] - res[:-1]
@@ -114,8 +114,8 @@ class PWWSAttacker(Attacker):
         sents = []
         for rw in rep_words:
             new_sent = sent[:idx] + [rw] + sent[idx + 1:]
-            sents.append(detokenizer(new_sent))
-        sents.append(detokenizer(sent))
+            sents.append(self.config["processor"].detokenizer(new_sent))
+        sents.append(self.config["processor"].detokenizer(sent))
         res = clsf.get_prob(sents)[:, target]
         prob_orig = res[-1]
         res = res[:-1]
