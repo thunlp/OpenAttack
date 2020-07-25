@@ -59,13 +59,13 @@ class DeepWordBugAttacker(Attacker):
                 j += 1
             t += 1
 
-        output2 = clsf.get_pred([self.config["processor"].self.config["processor"].detokenizer(advinputs)])[0]
+        output2 = clsf.get_pred([self.config["processor"].detokenizer(advinputs)])[0]
         if target is None:
             if output2 != y_orig:
                 return self.config["processor"].detokenizer(advinputs), output2
         else:
             if int(output2) is int(target):
-                return self.config["processor"].self.config["processor"].detokenizer(advinputs), output2
+                return self.config["processor"].detokenizer(advinputs), output2
         return None
 
     def scorefunc(self, type, clsf, inputs, y_orig):
