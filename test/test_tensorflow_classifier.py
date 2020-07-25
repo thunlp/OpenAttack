@@ -49,7 +49,8 @@ class TestTensorflow(unittest.TestCase):
         self.assertEqual(len(ret.shape), 2)
         self.assertEqual(ret.shape[0], len(test_str))
         
-        ret = classifier.get_grad(test_str, [1, 1])
+        x_batch = [ list(map(lambda x:x[0], processor.get_tokens(sent))) for sent in test_str ]
+        ret = classifier.get_grad(x_batch, [1, 1])
         self.assertIsInstance(ret, tuple)
         self.assertEqual(len(ret), 2)
         self.assertIsInstance(ret[0], np.ndarray)
