@@ -38,6 +38,7 @@ class TestTensorflow(unittest.TestCase):
             vocab[w] = num
             num += 1
         classifier =  OpenAttack.classifiers.TensorflowClassifier(net, word2id=vocab, max_len=26, embedding=embedding_matrix, token_pad=0)
+        processor = OpenAttack.text_processors.DefaultTextProcessor()
         test_str = ["i like apples", "i like apples"]
 
         ret = classifier.get_pred(test_str)
