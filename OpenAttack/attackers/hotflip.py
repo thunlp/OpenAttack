@@ -1,8 +1,8 @@
 import numpy as np
-from ..text_processors import DefaultTextProcessor
+from ..text_processors import DefaultTextProcessor, detokenizer
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..attacker import Attacker
 
 

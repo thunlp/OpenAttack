@@ -85,7 +85,7 @@ class PytorchClassifier(ClassifierBase):
             raise ClassifierNotSupportException("gradient")
 
         import torch
-        input_, seq_len = self.preprocess(input_)
+        input_, seq_len = self.preprocess_token(input_)
         if isinstance(input_, np.ndarray):
             input_ = torch.from_numpy(input_).to(self.config["device"])
             input_.requires_grad_(True)

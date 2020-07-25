@@ -5,7 +5,7 @@ import numpy as np
 import re
 import sys
 import torchtext
-from ...utils import detokenizer
+from ...text_processors import detokenizer
 from collections import Counter, defaultdict
 
 

@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from ..attacker import Attacker
 from ..data_manager import DataManager
-from ..utils import detokenizer
+from ..text_processors import detokenizer
 
 
 def get_min(indices_adv1, d):

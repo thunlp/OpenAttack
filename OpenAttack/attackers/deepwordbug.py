@@ -1,5 +1,5 @@
 from ..attacker import Attacker
-from ..utils import detokenizer
+from ..text_processors import detokenizer
 import numpy as np
 
 

@@ -7,7 +7,7 @@ import collections
 import copy
 import sys
 from itertools import zip_longest as zip_longest
-from ...utils import detokenizer
+from ...text_processors import detokenizer
 unicode = lambda x: x
 
 

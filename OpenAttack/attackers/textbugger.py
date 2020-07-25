@@ -1,8 +1,7 @@
 from ..attacker import Attacker
-from ..text_processors import DefaultTextProcessor
+from ..text_processors import DefaultTextProcessor, detokenizer
 from ..data_manager import DataManager
 from ..substitutes import CounterFittedSubstitute
-from ..utils import detokenizer
 import random
 import numpy as np
 # from spacy.lang.en import English

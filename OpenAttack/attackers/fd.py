@@ -1,7 +1,7 @@
 import numpy as np
-from ..text_processors import DefaultTextProcessor
+from ..text_processors import DefaultTextProcessor, detokenizer
 from ..substitutes import CounterFittedSubstitute
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..exceptions import NoEmbeddingException, WordNotInDictionaryException, TokensNotAligned
 from ..attacker import Attacker
 

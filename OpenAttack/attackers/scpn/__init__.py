@@ -1,8 +1,8 @@
 import os
 import pickle
 import numpy as np
-from ...utils import check_parameters, detokenizer
-from ...text_processors import DefaultTextProcessor
+from ...utils import check_parameters
+from ...text_processors import DefaultTextProcessor, detokenizer
 from ...attacker import Attacker
 from ...data_manager import DataManager
 
