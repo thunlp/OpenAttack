@@ -51,7 +51,7 @@ class BertModel():
             attentions = np.array([
                 [1] * (len(sen) + 2) + [0] * (self.max_len - 2 - len(sen))
                 for sen in sen_list
-            ])
+            ], dtype='int64')
             sen_list = [
                 sen + [self.word2id["[PAD]"]] * (self.max_len - 2 - len(sen))
                     for sen in sen_list
