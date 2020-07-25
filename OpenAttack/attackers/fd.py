@@ -77,8 +77,7 @@ class FDAttacker(Attacker):
                 if len(reps) > 0:
                     break
             
-            sent = list(map(lambda x: x[0], self.processor.get_tokens( self.config["processor"].detokenizer(sent) )))
-            prob, grad = clsf.get_grad([self.config["processor"].detokenizer(sent)], [target])
+            prob, grad = clsf.get_grad([sent], [target])
             grad = grad[0]
             prob = prob[0]
             if grad.shape[0] != len(sent) or grad.shape[1] != self.embedding.shape[1]:
