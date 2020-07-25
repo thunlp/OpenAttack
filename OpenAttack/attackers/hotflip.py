@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..attacker import Attacker
 
 
@@ -88,7 +88,7 @@ class HotFlipAttacker(Attacker):
                 continue
             neighbours = self.get_neighbours(word, self.config["processor"].get_tokens(word)[0][1], self.config["top_n"])
             for neighbour in neighbours:
-                x_new = detokenizer(self.do_replace(x_orig, neighbour, counter))
+                x_new = self.config["processor"].detokenizer(self.do_replace(x_orig, neighbour, counter))
                 pred_target = clsf.get_pred(x_new)[0]
                 if targeted and pred_target == target:
                     return (x_new, target)

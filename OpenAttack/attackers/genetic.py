@@ -2,7 +2,7 @@ import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..attacker import Attacker
 
 DEFAULT_SKIP_WORDS = set(
@@ -131,12 +131,12 @@ class GeneticAttacker(Attacker):
             if targeted:
                 top_attack = np.argmax(pop_preds[:, target])
                 if np.argmax(pop_preds[top_attack, :]) == target:
-                    return detokenizer(pop[top_attack]), target
+                    return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 top_attack = np.argmax(-pop_preds[:, target])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
-                        detokenizer(pop[top_attack]),
+                        self.config["processor"].detokenizer(pop[top_attack]),
                         np.argmax(pop_preds[top_attack, :]),
                     )
 
@@ -220,7 +220,7 @@ class GeneticAttacker(Attacker):
             return x_cur
 
     def make_batch(self, sents):
-        return [detokenizer(sent) for sent in sents]
+        return [self.config["processor"].detokenizer(sent) for sent in sents]
 
     def perturb(
         self, clsf, x_cur, x_orig, neighbours, w_select_probs, target, targeted

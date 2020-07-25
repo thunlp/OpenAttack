@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..exceptions import NoEmbeddingException, WordNotInDictionaryException, TokensNotAligned
 from ..attacker import Attacker
 
@@ -55,13 +55,13 @@ class FDAttacker(Attacker):
         sent = list(map(lambda x: x[0], self.processor.get_tokens(x_orig)))
         
         for i in range(self.config["max_iter"]):
-            pred = clsf.get_pred([ detokenizer(sent) ])[0]
+            pred = clsf.get_pred([ self.config["processor"].detokenizer(sent) ])[0]
             if targeted:
                 if pred == target:
-                    return (detokenizer(sent), pred)
+                    return (self.config["processor"].detokenizer(sent), pred)
             else:
                 if pred != target:
-                    return (detokenizer(sent), pred)
+                    return (self.config["processor"].detokenizer(sent), pred)
             
             iter_cnt = 0
             while True:
@@ -77,8 +77,8 @@ class FDAttacker(Attacker):
                 if len(reps) > 0:
                     break
             
-            sent = list(map(lambda x: x[0], self.processor.get_tokens( detokenizer(sent) )))
-            prob, grad = clsf.get_grad([detokenizer(sent)], [target])
+            sent = list(map(lambda x: x[0], self.processor.get_tokens( self.config["processor"].detokenizer(sent) )))
+            prob, grad = clsf.get_grad([self.config["processor"].detokenizer(sent)], [target])
             grad = grad[0]
             prob = prob[0]
             if grad.shape[0] != len(sent) or grad.shape[1] != self.embedding.shape[1]:

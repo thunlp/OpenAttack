@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from ..attacker import Attacker
 from ..data_manager import DataManager
-from ..utils import detokenizer
+from ..text_processors import DefaultTextProcessor
 
 
 def get_min(indices_adv1, d):
@@ -14,7 +14,7 @@ def get_min(indices_adv1, d):
 
 DEFAULT_CONFIG = {
     "sst": False,
-    "detokenizer": detokenizer
+    "processor": DefaultTextProcessor(),
 }
 
 
@@ -22,7 +22,7 @@ class GANAttacker(Attacker):
     def __init__(self, **kwargs):
         """
         :param bool sst: Use model trained on sst-2 dataset or snli. True: use sst-2 **Default:** False
-        :param detokenizer: Word list detokenizer used in this attacker. **Default:** :any:`utils.detokenizer`
+        :param processor: text processor used in this attacker. **Default:** :any:`text_processors.DefaultTextProcessor`
 
         :Package Requirements:
             * torch
@@ -46,7 +46,6 @@ class GANAttacker(Attacker):
         self.inverter = self.inverter.cpu()
         self.autoencoder.eval()
         self.autoencoder = self.autoencoder.cpu()
-        self.detokenizer = self.config["detokenizer"]
         self.right = 0.05  # ####
         self.nsamples = 10
         self.autoencoder.gpu = False
@@ -117,8 +116,8 @@ class GANAttacker(Attacker):
                     words = words[:words.index("<eos>")]
                 # adv_prob.append(clsf.get_pred([" ".join(words)])[0])
                 # sentences.append(" ".join(words))
-                adv_prob.append(clsf.get_pred([self.detokenizer(words)])[0])
-                sentences.append(self.detokenizer(words))
+                adv_prob.append(clsf.get_pred([self.config["processor"].detokenizer(words)])[0])
+                sentences.append(self.config["processor"].detokenizer(words))
             for i in range(self.nsamples):
                 if target is None:
                     if adv_prob[i] != y_orig:
@@ -201,7 +200,7 @@ class GANAttacker(Attacker):
                 if words[i] is "<oov>":
                     words[i] = ""
             # sent = " ".join(words)
-            sent = self.detokenizer(words)
+            sent = self.config["processor"].detokenizer(words)
             pred = clsf.get_pred([sent])[0]
             if tt is None:
                 if pred != y_orig:

@@ -1,13 +1,14 @@
 from ..attacker import Attacker
-from ..utils import detokenizer
 import numpy as np
+from ..text_processors import DefaultTextProcessor
 
 
 DEFAULT_CONFIG = {
     "unk": "unk",  # unk token
     "scoring": "replaceone",  # replaceone, temporal, tail, combined
     "transformer": "homoglyph",  # homoglyph, swap
-    "power": 5
+    "power": 5,
+    "processor": DefaultTextProcessor(),
 }
 homos = {
          '-': '˗', '9': '৭', '8': 'Ȣ', '7': '𝟕', '6': 'б', '5': 'Ƽ', '4': 'Ꮞ', '3': 'Ʒ', '2': 'ᒿ', '1': 'l', '0': 'O',
@@ -58,13 +59,13 @@ class DeepWordBugAttacker(Attacker):
                 j += 1
             t += 1
 
-        output2 = clsf.get_pred([detokenizer(advinputs)])[0]
+        output2 = clsf.get_pred([self.config["processor"].detokenizer(advinputs)])[0]
         if target is None:
             if output2 != y_orig:
-                return detokenizer(advinputs), output2
+                return self.config["processor"].detokenizer(advinputs), output2
         else:
             if int(output2) is int(target):
-                return detokenizer(advinputs), output2
+                return self.config["processor"].detokenizer(advinputs), output2
         return None
 
     def scorefunc(self, type, clsf, inputs, y_orig):
@@ -113,10 +114,10 @@ class DeepWordBugAttacker(Attacker):
         for i in range(len(inputs)):
             tempinputs = inputs[: i + 1]
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
+                tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
             # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-            print(detokenizer(tempinputs), losses1[i])
+            print(self.config["processor"].detokenizer(tempinputs), losses1[i])
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
@@ -130,7 +131,7 @@ class DeepWordBugAttacker(Attacker):
         for i in range(len(inputs)):
             tempinputs = inputs[i:]
             with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([detokenizer(tempinputs)]))
+                tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
             # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
         for i in range(1, len(inputs)):
