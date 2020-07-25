@@ -180,6 +180,8 @@ class DefaultTextProcessor(TextProcessor):
     def get_parser(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordParser`
+
+        This method uses Stanford LexParser to generate a lexical tree.
         """
         if self.__parser is None:
             self.__parser = DataManager.load("TProcess.StanfordParser")
