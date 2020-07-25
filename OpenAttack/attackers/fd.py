@@ -9,7 +9,7 @@ DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
     "substitute": None,
     "embedding": None,
-    "wordid": None,
+    "word2id": None,
     "threshold": 0.5,
     "token_unk": "<UNK>",
     "max_iter": 100
@@ -21,7 +21,7 @@ class FDAttacker(Attacker):
         """
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
         :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
-        :param dict wordid: A dict that maps tokens to ids.
+        :param dict word2id: A dict that maps tokens to ids.
         :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
         :param token_unk: The word_id or the token for out-of-vocabulary words. **Default:** ``"<UNK>"``.
         :type token_unk: int or str
@@ -37,12 +37,12 @@ class FDAttacker(Attacker):
         self.config.update(kwargs)
         if self.config["substitute"] is None:
             self.config["substitute"] = CounterFittedSubstitute()
-        if ((self.config["embedding"] is None) or (self.config["wordid"] is None)):
+        if ((self.config["embedding"] is None) or (self.config["word2id"] is None)):
             raise NoEmbeddingException()
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
         self.processor = self.config["processor"]
         self.embedding = self.config["embedding"]
-        self.wordid = self.config["wordid"]
+        self.wordid = self.config["word2id"]
         self.substitute = self.config["substitute"]
     
     def __call__(self, clsf, x_orig, target=None):
