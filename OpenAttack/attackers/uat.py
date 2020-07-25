@@ -1,7 +1,7 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm
@@ -41,7 +41,7 @@ class UATAttacker(Attacker):
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
             targeted = True
-        trigger_sent = detokenizer(self.config["triggers"]) + " " + x_orig
+        trigger_sent = self.config["processor"].detokenizer(self.config["triggers"]) + " " + x_orig
         pred = clsf.get_pred([trigger_sent])[0]
         if pred == target:
             if targeted:
@@ -98,7 +98,7 @@ class UATAttacker(Attacker):
                     nw_beams = []
                     for trigger, _ in beams:
                         while True:
-                            trigger_sent =  detokenizer(trigger) + " "
+                            trigger_sent =  self.config["processor"].detokenizer(trigger) + " "
                             retoken = list(map(lambda x:x[0], config["processor"].get_tokens(trigger_sent))) 
                             if len(retoken) == config["trigger_len"]:
                                 break
@@ -113,7 +113,7 @@ class UATAttacker(Attacker):
 
                         for cw in candidates_words:
                             tt = trigger[:i] + [cw] + trigger[i + 1:]
-                            trigger_sent = detokenizer(tt) + " "
+                            trigger_sent = self.config["processor"].detokenizer(tt) + " "
                             xt = list(map(lambda x: trigger_sent + x, x))
                             pred = clsf.get_prob(xt)
                             loss = pred[ (list(range(len(y))), list(y) ) ].sum()
