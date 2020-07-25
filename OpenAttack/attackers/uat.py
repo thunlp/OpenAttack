@@ -7,7 +7,8 @@ from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm
 
 DEFAULT_CONFIG = {
-    "triggers": ["the", "the", "the"]
+    "triggers": ["the", "the", "the"],
+    "processor": DefaultTextProcessor()
 }
 
 TRAIN_CONFIG = {
