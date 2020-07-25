@@ -53,7 +53,8 @@ class BertModel():
                 for sen in sen_list
             ], dtype='int64')
             sen_list = [
-                sen + [self.word2id["[PAD]"]] * (self.max_len - 2 - len(sen))
+                [self.word2id[token] if token in self.word2id else self.word2id["[UNK]"] for token in sen]
+                 + [self.word2id["[PAD]"]] * (self.max_len - 2 - len(sen))
                     for sen in sen_list
             ]
             tokeinzed_sen = np.array([
