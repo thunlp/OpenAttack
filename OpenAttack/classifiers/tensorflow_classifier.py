@@ -91,7 +91,7 @@ class TensorflowClassifier(ClassifierBase):
             raise ClassifierNotSupportException("gradient")
 
         import tensorflow as tf
-        input_, seq_len = self.preprocess(input_)
+        input_, seq_len = self.preprocess_token(input_)
         if isinstance(input_, np.ndarray):
             with self.config["device"]:
                 input_ = tf.constant( input_ )
