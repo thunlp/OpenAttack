@@ -99,7 +99,7 @@ class BertClassifier(Classifier):
         return self
     
     def get_prob(self, input_):
-        return self.__model.predict(input_, [0] * len(input_))
+        return self.__model.predict(input_, [0] * len(input_))[0]
     
     def get_grad(self, input_, labels):
         return self.__model.predict(input_, labels, tokenize=False)
