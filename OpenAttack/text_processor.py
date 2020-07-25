@@ -62,3 +62,13 @@ class TextProcessor(metaclass=abc.ABCMeta):
         :rtype: list
         """
         pass
+
+    @abc.abstractmethod
+    def detokenizer(self, tokens):
+        """
+        :param list tokens: A list of tokens
+        :return: A detokenized sentence.
+        :rtype: str
+
+        """
+        pass

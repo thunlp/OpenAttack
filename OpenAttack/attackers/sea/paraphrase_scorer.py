@@ -10,7 +10,6 @@ import editdistance
 import sys
 import itertools
 from itertools import zip_longest as zip_longest
-from ...utils import detokenizer
 
 DEFAULT_TO_PATHS = ['data/TranslationModels/english_french_model_acc_71.05_ppl_3.71_e13.pt', 'data/TranslationModels/english_portuguese_model_acc_70.75_ppl_4.32_e13.pt']
 DEFAULT_BACK_PATHS = ['data/TranslationModels/french_english_model_acc_68.51_ppl_4.43_e13.pt', 'data/TranslationModels/portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
@@ -321,7 +320,7 @@ class ParaphraseScorer(object):
                     words = [self.global_itos[x] if x != onmt.IO.UNK
                              else prev_unks[i][k]
                              for k, x in enumerate(prev[i][1:], start=1)]
-                    new = detokenizer(words)
+                    new = " ".join(words)
                     if new not in output:
                         output[new] = new_scores[i, j]
                     else:

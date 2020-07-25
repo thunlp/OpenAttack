@@ -3,7 +3,7 @@ import os
 from ..text_processors import DefaultTextProcessor
 from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
-from ..utils import check_parameters, detokenizer
+from ..utils import check_parameters
 from ..metric import usencoder
 from ..attacker import Attacker
 
@@ -105,7 +105,7 @@ class TextFoolerAttacker(Attacker):
         # get importance score
 
         leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
-        leave_1_probs = clsf.get_prob([" ".join(sentence) for sentence in leave_1_texts])
+        leave_1_probs = clsf.get_prob([self.config["processor"].detokenizer(sentence) for sentence in leave_1_texts])
         leave_1_probs_argmax = np.argmax(leave_1_probs, axis=-1)
         #import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
         #            leave_1_probs.max(axis=-1)[0] - orig_probs[:, leave_1_probs_argmax])
@@ -145,7 +145,7 @@ class TextFoolerAttacker(Attacker):
         text_cache = text_prime[:]
         for idx, synonyms in synonyms_all:
             new_texts = [text_prime[:idx] + [synonym] + text_prime[min(idx + 1, len_text):] for synonym in synonyms]
-            new_probs = clsf.get_prob([" ".join(sentence) for sentence in new_texts])
+            new_probs = clsf.get_prob([self.config["processor"].detokenizer(sentence) for sentence in new_texts])
 
             # compute semantic similarity
             if idx >= half_sim_score_window and len_text - idx - 1 >= half_sim_score_window:
@@ -163,23 +163,23 @@ class TextFoolerAttacker(Attacker):
 
             #semantic_sims = self.sim_predictor([' '.join(text_cache[text_range_min:text_range_max]) for i in range(len(new_texts))],
             #                           list(map(lambda x: ' '.join(x[text_range_min:text_range_max]), new_texts)))[0]
-            texts = [" ".join(x[text_range_min:text_range_max]) for x in new_texts]
-            semantic_sims = np.array([self.sim_predictor(" ".join(text_cache[text_range_min:text_range_max]), x) for x in texts])
+            texts = [self.config["processor"].detokenizer(x[text_range_min:text_range_max]) for x in new_texts]
+            semantic_sims = np.array([self.sim_predictor(self.config["processor"].detokenizer(text_cache[text_range_min:text_range_max]), x) for x in texts])
             if len(new_probs.shape) < 2:
                 new_probs = new_probs.unsqueeze(0)
             new_probs_mask = orig_label != np.argmax(new_probs, axis=-1)
             # prevent bad synonyms
             new_probs_mask *= (semantic_sims >= self.config["sim_score_threshold"])
             # prevent incompatible pos
-            synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(" ".join(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
-                               if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(" ".join(new_text))))[idx] for new_text in new_texts]
+            synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(self.config["processor"].detokenizer(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
+                               if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(self.config["processor"].detokenizer(new_text))))[idx] for new_text in new_texts]
 
             pos_mask = np.array(self.pos_filter(pos_ls[idx], synonyms_pos_ls))
             new_probs_mask *= pos_mask
 
             if np.sum(new_probs_mask) > 0:
                 text_prime[idx] = synonyms[(new_probs_mask * semantic_sims).argmax()]
-                x_adv = " ".join(text_prime)
+                x_adv = self.config["processor"].detokenizer(text_prime)
                 pred = clsf.get_pred([x_adv])
                 if not targeted:
                     return (x_adv, pred[0])
