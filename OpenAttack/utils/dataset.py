@@ -80,6 +80,27 @@ class Dataset(object):
             return True
         else:
             return False
+        
+    def shuffle(self, inplace=False, copy=True):
+        """
+        :param bool inplace: If true, randomly shuffle dataset and returns itself.
+        :param bool copy: If true, works on the copy of this dataset. This option would be ignored if ``inplace=True``.
+        :rtype: Dataset
+
+        This method would randomly shuffle dataset and reset indexes.
+        """
+        keys = list(self.__data.keys())
+        random.shuffle(keys)
+        if inplace:
+            nw_dict = {}
+            for idx, old_id in enumerate(keys):
+                nw_dict[idx] = self.__data[old_id]
+                nw_dict[idx].id = idx
+            self.__data = nw_dict
+            return self
+        else:
+            ret = [ self.__data[idx].copy() if copy else self.__data[idx] for idx in keys]
+            return Dataset(ret, copy=False)
     
     def iter(self, shuffle=False, copy=True):
         """
