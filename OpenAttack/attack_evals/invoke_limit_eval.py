@@ -1,46 +1,72 @@
-from . import DefaultAttackEval
-from .. import Classifier
+from .default import DefaultAttackEval
+from ..classifier import Classifier
+from ..attacker import Attacker
 import json
 from tqdm import tqdm
 
 class InvokeLimitException(Exception):
     pass
-class InvokeLimitWrapper(Classifier):
+
+class InvokeLimitClassifierWrapper(Classifier):
     def __init__(self, clsf, invoke_limit):
         self.invoke_limit = invoke_limit
         self.clsf = clsf
-        self.clear()
-    
+        self.brk = False
+
     def clear(self):
         self.invoke = 0
+    
+    def test(self, limit=True):
+        self.brk = limit
     
     def get_invoke(self):
         return self.invoke
     
     def get_pred(self, input_):
-        if self.invoke >= self.invoke_limit:
+        if self.brk and self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
         return self.clsf.get_pred(input_)
     
     def get_prob(self, input_):
-        if self.invoke >= self.invoke_limit:
+        if self.brk and self.invoke >= self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
         return self.clsf.get_prob(input_)
     
     def get_grad(self, input_, labels):
-        if self.invoke > self.invoke_limit:
+        if self.brk and self.invoke > self.invoke_limit:
             raise InvokeLimitException()
         self.invoke += len(input_)
         return self.clsf.get_grad(input_, labels)
+
+class InvokeLimitAttackerWrapper(Attacker):
+    def __init__(self, attacker, clsf):
+        self.__attacker = attacker
+        self.__clsf = clsf
+        self.__exceed = False
+    
+    def __call__(self, *args, **kwargs):
+        self.__clsf.test()
+        self.__clsf.clear()
+        self.__exceed = False
+        try:
+            ret = self.__attacker(*args, **kwargs)
+        except InvokeLimitException:
+            ret = None
+            self.__exceed = True
+        self.__clsf.test(limit=False)
+        return ret
+    
+    def exceed(self):
+        return self.__exceed
 
 class InvokeLimitedAttackEval(DefaultAttackEval):
     """
     Evaluate attackers and classifiers with invoke limitation.
     """
     def __init__(self, attacker, classifier, invoke_limit=100,
-                    average_invoke=False, progress_bar=True, **kwargs):
+                    average_invoke=False, **kwargs):
         """
         :param Attacker attacker: The attacker you use.
         :param Classifier classifier: The classifier you want to attack.
@@ -48,26 +74,30 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
         :param bool average_invoke: If true, returns "Avg. Victim Model Queries".
         :param kwargs: Other parameters, see :py:class:`.DefaultAttackEval` for detail.
         """
-        super().__init__(attacker, classifier, progress_bar=progress_bar, **kwargs)
-        self.attacker = attacker
-        self.classifier = InvokeLimitWrapper(classifier, invoke_limit)
-        self.progress_bar = progress_bar
+        super().__init__(attacker, classifier, **kwargs)
 
-        self.average_invoke = average_invoke
+        # wrap classifier, attacker after super().__init__
+        self.classifier = InvokeLimitClassifierWrapper(self.classifier, invoke_limit)
+        self.attacker =  InvokeLimitAttackerWrapper(self.attacker, self.classifier)
 
-    def __update(self, sentA, sentB, out_of_invoke_limit):
+        # keep a private version
+        self.__attacker = self.attacker
+        self.__classifier = self.classifier
+
+        self.__average_invoke = average_invoke
+    
+    def measure(self, sentA, sentB):
         info = super().measure(sentA, sentB)
-
-        if self.average_invoke and info["Succeed"]:
-            info["Queries"] = self.classifier.get_invoke()
-
-        if out_of_invoke_limit:
+        if self.__attacker.exceed():
             info["Query Exceeded"] = True
         else:
             info["Query Exceeded"] = False
-        
-        return self.update(info)
-    
+
+        # only records succeed attacks
+        if info["Succeed"] and self.__average_invoke:
+            info["Queries"] = self.__classifier.get_invoke()
+        return info
+
     def update(self, info):
         super().update(info)
         if "Queries" in info:
@@ -80,49 +110,13 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
                 self.__result["out_of_invoke"] = 0
             self.__result["out_of_invoke"] += 1
         return info
-
-    def eval_results(self, dataset):
-        self.clear()
-        for sent in dataset:
-            self.classifier.clear()
-            try:
-                if isinstance(sent, tuple):
-                    res = self.attacker(self.classifier, sent[0], sent[1])
-                    if res is None:
-                        info = self.__update(sent[0], None, False)
-                        self.classifier.clear()
-                        yield (sent[0], None, None, info )
-                    else:
-                        info = self.__update(sent[0], res[0], False)
-                        self.classifier.clear()
-                        yield (sent[0], res[0], res[1], info)
-                else:
-                    res = self.attacker(self.classifier, sent)
-                    if res is None:
-                        info = self.__update(sent, None, False)
-                        self.classifier.clear()
-                        yield (sent, None, None, info )
-                    else:
-                        info = self.__update(sent, res[0], False)
-                        self.classifier.clear()
-                        yield (sent, res[0], res[1], info)
-            except InvokeLimitException:
-                if isinstance(sent, tuple):
-                    info = self.__update(sent[0], None, True)
-                    self.classifier.clear()
-                    yield (sent[0], None, None, info )
-                else:
-                    info = self.__update(sent, None, True)
-                    self.classifier.clear()
-                    yield (sent, None, None, info )
     
     def clear(self):
         super().clear()
         self.__result = {}
 
-    
     def get_result(self):
         ret = super().get_result()
-        if self.average_invoke and "invoke" in self.__result:
+        if self.__average_invoke and "invoke" in self.__result:
             ret["Avg. Victim Model Queries"] = self.__result["invoke"] / ret["Successful Instances"]
         return ret

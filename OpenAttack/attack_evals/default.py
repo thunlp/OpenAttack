@@ -1,7 +1,7 @@
 from ..attack_eval import AttackEval
 import json, sys, time
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer, check_parameters
+from ..utils import visualizer, result_visualizer, check_parameters, DataInstance, Dataset
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
 
@@ -73,7 +73,7 @@ class DefaultAttackEval(AttackEval):
     
     def eval(self, dataset, total_len=None, visualize=False):
         """
-        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
+        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
         :type dataset: list or generator
         :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
         :param bool visualize: Display a visualized result for each instance and the summary.
@@ -82,8 +82,7 @@ class DefaultAttackEval(AttackEval):
 
         In this method, ``eval_results`` is called and gets the result for each instance iteratively.
         """
-        self.clear()
-        if isinstance(dataset, list):
+        if hasattr(dataset, "__len__"):
             total_len = len(dataset)
         
         counter = 0
@@ -92,7 +91,8 @@ class DefaultAttackEval(AttackEval):
             return tqdm.write(x, end="")
 
         time_start = time.time()
-        for x_orig, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+            x_orig = data.x
             counter += 1
             if visualize:
                 try:
@@ -138,25 +138,23 @@ class DefaultAttackEval(AttackEval):
 
     def eval_results(self, dataset):
         """
-        :param dataset: A list of data or a generator of data, each element can be a single sentence or a tuple of (sentence, label). A single sentence means an untargeted attack while tuple means a label-targeted attack.
-        :type dataset: list or generator
-        :return: A generator which generates the result for each instance, *(x_orig, x_adv, y_adv, info)*.
+        :param dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
+        :type dataset: Dataset or generator
+        :return: A generator which generates the result for each instance, *(DataInstance, x_adv, y_adv, info)*.
         :rtype: generator
         """
         self.clear()
-        for sent in dataset:
-            if isinstance(sent, tuple):
-                res = self.attacker(self.classifier, sent[0], sent[1])
-                if res is None:
-                    yield (sent[0], None, None, self.__update(sent[0], None) )
-                else:
-                    yield (sent[0], res[0], res[1], self.__update(sent[0], res[0]))
+        for data in dataset:
+            assert isinstance(data, DataInstance)
+            res = self.attacker(self.classifier, data.x, data.target)
+            if res is None:
+                info = self.__update(data.x, None)
             else:
-                res = self.attacker(self.classifier, sent)
-                if res is None:
-                    yield (sent, None, None, self.__update(sent, None) )
-                else:
-                    yield (sent, res[0], res[1], self.__update(sent, res[0]))
+                info = self.__update(data.x, res[0])
+            if not info["Succeed"]:
+                yield (data, None, None, info)
+            else:
+                yield (data, res[0], res[1], info)
     
     def __levenshtein(self, sentA, sentB):
         from ..metric import levenshtein
@@ -280,7 +278,7 @@ class DefaultAttackEval(AttackEval):
         
     def get_result(self):
         """
-        :return: The results which is accumulated previously.
+        :return: The results which were accumulated previously.
         :rtype: dict
 
         This method summarizes and returns to previous accumulated results.
@@ -318,3 +316,28 @@ class DefaultAttackEval(AttackEval):
         Clear all the accumulated results.
         """
         self.__result = {}
+    
+    def generate_adv(self, dataset, total_len=None):
+        """
+        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
+        :return: A :py:class:`.Dataset` consists of adversarial samples.
+        :rtype: Dataset
+        """
+        if hasattr(dataset, "__len__"):
+            total_len = len(dataset)
+
+        ret = []
+        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+            if x_adv is not None:
+                ret.append(DataInstance (
+                    x=x_adv,
+                    y=data.y,
+                    pred=y_adv,
+                    meta={
+                        "original": data.x,
+                        "info": info
+                    }
+                ))
+        return Dataset(ret)
+            
+            

@@ -6,7 +6,7 @@ from ..data_manager import DataManager
 
 class DefaultTextProcessor(TextProcessor):
     """
-    An implementation of :class:`OpenAttack.TextProcessor`.
+    An implementation of :class:`OpenAttack.TextProcessor` mainly uses ``nltk`` toolkit.
     """
 
     def __init__(self):
@@ -42,6 +42,8 @@ class DefaultTextProcessor(TextProcessor):
     def get_lemmas(self, token_and_pos):
         """
         :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
+
+        This method uses ``nltk.WordNetLemmatier`` to lemmatize tokens.
         """
         if self.__lemmatize is None:
             self.__lemmatize = DataManager.load("TProcess.NLTKWordNet").lemma
@@ -53,6 +55,8 @@ class DefaultTextProcessor(TextProcessor):
     def get_delemmas(self, lemma_and_pos):
         """
         :Data Requirements: :py:data:`.TProcess.NLTKWordNetDelemma`
+        
+        This method uses a pre-processed dict which maps (lemma, pos) to original token for delemmatizing.
         """
         if self.__delemmatize is None:
             self.__delemmatize = DataManager.load("TProcess.NLTKWordNetDelemma")
@@ -74,6 +78,8 @@ class DefaultTextProcessor(TextProcessor):
     def get_ner(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordNER` , :py:data:`.TProcess.NLTKSentTokenizer`
+
+        This method uses NLTK tokenizer and Stanford NER toolkit which requires Java installed.
         """
         if self.__ner is None:
             self.__ner = DataManager.load("TProcess.StanfordNER")
@@ -182,6 +188,9 @@ class DefaultTextProcessor(TextProcessor):
     def get_wsd(self, tokens_and_pos):
         """
         :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
+
+        This method uses NTLK WordNet to generate synsets, and uses "lesk" algorithm which
+        is proposed by Michael E. Lesk in 1986, to screen the sense out.
         """
         if self.__wordnet is None:
             self.__wordnet = DataManager.load("TProcess.NLTKWordNet")

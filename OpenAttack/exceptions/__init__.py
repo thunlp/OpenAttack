@@ -4,3 +4,4 @@ from .substitute import NoEmbeddingException, WordNotInDictionaryException, Unkn
 from .utils import UnknownParameterException
 from .classifier import ClassifierNotSupportException
 from .cais_attacker import WordEmbeddingRequired, TokensNotAligned
+from .dataset import DuplicatedParameterException, UnknownDataLabelException, UnknownDataFormatException

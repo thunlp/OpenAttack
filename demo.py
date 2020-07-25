@@ -7,7 +7,12 @@ from tqdm import tqdm
 def make_model():
     class MyClassifier(OpenAttack.Classifier):
         def __init__(self):
-            self.model = SentimentIntensityAnalyzer()
+            try:
+                self.model = SentimentIntensityAnalyzer()
+            except LookupError:
+                nltk.download('vader_lexicon')
+                self.model = SentimentIntensityAnalyzer()
+            
         def get_prob(self, input_):
             ret = []
             for sent in input_:
@@ -31,9 +36,9 @@ def main():
     print("Start attack")
     options = {
         "success_rate": True,
-        "fluency": True,
-        "mistake": True,
-        "semantic": True,
+        "fluency": False,
+        "mistake": False,
+        "semantic": False,
         "levenstein": True,
         "word_distance": False,
         "modification_rate": True,

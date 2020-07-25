@@ -6,7 +6,7 @@ WordVector
 ------------
 
 .. autoclass:: OpenAttack.utils.WordVector
-    :members:
+    :members: 
 
 check_parameters
 ------------------
@@ -37,5 +37,17 @@ BertClassifier
 ----------------
 
 .. autoclass:: OpenAttack.utils.BertClassifier
-    :members:
+    :members: 
+
+Dataset
+---------
+
+.. autoclass:: OpenAttack.utils.Dataset
+    :members: __init__, append, clear_label, clear_pred, copy, correct, data, eval, extend, filter_label, filter_pred, iter, merge, remove, reset_index, sample, wrong
+
+DataInstance
+--------------
+
+.. autoclass:: OpenAttack.utils.DataInstance
+    :members: __init__, copy, data
 
