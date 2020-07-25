@@ -72,7 +72,6 @@ class ClassifierBase(Classifier):
 
     def preprocess_token(self, x_batch):
         
-        x_batch = [ list(map(lambda x:x[0], self.config["processor"].get_tokens(sent))) for sent in x_batch ]
         seq_len = list( map( lambda x: len(x), x_batch ) )
         max_len = max( seq_len )
         if self.config["max_len"] is not None:
