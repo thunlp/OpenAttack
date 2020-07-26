@@ -18,11 +18,6 @@ make_zip_downloader
 
 .. autofunction:: OpenAttack.utils.make_zip_downloader
 
-detokenizer
--------------
-
-.. autofunction:: OpenAttack.utils.detokenizer
-
 visualizer
 ------------
 
@@ -43,7 +38,7 @@ Dataset
 ---------
 
 .. autoclass:: OpenAttack.utils.Dataset
-    :members: __init__, append, clear_label, clear_pred, copy, correct, data, eval, extend, filter_label, filter_pred, iter, merge, remove, reset_index, sample, wrong
+    :members: __init__, append, clear_label, clear_pred, copy, correct, data, eval, extend, filter_label, filter_pred, iter, merge, remove, reset_index, sample, shuffle, wrong
 
 DataInstance
 --------------
