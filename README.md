@@ -1,11 +1,26 @@
-# OpenAttack
+<h1 align="center">OpenAttack</h1>
 
-![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest)
+![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master)[![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest)![](https://img.shields.io/badge/PRs-Welcome-red)
+
+<p align="center">
+  <a href="https://openattack.readthedocs.io/">Documentation</a> • <a href="#features-&-uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
+<br><br>
+</p>
 
 OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation. 
 
-## Uses
+![demo](./docs/source/images/demo.gif)
+
+## Features & Uses
+
+OpenAttack has following features:
+
+1. **High usability.** OpenAttack provides easy-to-use APIs that can support the whole process of textual adversarial attacks;
+2. **Full coverage of attack model types**. OpenAttack supports sentence-/word-/character-level perturbations and gradient-/score-/decision-based/blind attack models;
+3. **Great flexibility and extensibility**. You can easily attack a customized victim model or develop and evaluate a customized attack model;
+4. **Comprehensive Evaluation**. OpenAttack can thoroughly evaluate an attack model from attack effectiveness, adversarial example quality and attack efficiency.
+
+
 
 OpenAttack has a wide range of uses, including:
 
@@ -15,28 +30,47 @@ OpenAttack has a wide range of uses, including:
 4. Evaluating the robustness of a machine learning model against various adversarial attacks; 
 5. Conducting adversarial training to improve robustness of a machine learning model by enriching the training data with generated adversarial examples.
 
-
-
 ## Installation
 
-You can just down the whole repo for installation.
+You can either use `pip` or clone this repo to install OpenAttack.
+
+#### 1. Using pip (recommended)
+
+```bash
+pip install OpenAttack
+```
+
+#### 2. Cloning this repo
+
+```bash
+git clone https://github.com/thunlp/OpenAttack.git
+cd OpenAttack
+python setup.py install
+```
+
+
+
+After installation, you can try running `demo.py` to check if OpenAttack works well:
+
+```
+python demo.py
+```
 
 ## Usage Examples
 
-#### Use Built-in Attacks and Evaluation
+#### Basic: Use Built-in Attacks
 
-OpenAttack builds in some commonly used text classification models such as LSTM and BERT as well as datasets such as SST for sentiment analysis and SNLI for natural language inference.
-You can use the built-in victim models and datasets to quickly conduct adversarial attacks.
+OpenAttack builds in some commonly used text classification models such as LSTM and BERT as well as datasets such as [SST](https://nlp.stanford.edu/sentiment/treebank.html) for sentiment analysis and [SNLI](https://nlp.stanford.edu/projects/snli/) for natural language inference. You can effortlessly conduct adversarial attacks against the built-in victim models on the datasets.
 
-The following code snippet shows how to use Genetic to attack BERT on the SST dataset:
+The following code snippet shows how to use a genetic algorithm-based attack model ([Alzantot et al., 2018](https://www.aclweb.org/anthology/D18-1316.pdf)) to attack BERT on the SST dataset:
 
 ```python
 import OpenAttack as oa
-# choose trained victim model
+# choose a trained victim classification model
 victim = oa.DataManager.load("Victim.BERT.SST")
-# choose evaluation dataset 
-dataset = oa.DataManager.load("Dataset.SST.sample")[:10]
-# choose Genetic as the attacker
+# choose an evaluation dataset 
+dataset = oa.DataManager.load("Dataset.SST.sample")
+# choose Genetic as the attacker and initialize it with default parameters
 attacker = oa.attackers.GeneticAttacker() 
 # prepare for attacking
 attack_eval = oa.attack_evals.DefaultAttackEval(attacker, victim)
@@ -44,37 +78,46 @@ attack_eval = oa.attack_evals.DefaultAttackEval(attacker, victim)
 attack_eval.eval(dataset, visualize=True)
 ```
 
-#### Attack a Customized Victim Model
+#### Advanced: Attack a Customized Victim Model
 
-The following code snippet shows how to use Genetic to attack a customized sentiment analysis model (a statistical model built in NLTK) on SST.
+The following code snippet shows how to use the genetic algorithm-based attack model to attack a customized sentiment analysis model (a statistical model built in NLTK) on SST.
 
 ```python
 import OpenAttack as oa
 import numpy as np
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# configure access interface of customized model
+# configure access interface of the customized victim model
 class MyClassifier(oa.Classifier):
     def __init__(self):
         self.model = SentimentIntensityAnalyzer()
-    def get_prob(self, input_):
+    # access to the classification probability scores with respect input sentences
+    def get_prob(self, input_): 
         rt = []
         for sent in input_:
             rs = self.model.polarity_scores(sent)
             prob = rs["pos"] / (rs["neg"] + rs["pos"])
             rt.append(np.array([1 - prob, prob]))
         return np.array(rt)
-# choose evaluation dataset 
-dataset = oa.load("Dataset.SST.sample")[:10]
-# choose the costomized classifier
-clsf = MyClassifier()
-# choose Genetic as the attack model 
+# choose the costomized classifier as the victim model
+victim = MyClassifier()
+# choose an evaluation dataset 
+dataset = oa.DataManager.load("Dataset.SST.sample")
+# choose Genetic as the attacker and initialize it with default parameters
 attacker = oa.attackers.GeneticAttacker()
 # prepare for attacking
-attack_eval = oa.attack_evals.DefaultAttackEval(attacker, clsf)
+attack_eval = oa.attack_evals.DefaultAttackEval(attacker, victim)
 # launch attacks and print attack results 
 attack_eval.eval(dataset, visualize=True)
 ```
+
+#### Advanced: Design a Customized Attack Model
+
+OpenAttack incorporates many handy components which can be easily assembled into new attack model. 
+
+<u>Here</u> gives an example of how to design a simple word swap attack model.
+
+#### Advanced: Adversarial Training
 
 
 
@@ -84,7 +127,9 @@ According to the level of perturbations imposed on original input, textual adver
 
 According to the accessibility to the victim model, textual adversarial attack models can be categorized into `gradient`-based, `score`-based, `decision`-based and `blind` attack models.
 
-Currently OpenAttack includes 13 typical attack models against text classification models that cover all attack types. 
+> [TAADPapers](https://github.com/thunlp/TAADpapers) is a paper list which summarizes almost all the papers concerning textual adversarial attack and defense. You can have a look at this list to find more attack models.
+
+Currently OpenAttack includes 13 typical attack models against text classification models that cover **all** attack types. 
 
 Here is the list of currently involved attack models.
 
@@ -123,3 +168,19 @@ Following table illustrates the comparison of the attack models.
 |   HotFlip   |    Gradient     |  Word, Char  | Gradient-based word or character substitution       |
 |    VIPER    |      Blind      |     Char     | Visually similar character substitution             |
 | DeepWordBug |      Score      |     Char     | Greedy character manipulation                       |
+
+## Toolkit Design
+
+Considering the significant distinctions among different attack models, we leave considerable freedom for the skeleton design of attack models, and focus more on streamlining the general processing of adversarial attacking and the common components used in attack models.
+
+OpenAttack has 7 main modules: 
+
+<img src="./docs/source/images/toolkit_framework.png" alt="toolkit_framework" style="zoom:30%;" />
+
+* **TextProcessor**: processing the original text sequence so as to assist attack models in generating adversarial examples.
+* **Classifier**: wrapping victim classification models
+* **Attacker**: involving various attack models
+* **Substitute**: packing different word/character substitution methods which are widely used in word- and character-level attack models.
+* **Metric**: providing several adversarial example quality metrics which can serve as either the constraints on the adversarial examples during attacking or evaluation metrics for evaluating adversarial attacks.
+* **AttackEval**: evaluating textual adversarial attacks from attack effectiveness, adversarial example quality and attack efficiency.
+* **DataManager**: managing all the data as well as saved models that are used in other modules
