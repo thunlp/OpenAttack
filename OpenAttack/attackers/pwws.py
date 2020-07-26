@@ -90,22 +90,7 @@ class PWWSAttacker(Attacker):
     def get_wstar(self, clsf, sent, idx, pos, target, targeted):
         word = sent[idx]
         try:
-            # rep_words = list(map(lambda x:x[0], self.substitute(word, pos, threshold = self.config["threshold"])))
-            pp = "noun"
-            if pos in ["a", "r", "n", "v", "s"]:
-                pp = pos
-            else:
-                if pos[:2] == "JJ":
-                    pp = "adj"
-                elif pos[:2] == "VB":
-                    pp = "verb"
-                elif pos[:2] == "NN":
-                    pp = "noun"
-                elif pos[:2] == "RB":
-                    pp = "adv"
-                else:
-                    pp = None
-            rep_words = list(map(lambda x:x[0], self.substitute(word, pp, threshold = self.config["threshold"])))
+            rep_words = list(map(lambda x:x[0], self.substitute(word, pos, threshold = self.config["threshold"])))
         except WordNotInDictionaryException:
             rep_words = []
         rep_words = list(filter(lambda x: x != word, rep_words))
