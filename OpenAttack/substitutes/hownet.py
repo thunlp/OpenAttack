@@ -1,3 +1,10 @@
+"""
+    由hownet提供的近义词。
+    进一步工作：以义原数量排序
+    require:
+    DataManager.download("HOWNET")
+    DataManager.download("WNL")
+"""
 from .base import WordSubstitute
 from ..data_manager import DataManager
 from ..exceptions import UnknownPOSException
@@ -10,7 +17,7 @@ pos_set = set(pos_list)
 class HowNetSubstitute(WordSubstitute):
     """
     :Package Requirements: OpenHowNet
-    :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`TProcess.NLTKWordNet`
+    :Data Requirements: :any:`HOWNET` :any:`NLTKWordnet`
 
     An implementation of :py:class:`.WordSubstitute`.
 
@@ -19,13 +26,25 @@ class HowNetSubstitute(WordSubstitute):
     """
 
     def __init__(self):
-        self.hownet_dict = DataManager.load("AttackAssist.HowNet")
-        self.wn = DataManager.load("TProcess.NLTKWordNet")
+        self.hownet_dict = DataManager.load("HOWNET")
+        self.wn = DataManager.load("NLTKWordnet")
         self.en_word_list = self.hownet_dict.get_en_words()
         # self.hownet_dict = OpenHowNet.HowNetDict()
         # self.wnl = WordNetLemmatizer()
 
     def __call__(self, word, pos_tag, threshold=None):
+        pp = "noun"
+        if pos_tag[:2] == "JJ":
+            pp = "adj"
+        elif pos_tag[:2] == "VB":
+            pp = "verb"
+        elif pos_tag[:2] == "NN":
+            pp = "noun"
+        elif pos_tag[:2] == "RB":
+            pp = "adv"
+        else:
+            pp = None
+        pos_tag = pp
         if pos_tag is None:
             return [word]
         word_candidate = []
