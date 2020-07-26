@@ -40,10 +40,22 @@ EmbedBasedSubstitute
 .. autoclass:: OpenAttack.substitutes.EmbedBasedSubstitute(OpenAttack.substitutes.WordSubstitute)
     :members:
 
+GloveSubstitute
+-----------------
+
+.. autoclass:: OpenAttack.substitutes.GloveSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
+    :members:
+
 HowNetSubstitute
 ------------------
 
 .. autoclass:: OpenAttack.substitutes.HowNetSubstitute(OpenAttack.substitutes.WordSubstitute)
+    :members:
+
+Word2VecSubstitute
+--------------------
+
+.. autoclass:: OpenAttack.substitutes.Word2VecSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
     :members:
 
 WordNetSubstitute

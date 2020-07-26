@@ -70,6 +70,13 @@ UniversalSentenceEncoder
 
     .. automodule:: OpenAttack.data.universal_sentence_encoder
 
+Word2Vec
+----------
+
+.. py:data:: AttackAssist.Word2Vec
+
+    .. automodule:: OpenAttack.data.word2vec
+
 ------------------------------------
 
 Dataset

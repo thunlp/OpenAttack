@@ -14,3 +14,15 @@ UniversalSentenceEncoder
 .. autoclass:: OpenAttack.metric.UniversalSentenceEncoder
     :members: __init__, __call__
 
+Levenshtein
+-------------
+
+.. autoclass:: OpenAttack.metric.Levenshtein
+    :members: __init__, __call__
+
+Modification
+--------------
+
+.. autoclass:: OpenAttack.metric.Modification
+    :members: __init__, __call__
+
