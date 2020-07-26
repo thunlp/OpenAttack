@@ -24,6 +24,7 @@ class Classifier(metaclass=abc.ABCMeta):
 
         This is used to get the probabilities of a batch of sentences on every type.
         """
+        from .text_processors import DefaultTextProcessor
         processor = DefaultTextProcessor()
         x_batch = [ list(map(lambda x:x[0], processor.get_tokens(sent))) for sent in input_ ]
         return self.get_grad(x_batch, [0] * len(x_batch))[0]
