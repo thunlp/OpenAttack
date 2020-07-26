@@ -6,7 +6,8 @@ from ..exceptions import WordNotInDictionaryException, NoEmbeddingException
 from tqdm import tqdm
 
 DEFAULT_CONFIG = {
-    "triggers": ["the", "the", "the"]
+    "triggers": ["the", "the", "the"],
+    "processor": DefaultTextProcessor()
 }
 
 TRAIN_CONFIG = {
@@ -57,7 +58,7 @@ class UATAttacker(Attacker):
     def get_triggers(self, clsf, dataset, **kwargs):
         """
         :param Classifier clsf: The classifier that you want to attack.
-        :param list dataset: A list of input sentences and labels ``[(sentence, label) ...]``.
+        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
         :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
         :param dict word2id: A dict that maps tokens to ids.
         :param int epoch: Maximum epochs to get the universal adversarial triggers.
@@ -87,8 +88,11 @@ class UATAttacker(Attacker):
                 batch = dataset[ cnt: cnt + config["batch_size"] ]
                 cnt += config["batch_size"]
 
-                x = list(map(lambda x: x[0].lower(), batch))
-                y = list(map(lambda x: x[1], batch))
+                x = [
+                    list(map(lambda x: x[0], config["processor"].get_tokens(sent)))
+                        for sent in list(map(lambda x: x.x, batch))
+                ]
+                y = list(map(lambda x: x.y, batch))
 
                 nw_beams = [ ( curr_trigger,  0 ) ]
                 for i in range(config["trigger_len"]):
@@ -96,24 +100,13 @@ class UATAttacker(Attacker):
                     beams = nw_beams
                     nw_beams = []
                     for trigger, _ in beams:
-                        while True:
-                            trigger_sent =  self.config["processor"].detokenizer(trigger) + " "
-                            retoken = list(map(lambda x:x[0], config["processor"].get_tokens(trigger_sent))) 
-                            if len(retoken) == config["trigger_len"]:
-                                break
-                            elif len(retoken) > config["trigger_len"]:
-                                trigger = retoken[: config["trigger_len"] ]
-                            else:
-                                trigger = retoken + [ "the" for _ in range(config["trigger_len"] - len(retoken)) ]
-
-                        xt = list(map(lambda x: trigger_sent + x, x))
+                        xt = list(map(lambda x: trigger + x, x))
                         grad = clsf.get_grad(xt, y)[1]
                         candidates_words = get_candidates(grad[:, i, :].mean(axis=0))
 
                         for cw in candidates_words:
                             tt = trigger[:i] + [cw] + trigger[i + 1:]
-                            trigger_sent = self.config["processor"].detokenizer(tt) + " "
-                            xt = list(map(lambda x: trigger_sent + x, x))
+                            xt = list(map(lambda x:  config["processor"].detokenizer(tt + x), x))
                             pred = clsf.get_prob(xt)
                             loss = pred[ (list(range(len(y))), list(y) ) ].sum()
                             nw_beams.append((tt, loss))

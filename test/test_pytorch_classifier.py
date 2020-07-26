@@ -77,6 +77,7 @@ class TestPytorch(unittest.TestCase):
             vocab[w] = num
             num += 1
         classifier = OpenAttack.classifiers.PytorchClassifier(net, word2id=vocab, max_len=250, embedding=embedding_matrix, token_pad=0)
+        processor = OpenAttack.text_processors.DefaultTextProcessor()
         test_str = ["i like apples", "i like apples"]
 
         ret = classifier.get_pred(test_str)
@@ -88,7 +89,8 @@ class TestPytorch(unittest.TestCase):
         self.assertEqual(len(ret.shape), 2)
         self.assertEqual(ret.shape[0], len(test_str))
         
-        ret = classifier.get_grad(test_str, [1, 1])
+        x_batch = [ list(map(lambda x:x[0], processor.get_tokens(sent))) for sent in test_str ]
+        ret = classifier.get_grad(x_batch, [1, 1])
         self.assertIsInstance(ret, tuple)
         self.assertEqual(len(ret), 2)
         self.assertIsInstance(ret[0], np.ndarray)

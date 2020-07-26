@@ -9,7 +9,7 @@ DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
     "substitute": None,
     "embedding": None,
-    "wordid": None,
+    "word2id": None,
     "threshold": 0.5,
     "token_unk": "<UNK>",
     "max_iter": 100
@@ -20,8 +20,8 @@ class FDAttacker(Attacker):
     def __init__(self, **kwargs):
         """
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param EmbedBasedSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
-        :param dict wordid: A dict that maps tokens to ids.
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
+        :param dict word2id: A dict that maps tokens to ids.
         :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
         :param token_unk: The word_id or the token for out-of-vocabulary words. **Default:** ``"<UNK>"``.
         :type token_unk: int or str
@@ -37,12 +37,12 @@ class FDAttacker(Attacker):
         self.config.update(kwargs)
         if self.config["substitute"] is None:
             self.config["substitute"] = CounterFittedSubstitute()
-        if ((self.config["embedding"] is None) or (self.config["wordid"] is None)):
+        if ((self.config["embedding"] is None) or (self.config["word2id"] is None)):
             raise NoEmbeddingException()
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
         self.processor = self.config["processor"]
         self.embedding = self.config["embedding"]
-        self.wordid = self.config["wordid"]
+        self.wordid = self.config["word2id"]
         self.substitute = self.config["substitute"]
     
     def __call__(self, clsf, x_orig, target=None):
@@ -77,8 +77,7 @@ class FDAttacker(Attacker):
                 if len(reps) > 0:
                     break
             
-            sent = list(map(lambda x: x[0], self.processor.get_tokens( self.config["processor"].detokenizer(sent) )))
-            prob, grad = clsf.get_grad([self.config["processor"].detokenizer(sent)], [target])
+            prob, grad = clsf.get_grad([sent], [target])
             grad = grad[0]
             prob = prob[0]
             if grad.shape[0] != len(sent) or grad.shape[1] != self.embedding.shape[1]:

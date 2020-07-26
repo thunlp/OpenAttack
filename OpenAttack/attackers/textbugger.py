@@ -106,10 +106,10 @@ class TextBuggerAttacker(Attacker):
     def get_w_word_importances(self, sentence, clsf, y_orig):  # white
         from collections import OrderedDict
 
-        prob, grad = clsf.get_grad([sentence], [y_orig])
-        grad = grad[0]
         # sentence = self.textprocessor.detokenizer(self.tokenize(sentence))
         sentence_tokens = self.tokenize(sentence)
+        prob, grad = clsf.get_grad([sentence_tokens], [y_orig])
+        grad = grad[0]
         dist = []
         for i in range(len(grad)):
             dist.append(0.0)
