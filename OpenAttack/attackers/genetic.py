@@ -71,23 +71,6 @@ class GeneticAttacker(Attacker):
             self.config["substitute"] = CounterFittedSubstitute()
 
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
-    
-    def parse_pos(self, pos):
-        pp = "noun"
-        if pos in ["a", "r", "n", "v", "s"]:
-            pp = pos
-        else:
-            if pos[:2] == "JJ":
-                pp = "adj"
-            elif pos[:2] == "VB":
-                pp = "verb"
-            elif pos[:2] == "NN":
-                pp = "noun"
-            elif pos[:2] == "RB":
-                pp = "adv"
-            else:
-                pp = None
-        return pp
 
     def __call__(self, clsf, x_orig, target=None):
         """
@@ -101,7 +84,7 @@ class GeneticAttacker(Attacker):
         else:
             targeted = True
         x_orig = self.config["processor"].get_tokens(x_orig)
-        x_pos =  list(map(lambda x: self.parse_pos(x[1]), x_orig))
+        x_pos =  list(map(lambda x: x[1], x_orig))
         x_orig = list(map(lambda x: x[0], x_orig))
 
         x_len = len(x_orig)
