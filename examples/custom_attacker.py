@@ -17,7 +17,7 @@ class MyAttacker(OpenAttack.Attacker):
         curr_x = self.processor.get_tokens(x_orig)
         for i in range(self.max_iter):
             curr_x = self.swap(curr_x)
-            sent = OpenAttack.utils.detokenizer(curr_x)
+            sent = self.processor.detokenizer(curr_x)
             all_sents.append(sent)
         
         # get prediction
