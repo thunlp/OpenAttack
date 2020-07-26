@@ -10,7 +10,7 @@ class GloveSubstitute(EmbedBasedSubstitute):
     An implementation of :py:class:`.WordSubstitute`.
     """
     def __init__(self, cosine=False):
-        self.wordvec = DataManager.load("AttackAssist.Glove")
+        self.wordvec = DataManager.load("AttackAssist.GloVe")
         self.word2id = {}
         for word in self.wordvec.get_dictionary():
             self.word2id[word] = len(self.word2id)
