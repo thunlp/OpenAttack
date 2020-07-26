@@ -1,4 +1,4 @@
 from .gptlm import GPT2LM
 from .usencoder import UniversalSentenceEncoder
-from .levenshtein import levenshtein
-from .modification import modification
+from .levenshtein import Levenshtein
+from .modification import Modification
