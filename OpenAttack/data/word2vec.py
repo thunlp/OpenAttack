@@ -8,7 +8,7 @@ import numpy as np
 import os, pickle
 from OpenAttack.utils import WordVector, make_zip_downloader
 
-NAME = "Word2Vec"
+NAME = "AttackAssist.Word2Vec"
 
 URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/word2vec.zip"
 DOWNLOAD = make_zip_downloader(URL)

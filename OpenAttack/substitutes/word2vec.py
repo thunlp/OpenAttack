@@ -10,7 +10,7 @@ class Word2VecSubstitute(EmbedBasedSubstitute):
     An implementation of :py:class:`.WordSubstitute`.
     """
     def __init__(self, cosine=False):
-        self.wordvec = DataManager.load("Word2Vec")
+        self.wordvec = DataManager.load("AttackAssist.Word2Vec")
         self.word2id = {}
         for word in self.wordvec.get_dictionary():
             self.word2id[word] = len(self.word2id)

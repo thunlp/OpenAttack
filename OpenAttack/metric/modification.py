@@ -5,7 +5,7 @@ class Modification:
             :param list tokenB: The second list of tokens.
 
             Make sure two list have the same length.
-            """
+        """
         va = tokenA
         vb = tokenB
         ret = 0
