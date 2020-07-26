@@ -10,6 +10,8 @@ DEFAULT_CONFIG = {
     "language_tool": None,
     "language_model": None,
     "sentence_encoder": None,
+    "levenshtein_tool": None,
+    "modification_tool": None,
 
     "success_rate": True,
     "fluency": False,
@@ -157,9 +159,11 @@ class DefaultAttackEval(AttackEval):
                 yield (data, res[0], res[1], info)
     
     def __levenshtein(self, sentA, sentB):
-        from ..metric import levenshtein
-        return levenshtein(sentA, sentB)
-    
+        if self.__config["levenshtein_tool"] is None:
+            from ..metric import Levenshtein
+            self.__config["levenshtein_tool"] = Levenshtein()
+        return self.__config["levenshtein_tool"](sentA, sentB)
+
     def __get_tokens(self, sent):
         return list(map(lambda x: x[0], self.__config["processor"].get_tokens(sent)))
     
@@ -187,11 +191,13 @@ class DefaultAttackEval(AttackEval):
         return self.__config["sentence_encoder"](sentA, sentB)
     
     def __get_modification(self, sentA, sentB):
-        from ..metric import modification
+        if self.__config["modification_tool"] is None:
+            from ..metric import Modification
+            self.__config["modification_tool"] = Modification()
         tokenA = self.__get_tokens(sentA)
         tokenB = self.__get_tokens(sentB)
-        return modification(tokenA, tokenB)
-    
+        return self.__config["modification_tool"](tokenA, tokenB)
+
     def measure(self, input_, attack_result):
         """
         :param str input_: The original sentence.

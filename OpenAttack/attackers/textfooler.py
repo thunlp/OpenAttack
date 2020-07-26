@@ -90,7 +90,10 @@ class TextFoolerAttacker(Attacker):
         orig_probs = clsf.get_prob([x_orig])
         orig_label = clsf.get_pred([x_orig])
         orig_prob = orig_probs.max()
-        x_orig = list(map(lambda x: x[0], self.config["processor"].get_tokens(x_orig)))
+
+        x_orig = self.config["processor"].get_tokens(x_orig)
+        x_pos =  list(map(lambda x: x[1], x_orig))
+        x_orig = list(map(lambda x: x[0], x_orig))
 
         len_text = len(x_orig)
         if len_text < self.config["sim_score_window"]:
@@ -100,42 +103,34 @@ class TextFoolerAttacker(Attacker):
 
         # get the pos and verb tense info
         pos_ls = list(map(lambda x: x[1], self.config["processor"].get_tokens(x_copy)))
-        #pos_ls = criteria.get_pos(text_ls)
 
         # get importance score
 
         leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
         leave_1_probs = clsf.get_prob([self.config["processor"].detokenizer(sentence) for sentence in leave_1_texts])
         leave_1_probs_argmax = np.argmax(leave_1_probs, axis=-1)
-        #import_scores = orig_prob - leave_1_probs[:, orig_label] + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
-        #            leave_1_probs.max(axis=-1)[0] - orig_probs[:, leave_1_probs_argmax])
 
         import_scores = orig_prob - leave_1_probs[:, orig_label].squeeze() + (leave_1_probs_argmax != orig_label).astype(np.float64) * (
                     np.max(leave_1_probs, axis=-1) - orig_probs.squeeze()[leave_1_probs_argmax])
 
-
-
-        # get words to perturb ranked by importance score for word in words_perturb
         words_perturb = []
         for idx, score in sorted(enumerate(import_scores), key=lambda x: x[1], reverse=True):
             try:
                 if score > self.config["import_score_threshold"] and x_orig[idx] not in self.config["skip_words"]:
-                    words_perturb.append((idx, x_orig[idx]))
+                    words_perturb.append((idx, x_orig[idx], x_pos[idx]))
             except:
                 print(idx, len(x_orig), import_scores.shape, x_orig, len(leave_1_texts))
 
 
         # find synonyms
-        #words_perturb_idx = [word2idx[word] for idx, word in words_perturb if word in word2idx]
         synonym_words = [
-            self.get_neighbours(word)
+            self.get_neighbours(word, pos)
             if word not in self.config["skip_words"]
             else []
-            for idx, word in words_perturb
+            for idx, word, pos in words_perturb
         ]
-        #synonym_words, _ = pick_most_similar_words_batch(words_perturb_idx, cos_sim, idx2word, self.config["synonym_num"], 0.5)
         synonyms_all = []
-        for idx, word in words_perturb:
+        for idx, word, pos in words_perturb:
             synonyms = synonym_words.pop(0)
             if synonyms:
                 synonyms_all.append((idx, synonyms))
@@ -161,8 +156,6 @@ class TextFoolerAttacker(Attacker):
                 text_range_min = 0
                 text_range_max = len_text
 
-            #semantic_sims = self.sim_predictor([' '.join(text_cache[text_range_min:text_range_max]) for i in range(len(new_texts))],
-            #                           list(map(lambda x: ' '.join(x[text_range_min:text_range_max]), new_texts)))[0]
             texts = [self.config["processor"].detokenizer(x[text_range_min:text_range_max]) for x in new_texts]
             semantic_sims = np.array([self.sim_predictor(self.config["processor"].detokenizer(text_cache[text_range_min:text_range_max]), x) for x in texts])
             if len(new_probs.shape) < 2:
@@ -187,7 +180,6 @@ class TextFoolerAttacker(Attacker):
                     return (x_adv, pred[0])
             else:
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"]) + (1 - pos_mask).astype(np.float64)
-                #new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.config["sim_score_threshold"])
                 
                 new_label_prob_min = np.min(new_label_probs, axis=0)[0]
                 new_label_prob_argmin = np.argmin(new_label_probs, axis=0)[0]
@@ -197,13 +189,13 @@ class TextFoolerAttacker(Attacker):
         return None
             
 
-    def get_neighbours(self, word):
+    def get_neighbours(self, word, pos):
         threshold = 0.5
         try:
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, threshold=threshold)[1 : self.config["synonym_num"] + 1],
+                    self.config["substitute"](word, pos=pos, threshold=threshold)[1 : self.config["synonym_num"] + 1],
                 )
             )
         except WordNotInDictionaryException:

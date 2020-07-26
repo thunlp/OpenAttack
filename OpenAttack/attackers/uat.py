@@ -1,6 +1,5 @@
 import numpy as np
 from ..text_processors import DefaultTextProcessor
-from ..substitutes import CounterFittedSubstitute
 from ..utils import check_parameters
 from ..attacker import Attacker
 from ..exceptions import WordNotInDictionaryException, NoEmbeddingException

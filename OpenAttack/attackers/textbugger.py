@@ -80,38 +80,26 @@ class TextBuggerAttacker(Attacker):
         return sentences'''
 
     def rank_sentences(self, sentences, clsf, target_all):
-        import torch
-        
         map_sentence_to_loss = {}  # 与原文不同
         for i in range(len(sentences)):
             y_orig = clsf.get_pred([sentences[i]])[0]
             if y_orig != target_all:
                 continue
-            with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([sentences[i]]))
-            # map_sentence_to_loss[i] = F.nll_loss(tempoutput, target_all, reduce=False)
-            softmax = torch.nn.Softmax(dim=1)
-            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][target_all].item()
-            map_sentence_to_loss[i] = nll_lossed
+            tempoutput = clsf.get_prob([sentences[i]])[0]
+            map_sentence_to_loss[i] = -np.log(tempoutput)[target_all]
         sentences_sorted_by_loss = {k: v for k, v in sorted(map_sentence_to_loss.items(), key=lambda item: -item[1], reverse=True)}
         return sentences_sorted_by_loss
 
     def get_word_importances(self, sentence, clsf, y_orig):
-        import torch
 
         # sentence_tokens = self.treebank.tokenize(sentence)
         sentence_tokens = self.tokenize(sentence)
         word_losses = {}
         for curr_token in sentence_tokens:
             sentence_tokens_without = [token for token in sentence_tokens if token != curr_token]
-            # sentence_without = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(sentence_tokens_without)
             sentence_without = self.textprocessor.detokenizer(sentence_tokens_without)
-            with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([sentence_without]))
-            # word_losses[curr_token] = F.nll_loss(tempoutput, y_orig, reduce=False)
-            softmax = torch.nn.Softmax(dim=1)
-            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-            word_losses[curr_token] = nll_lossed
+            tempoutput = clsf.get_prob([sentence_without])[0]
+            word_losses[curr_token] = -1 * np.log(tempoutput)[y_orig]
         word_losses = {k: v for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
 
@@ -161,20 +149,11 @@ class TextBuggerAttacker(Attacker):
         return new_tokens
 
     def getScore(self, candidate, x_prime, clsf):
-        import torch
-
-        # x_prime_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x_prime)
-        # candidate_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(candidate)
         x_prime_sentence = self.textprocessor.detokenizer(x_prime)
         candidate_sentence = self.textprocessor.detokenizer(candidate)
         y_orig = clsf.get_pred([x_prime_sentence])[0]
-        with torch.no_grad():
-            tempoutput = torch.from_numpy(clsf.get_prob(candidate_sentence))
-        # x_prime_loss = F.nll_loss(tempoutput, y_orig, reduce=False)
-        softmax = torch.nn.Softmax(dim=1)
-        nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-        x_prime_loss = nll_lossed
-        return x_prime_loss
+        tempoutput = clsf.get_prob([candidate_sentence])[0]
+        return -np.log(tempoutput)[y_orig]
 
     def replaceWithBug(self, x_prime, x_i, bug):
         tokens = x_prime

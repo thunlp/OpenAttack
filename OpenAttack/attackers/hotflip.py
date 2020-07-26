@@ -80,16 +80,18 @@ class HotFlipAttacker(Attacker):
         else:
             targeted = True
 
-        x_orig = list(map(lambda x: x[0], self.config["processor"].get_tokens(x_orig)))
+        x_orig = self.config["processor"].get_tokens(x_orig)
+        x_pos =  list(map(lambda x: x[1], x_orig))
+        x_orig = list(map(lambda x: x[0], x_orig))
         counter = -1
-        for word in x_orig:
+        for word, pos in zip(x_orig, x_pos):
             counter += 1
             if word in self.config["skip_words"]:
                 continue
-            neighbours = self.get_neighbours(word, self.config["processor"].get_tokens(word)[0][1], self.config["top_n"])
+            neighbours = self.get_neighbours(word, pos, self.config["top_n"])
             for neighbour in neighbours:
                 x_new = self.config["processor"].detokenizer(self.do_replace(x_orig, neighbour, counter))
-                pred_target = clsf.get_pred(x_new)[0]
+                pred_target = clsf.get_pred([x_new])[0]
                 if targeted and pred_target == target:
                     return (x_new, target)
                 elif not targeted and pred_target != target:
@@ -107,7 +109,7 @@ class HotFlipAttacker(Attacker):
             sub_words = list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, threshold=threshold)[:num],
+                    self.config["substitute"](word, pos=POS, threshold=threshold)[:num],
                 )
             )
             #print(sub_words)

@@ -26,6 +26,18 @@ class HowNetSubstitute(WordSubstitute):
         # self.wnl = WordNetLemmatizer()
 
     def __call__(self, word, pos_tag, threshold=None):
+        pp = "noun"
+        if pos_tag[:2] == "JJ":
+            pp = "adj"
+        elif pos_tag[:2] == "VB":
+            pp = "verb"
+        elif pos_tag[:2] == "NN":
+            pp = "noun"
+        elif pos_tag[:2] == "RB":
+            pp = "adv"
+        else:
+            pp = None
+        pos_tag = pp
         if pos_tag is None:
             return [word]
         word_candidate = []
