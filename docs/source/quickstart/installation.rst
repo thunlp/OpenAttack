@@ -19,6 +19,7 @@ After running the above script successfully, you can use demp.py to check if Ope
 
     python demo.py
 
+.. image:: /images/demo.gif
 
 Mandatory Requirements
 --------------------------
