@@ -33,16 +33,16 @@ class DCESSubstitute(CharSubstitute):
         self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
         # load
 
-    def __call__(self, char, threshold):  # 原字符，topn
+    def __call__(self, char, threshold):
+        """
+        :param int threshold: Returns top k results (k = threshold).
+        """
         c = get_hex_string(char)
-        # 二进制编码
+
         if c in self.descs:
             description = self.descs[c]["description"]
         else:
-            # raise exception
-            # print("failed to disturb %s" % char)
             return [char, 1]
-        # 找不到字符
 
         tokens = description.split(' ')
         case = 'unknown'
@@ -65,7 +65,6 @@ class DCESSubstitute(CharSubstitute):
                         not np.any(np.in1d(idx, disallowed_codes)) and \
                         not int(idx, 16) > 30000:
 
-                    # get the first case descriptor in the description
                     desc_toks = np.array(desc_toks)
                     case_descriptor = desc_toks[(desc_toks == 'SMALL') | (desc_toks == 'CAPITAL')]
 
@@ -92,15 +91,12 @@ class DCESSubstitute(CharSubstitute):
             dists, idxs = self.neigh.kneighbors(X, threshold, return_distance=True)
         else:
             dists, idxs = self.neigh.kneighbors(X, Y.shape[0], return_distance=True)
-        # turn distances to some heuristic probabilities
-        probs = np.exp(-0.5 * dists.flatten())
-        probs = probs / np.sum(probs)
+        probs = dists.flatten()
 
-        # turn idxs back to chars
         charcodes = [match_ids[idx] for idx in idxs.flatten()]
-            
+        
         chars = []
         for charcode in charcodes:
             chars.append(chr(int(charcode, 16)))
         ret = list(zip(chars, probs))
-        return ret
+        return list(filter(lambda x: x[1] < threshold, ret))

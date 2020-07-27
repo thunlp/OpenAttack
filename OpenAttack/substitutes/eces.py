@@ -26,8 +26,6 @@ class ECESSubstitute(CharSubstitute):
 
     def __call__(self, char, threshold=None):
         if char not in self.h:
-            # raise exception
-            # print("not a regular letter")
             return char
         ret = []
         ret.append((self.h[char], 1))
