@@ -30,15 +30,14 @@ class DCESSubstitute(CharSubstitute):
     """
 
     def __init__(self):
-        self.vec_colnames, self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
+        self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
         # load
 
     def __call__(self, char, threshold):  # 原字符，topn
         c = get_hex_string(char)
         # 二进制编码
-
-        if np.any(self.descs['code'] == c):
-            description = self.descs['description'][self.descs['code'] == c].values[0]
+        if c in self.descs:
+            description = self.descs[c]["description"]
         else:
             # raise exception
             # print("failed to disturb %s" % char)
@@ -58,12 +57,13 @@ class DCESSubstitute(CharSubstitute):
                 case = 'CAPITAL'
 
         matches = []
+        match_ids = []
         for i in identifiers:
-            for idx in self.descs.index:
-                desc_toks = self.descs['description'][idx].split(' ')
+            for idx, val in self.descs.items():
+                desc_toks = val["description"].split(' ')
                 if i in desc_toks and not np.any(np.in1d(desc_toks, disallowed)) and \
-                        not np.any(np.in1d(self.descs['code'][idx], disallowed_codes)) and \
-                        not int(self.descs['code'][idx], 16) > 30000:
+                        not np.any(np.in1d(idx, disallowed_codes)) and \
+                        not int(idx, 16) > 30000:
 
                     # get the first case descriptor in the description
                     desc_toks = np.array(desc_toks)
@@ -75,42 +75,32 @@ class DCESSubstitute(CharSubstitute):
                         case = 'unknown'
 
                     if case == 'unknown' or case == case_descriptor:
-                        matches.append(idx)
+                        match_ids.append(idx)
+                        matches.append(val["vec"])
 
-        # return c, np.array(matches)
-        matches = np.array(matches)  # 找到所有共同token的字符
+        if len(matches) == 0:
+            return [(char, 1)]
 
-        if not len(matches):
-            # print("cannot disturb, find no match")
-            return [(char, 1)]  # cannot disturb this one
+        match_vecs = np.stack(matches)
+        Y = match_vecs
 
-        match_vecs = self.descs[self.vec_colnames].loc[matches]  # description
-
-        Y = match_vecs.values
         self.neigh.fit(Y)
 
-        X = self.descs[self.vec_colnames].values[self.descs['code'] == c]
+        X = self.descs[c]["vec"].reshape(1, -1)
 
         if Y.shape[0] > threshold:
             dists, idxs = self.neigh.kneighbors(X, threshold, return_distance=True)
         else:
             dists, idxs = self.neigh.kneighbors(X, Y.shape[0], return_distance=True)
-
         # turn distances to some heuristic probabilities
         probs = np.exp(-0.5 * dists.flatten())
         probs = probs / np.sum(probs)
 
         # turn idxs back to chars
-        # print(idxs.flatten())
-        charcodes = self.descs['code'][matches[idxs.flatten()]]
-
+        charcodes = [match_ids[idx] for idx in idxs.flatten()]
+            
         chars = []
         for charcode in charcodes:
             chars.append(chr(int(charcode, 16)))
-        # print(chars)
-        ret = []
-        for i in range(len(chars)):
-            ret.append((chars[i], probs[i]))  # 以概率
-        # for char in chars:
-        #    ret.append((char, 1))
+        ret = list(zip(chars, probs))
         return ret
