@@ -2,6 +2,7 @@ from ..attacker import Attacker
 from ..text_processors import DefaultTextProcessor
 from ..data_manager import DataManager
 from ..substitutes import CounterFittedSubstitute
+from ..exceptions import WordNotInDictionaryException
 import random
 import numpy as np
 # from spacy.lang.en import English
@@ -11,7 +12,7 @@ import numpy as np
 
 
 DEFAULT_CONFIG = {
-    "blackbox": True
+    "blackbox": True,
     "textprocessor": DefaultTextProcessor()
 }
 
@@ -87,7 +88,8 @@ class TextBuggerAttacker(Attacker):
             if y_orig != target_all:
                 continue
             tempoutput = clsf.get_prob([sentences[i]])[0]
-            map_sentence_to_loss[i] = -np.log(tempoutput)[target_all]
+            ret = max(tempoutput[target_all], 1e-3)
+            map_sentence_to_loss[i] = -np.log(ret)
         sentences_sorted_by_loss = {k: v for k, v in sorted(map_sentence_to_loss.items(), key=lambda item: -item[1], reverse=True)}
         return sentences_sorted_by_loss
 
@@ -100,7 +102,8 @@ class TextBuggerAttacker(Attacker):
             sentence_tokens_without = [token for token in sentence_tokens if token != curr_token]
             sentence_without = self.textprocessor.detokenizer(sentence_tokens_without)
             tempoutput = clsf.get_prob([sentence_without])[0]
-            word_losses[curr_token] = -1 * np.log(tempoutput)[y_orig]
+            ret = max(tempoutput[y_orig], 1e-3)
+            word_losses[curr_token] = -np.log(ret)
         word_losses = {k: v for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
 
@@ -154,7 +157,8 @@ class TextBuggerAttacker(Attacker):
         candidate_sentence = self.textprocessor.detokenizer(candidate)
         y_orig = clsf.get_pred([x_prime_sentence])[0]
         tempoutput = clsf.get_prob([candidate_sentence])[0]
-        return -np.log(tempoutput)[y_orig]
+        ret = max(tempoutput[y_orig], 1e-3)
+        return -np.log(ret)
 
     def replaceWithBug(self, x_prime, x_i, bug):
         tokens = x_prime
@@ -173,7 +177,13 @@ class TextBuggerAttacker(Attacker):
         return bugs
 
     def bug_sub_W(self, word):
-        res = self.counterfit.__call__(word, pos=None, threshold=1)[0][0]
+        try:
+            res = self.counterfit.__call__(word, pos=None, threshold=0.5)
+            if len(res) == 0:
+                return word
+            return res[0][0]
+        except WordNotInDictionaryException:
+            return word
         return res
 
     def bug_insert(self, word):
@@ -246,5 +256,5 @@ class TextBuggerAttacker(Attacker):
 
     def tokenize(self, sent):
         # tokens = sent.strip().split()
-        tokens = list(map(lambda x: x[0], self.textprocesser.get_tokens(sent)))
+        tokens = list(map(lambda x: x[0], self.textprocessor.get_tokens(sent)))
         return tokens
