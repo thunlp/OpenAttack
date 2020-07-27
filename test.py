@@ -22,4 +22,11 @@ attackers = [
 ]
 
 for attacker in attackers:
-    OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf, progress_bar=False).eval(dataset)
+    print(attacker.__class__.__name__)
+    try:
+        print(
+            OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf, progress_bar=False).eval(dataset)
+        )
+    except Exception as e:
+        print(e)
+        print("\n")

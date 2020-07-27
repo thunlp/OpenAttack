@@ -1,6 +1,6 @@
 """
 :type: tuple
-:Size: 632.887KB
+:Size: 1.295MB
 
 :Package Requirements: * **sklearn**
 

@@ -22,6 +22,7 @@ class VIPERAttacker(Attacker):
         :param bool eces: Use DCES substitute or ECES substitute. **Default:** True
 
         :Data Requirements: :py:data:`.AttackAssist.DCES`
+        :Package Requirements: * **sklearn**
         :Classifier Capacity: Blind
 
         Text Processing Like Humans Do: Visually Attacking and Shielding NLP Systems. Steffen Eger, Gözde Gül ¸Sahin, Andreas Rücklé, Ji-Ung Lee, Claudia Schulz, Mohsen Mesgar, Krishnkant Swarnkar, Edwin Simpson, Iryna Gurevych. NAACL-HLT 2019.

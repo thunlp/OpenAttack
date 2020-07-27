@@ -52,4 +52,5 @@ You can install them manually when needed.
 * **OpenHowNet**
 * **editdistance**
 * **language_tool_python**
+* **sklearn**
 * **torchtext** == 0.1.1 *(The latest version of torchtext is not supported now. This will be improved in the futrue.)*
