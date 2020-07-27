@@ -2,10 +2,17 @@
 Installation
 ====================
 
-Using Source Code
--------------------
+You can either use `pip` or clone this repo to install OpenAttack.
 
-You can install OpenAttack by cloning github repository and run ``python setup.py install``.
+1. Using pip (recommended)
+-----------------------------
+
+.. code-block sh
+
+    pip install OpenAttack
+
+2. Cloning this repo
+-----------------------------
 
 .. code-block:: sh
 
@@ -13,7 +20,7 @@ You can install OpenAttack by cloning github repository and run ``python setup.p
     cd OpenAttack
     python setup.py install
 
-After running the above script successfully, you can use demp.py to check if OpenAttack works well.
+After installation, you can try running `demo.py` to check if OpenAttack works well:
 
 .. code-block:: sh
 

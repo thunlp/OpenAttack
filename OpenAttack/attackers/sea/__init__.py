@@ -104,6 +104,8 @@ class SEAAttacker(Attacker):
     @classmethod
     def get_rules(cls, clsf, sentence_list, **kwargs):
         """
+        :param Classifier clsf: Your classifier.
+        :param Dataset sentence_list: A list of sentences.
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
         :param bool cuda: Use gpu or not. **Default:** :True.
         :param int gpu_id: gpu_id. **Default:** :0.
@@ -145,7 +147,7 @@ class SEAAttacker(Attacker):
         ps = paraphrase_scorer.ParaphraseScorer(to_paths=to_paths, back_paths=back_paths, gpu_id=config["gpu_id"], cuda=config["cuda"])
         tokenizer = replace_rules.Tokenizer(config["processor"])
 
-        val_for_onmt = [onmt_model.clean_text(sentence.lower(), only_upper=False) for sentence in sentence_list]
+        val_for_onmt = [onmt_model.clean_text(sentence.x.lower(), only_upper=False) for sentence in sentence_list]
 
         orig_scores = {}
         flips = collections.defaultdict(lambda: [])
