@@ -12,6 +12,7 @@ import numpy as np
 
 DEFAULT_CONFIG = {
     "blackbox": True
+    "textprocessor": DefaultTextProcessor()
 }
 
 
@@ -29,7 +30,7 @@ class TextBuggerAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         self.nlp = DataManager.load("TProcess.NLTKSentTokenizer")
-        self.textprocesser = DefaultTextProcessor()
+        self.textprocessor = self.config["textprocessor"]
         self.counterfit = CounterFittedSubstitute()
         self.glove_vectors = None
 
