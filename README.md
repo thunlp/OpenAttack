@@ -1,10 +1,21 @@
 <h1 align="center">OpenAttack</h1>
 
-![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master) [![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest) ![](https://img.shields.io/badge/PRs-Welcome-red) ![PyPI](https://img.shields.io/pypi/v/OpenAttack?label=OpenAttack)
-
 <p align="center">
-  <a href="https://openattack.readthedocs.io/">Documentation</a> • <a href="#features-&-uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
+  <a target="_blank">
+    <img src="https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master" alt="Github Runner Covergae Status">
+  </a>
+  <a href="https://openattack.readthedocs.io/" target="_blank">
+    <img src="https://readthedocs.org/projects/openattack/badge/?version=latest" alt="ReadTheDoc Status">
+  </a>
+  <a  href="https://pypi.org/project/OpenAttack/"  target="_blank">
+    <img src="https://img.shields.io/pypi/v/OpenAttack?label=OpenAttack" alt="PyPI version">
+  </a>
+   <a target="_blank">
+    <img src="https://img.shields.io/badge/PRs-Welcome-red" alt="PRs are Welcome">
+  </a>
 <br><br>
+  <a href="https://openattack.readthedocs.io/">Documentation</a> • <a href="#features-&-uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
+<br>
 </p>
 
 OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation. 
@@ -115,11 +126,13 @@ attack_eval.eval(dataset, visualize=True)
 
 OpenAttack incorporates many handy components which can be easily assembled into new attack model. 
 
-<u>Here</u> gives an example of how to design a simple word swap attack model.
+[Here](./examples/custom_attacker.py) gives an example of how to design a simple word swap attack model.
 
 #### Advanced: Adversarial Training
 
+OpenAttack can easily generate adversarial examples by attacking instances in the training set, which can be added to original training data set to retrain a more robust victim model, i.e., adversarial training. 
 
+[Here](./examples/adversarial_training.py)  gives an example of how to conduct adversarial training with OpenAttack.
 
 ## Attack Models
 
