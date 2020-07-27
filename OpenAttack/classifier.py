@@ -1,7 +1,6 @@
 import abc
 from .exceptions import ClassifierNotSupportException
 
-
 class Classifier(metaclass=abc.ABCMeta):
     def __init__(self, *args, **kwargs):
         pass
@@ -39,3 +38,14 @@ class Classifier(metaclass=abc.ABCMeta):
         This is used to get the gradients of a batch of sentences(presented as lists of tokens) on the appointed types.
         """
         raise ClassifierNotSupportException()
+    
+    def __getattribute__(self, name):
+        ret = super().__getattribute__(name)
+        if name in ["get_pred", "get_prob", "get_grad"]:
+            def checker(*args):
+                if not isinstance(args[0], list):
+                    raise TypeError("input_ should be a list of str")
+                return ret(*args)
+            return checker
+        return ret
+
