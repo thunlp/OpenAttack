@@ -1,6 +1,6 @@
 <h1 align="center">OpenAttack</h1>
 
-![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master)[![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest)![](https://img.shields.io/badge/PRs-Welcome-red)
+![Test](https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master) [![Documentation Status](https://readthedocs.org/projects/openattack/badge/?version=latest)](https://openattack.readthedocs.io/en/latest/?badge=latest) ![](https://img.shields.io/badge/PRs-Welcome-red) ![PyPI](https://img.shields.io/pypi/v/OpenAttack?label=OpenAttack)
 
 <p align="center">
   <a href="https://openattack.readthedocs.io/">Documentation</a> • <a href="#features-&-uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
