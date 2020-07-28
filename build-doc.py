@@ -145,7 +145,13 @@ def make_substitute(path):
         opt += "    :members: __call__\n\n"
     opt += "-" * 36 + "\n\n"
 
-    for name in getSubClasses(OpenAttack.substitutes, OpenAttack.Substitute):
+    subs = getSubClasses(OpenAttack.substitutes, OpenAttack.Substitute)
+    
+    embed_based_idx = subs.index("EmbedBasedSubstitute")
+    if embed_based_idx != -1:
+        subs[0], subs[embed_based_idx] = subs[embed_based_idx], subs[0]
+
+    for name in subs:
         cls = OpenAttack.substitutes.__dict__[name]
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
         opt += ".. autoclass:: OpenAttack.substitutes.%s(OpenAttack.substitutes.%s)\n" % (name, cls.__base__.__name__)
