@@ -47,8 +47,17 @@ OpenAttack has a wide range of uses, including:
    TextProcessor <apis/text_processor>
    AttackEval <apis/attack_eval>
    Classifier <apis/classifier>
-   data <apis/data>
    utils <apis/utils>
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Data
+
+   AttackAssist <data/AttackAssist>
+   Dataset <data/Dataset>
+   TProcess <data/TProcess>
+   Victim <data/Victim>
 
 Indices and tables
 ==================
