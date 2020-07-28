@@ -80,6 +80,7 @@ class DataManager(object):
     def loadDataset(cls, data_name, cached=True):
         """
         This method is equivalent to ``DataManager.load("Dataset." + data_name)``.
+        :rtype: Dataset
         """
         return cls.load("Dataset." + data_name, cached=cached)
     
@@ -118,7 +119,8 @@ class DataManager(object):
     def get(cls, data_name):
         """
         :param str data_name: The name of data.
-        :return: 
+        :return: Relative path of data.
+        :rtype: str
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
