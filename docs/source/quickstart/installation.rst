@@ -7,7 +7,7 @@ You can either use `pip` or clone this repo to install OpenAttack.
 1. Using pip (recommended)
 -----------------------------
 
-.. code-block sh
+.. code-block:: sh
 
     pip install OpenAttack
 
