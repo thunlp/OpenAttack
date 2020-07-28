@@ -235,6 +235,13 @@ class DefaultTextProcessor(TextProcessor):
         return ret
 
     def detokenizer(self, tokens):
+        """
+        :param list tokens: A list of token.
+        :return: A detokenized sentence.
+        :rtype: str
+        
+        This method is the inverse function of get_tokens which reads a list of tokens and returns a sentence.
+        """
         all_tuple = True
         for it in tokens:
             if not isinstance(it, tuple):
