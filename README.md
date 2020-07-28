@@ -14,7 +14,7 @@
     <img src="https://img.shields.io/badge/PRs-Welcome-red" alt="PRs are Welcome">
   </a>
 <br><br>
-  <a href="https://openattack.readthedocs.io/">Documentation</a> • <a href="#features--uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
+  <a href="https://openattack.readthedocs.io/" target="_blank">Documentation</a> • <a href="#features--uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
 <br>
 </p>
 
