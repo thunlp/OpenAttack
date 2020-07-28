@@ -78,6 +78,7 @@ class DefaultTextProcessor(TextProcessor):
     def get_ner(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordNER` , :py:data:`.TProcess.NLTKSentTokenizer`
+        :Package Requirements: * **Java**
 
         This method uses NLTK tokenizer and Stanford NER toolkit which requires Java installed.
         """
@@ -180,6 +181,7 @@ class DefaultTextProcessor(TextProcessor):
     def get_parser(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordParser`
+        :Package Requirements: * **Java**
 
         This method uses Stanford LexParser to generate a lexical tree.
         """

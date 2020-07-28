@@ -1,6 +1,7 @@
 """
 :type: function
 :Size: 21.164MB
+:Package Requirements: * **Java**
 
 Model files for Stanford NER tagger.
 `[page] <https://nlp.stanford.edu/software/CRF-NER.html>`__
