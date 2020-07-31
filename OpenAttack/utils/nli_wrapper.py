@@ -1,0 +1,14 @@
+def NLIWrapper(func):
+    func_name = func.__code__.co_name
+    if func_name in ["get_pred", "get_prob"]:
+        def warpper1(self, input_, meta):
+            refs = [ meta["reference"] ] * len(input_)
+            return func(self, input_, refs)
+        return warpper1
+    elif func_name in ["get_grad"]:
+        def wrapper2(self, input_, labels, meta):
+            refs = [ meta["reference"] ] * len(input_)
+            return func(self, input_, refs, labels)
+        return wrapper2
+    else:
+        return func
