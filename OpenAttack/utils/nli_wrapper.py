@@ -2,7 +2,7 @@ def NLIWrapper(func):
     """
     ``NLIWrapper`` is a "decorator" used in NLI classifiers to provide a more friendly interface.
 
-    .. code:: python
+    .. code-block:: python
         :linenos:
 
         # original interface

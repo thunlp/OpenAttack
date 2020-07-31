@@ -3,6 +3,7 @@ from .data_manager import DataManager
 
 # text processor
 from .text_processor import TextProcessor
+from .text_processors import DefaultTextProcessor
 
 # attacker
 from .attacker import Attacker

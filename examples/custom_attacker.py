@@ -2,7 +2,7 @@ import OpenAttack
 import random
 
 class MyAttacker(OpenAttack.Attacker):
-    def __init__(self, processor = OpenAttack.text_processors.DefaultTextProcessor()):
+    def __init__(self, processor = OpenAttack.DefaultTextProcessor()):
         self.processor = processor
         # We add parameter ``processor`` to specify the :py:class:`.TextProcessor` which is used for tokenization and detokenization.
         # By default, :py:class:`.DefaultTextProcessor` is used. 
