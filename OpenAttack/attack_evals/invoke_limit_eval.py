@@ -100,7 +100,7 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
         return info
 
     def update(self, info):
-        super().update(info)
+        info = super().update(info)
         if "Queries" in info:
             if "invoke" not in self.__result:
                 self.__result["invoke"] = 0

@@ -1,51 +1,35 @@
 import OpenAttack
+import random
 
 class MyAttacker(OpenAttack.Attacker):
-    def __init__(self, max_iter=20, processor = OpenAttack.text_processors.DefaultTextProcessor()):
+    def __init__(self, processor = OpenAttack.DefaultTextProcessor()):
         self.processor = processor
-        self.max_iter = max_iter
+        # We add parameter ``processor`` to specify the :py:class:`.TextProcessor` which is used for tokenization and detokenization.
+        # By default, :py:class:`.DefaultTextProcessor` is used. 
     
     def __call__(self, clsf, x_orig, target=None):
-        if target is None:
-            target = clsf.get_pred([x_orig])[0]
-            targeted = False
+        x_new = self.swap(x_orig)
+        # Generate a candidate sentence
+
+        y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
+        # Get the preidictions of victim classifier
+
+        if (target is None and y_orig != y_new) or target == y_new:
+            # Check for untargeted or targeted attack
+            return x_new, y_new
         else:
-            targeted = True
-        
-        # generate samples
-        all_sents = []
-        curr_x = self.processor.get_tokens(x_orig)
-        for i in range(self.max_iter):
-            curr_x = self.swap(curr_x)
-            sent = self.processor.detokenizer(curr_x)
-            all_sents.append(sent)
-        
-        # get prediction
-        preds = clsf.get_pred(all_sents)
-
-        for idx, sent in enumerate(all_sents):
-            if targeted:
-                if preds[idx] == target:
-                    return (sent, preds[idx])
-            else:
-                if preds[idx] != target:
-                    return (sent, preds[idx])
-        return None
+            # Failed
+            return None
     
-    def swap(self, sent_token):
-        pairs = []
-        for i in range(len(sent_token)):
-            for j in range(i):
-                if sent_token[i][1] == sent_token[j][1]:    # same POS
-                    pairs.append((i, j))
-        if len(pairs) == 0:
-            return sent_token
+    def swap(self, sentence):
+        tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
+        # Get tokens of sentence
 
-        import random
-        pi, pj = random.choice(pairs)   # random select one pair
-        sent_token[pi], sent_token[pj] = sent_token[pj], sent_token[pi] # swap this pair
-        return sent_token
+        random.shuffle(tokens)
+        # Shuffle tokens to generate a candidate sentence
 
+        return self.processor.detokenizer(tokens)
+        # Return the candidate sentence
 
 def main():
     clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
