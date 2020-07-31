@@ -46,3 +46,8 @@ DataInstance
 .. autoclass:: OpenAttack.utils.DataInstance
     :members: __init__, copy, data
 
+NLIWrapper
+------------
+
+.. autofunction:: OpenAttack.utils.NLIWrapper
+
