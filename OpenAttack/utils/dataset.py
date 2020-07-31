@@ -123,12 +123,13 @@ class Dataset(object):
     def __iter__(self):
         return self.iter(shuffle=False, copy=False)
     
-    def eval(self, clsf, batch_size=1, copy=True, ignore_known=True):
+    def eval(self, clsf, batch_size=1, copy=True, ignore_known=True, ignore_meta=False):
         """
         :param Classifier clsf: classifier.
         :param int batch_size: Number of instances in a batch. **Default:** 1
         :param bool copy: Generate a copy for result. **Default:** True
         :param bool ignore_known: Ignore the data instances which already has a predicted label. **Default:** True
+        :param bool ignore_meta: Ignore meta of data instances when evaluating. **Default:** False
         :return: Results with predictions.
         :rtype: Dataset
 
@@ -151,6 +152,14 @@ class Dataset(object):
                 if copy:
                     ret.append(val.copy())
                 continue
+
+            if (not ignore_meta) and val.meta != {}:  # for instance with meta
+                inst = val.copy() if copy else val
+                inst.pred = clsf.get_pred([inst.x], inst.meta)[0]
+                if copy:
+                    ret.append(inst)
+                continue
+
             batch.append(val)
             if len(batch) < batch_size:
                 continue
