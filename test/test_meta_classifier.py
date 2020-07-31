@@ -1,6 +1,6 @@
 import OpenAttack
 import numpy as np
-import unittest
+import unittest, os
 
 class MetaClassifier(OpenAttack.Classifier):
     def __init__(self):
