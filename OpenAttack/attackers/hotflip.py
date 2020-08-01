@@ -76,7 +76,7 @@ class HotFlipAttacker(Attacker):
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
-            target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
+            target = clsf.get_pred([x_orig])[0]  
         else:
             targeted = True
 
@@ -112,7 +112,6 @@ class HotFlipAttacker(Attacker):
                     self.config["substitute"](word, pos=POS, threshold=threshold)[:num],
                 )
             )
-            #print(sub_words)
             neighbours = []
             for sub_word in sub_words:
                 if self.config["processor"].get_tokens(sub_word)[0][1] == POS:
