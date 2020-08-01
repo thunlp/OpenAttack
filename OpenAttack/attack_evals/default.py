@@ -1,4 +1,5 @@
 from ..attack_eval import AttackEval
+from ..classifier import Classifier
 import json, sys, time
 from tqdm import tqdm
 from ..utils import visualizer, result_visualizer, check_parameters, DataInstance, Dataset
@@ -22,6 +23,22 @@ DEFAULT_CONFIG = {
     "modification_rate": False,
     "running_time": True,
 }
+
+class MetaClassifierWrapper(Classifier):
+    def __init__(self, clsf):
+        self.__meta = None
+        self.__clsf = clsf
+    def set_meta(self, meta):
+        self.__meta = meta
+
+    def get_pred(self, input_):
+        return self.__clsf.get_pred(input_, self.__meta)
+    
+    def get_prob(self, input_):
+        return self.__clsf.get_prob(input_, self.__meta)
+    
+    def get_grad(self, input_, labels):
+        return self.__clsf.get_grad(input_, labels, self.__meta)
 
 class DefaultAttackEval(AttackEval):
     """
@@ -71,6 +88,7 @@ class DefaultAttackEval(AttackEval):
         self.clear()
         self.attacker = attacker
         self.classifier = classifier
+        
         self.__progress_bar = progress_bar
     
     def eval(self, dataset, total_len=None, visualize=False):
@@ -99,18 +117,18 @@ class DefaultAttackEval(AttackEval):
             if visualize:
                 try:
                     if x_adv is not None:
-                        res = self.classifier.get_prob([x_orig, x_adv])
+                        res = self.classifier.get_prob([x_orig, x_adv], data.meta)
                         y_orig = res[0]
                         y_adv = res[1]
                     else:
-                        y_orig = self.classifier.get_prob([x_orig])[0]
+                        y_orig = self.classifier.get_prob([x_orig], data.meta)[0]
                 except ClassifierNotSupportException:
                     if x_adv is not None:
-                        res = self.classifier.get_pred([x_orig, x_adv])
+                        res = self.classifier.get_pred([x_orig, x_adv], data.meta)
                         y_orig = int(res[0])
                         y_adv = int(res[1])
                     else:
-                        y_orig = int(self.classifier.get_pred([x_orig])[0])
+                        y_orig = int(self.classifier.get_pred([x_orig], data.meta)[0])
 
                 if self.__progress_bar:
                     visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
@@ -146,9 +164,12 @@ class DefaultAttackEval(AttackEval):
         :rtype: generator
         """
         self.clear()
+
+        clsf_wrapper = MetaClassifierWrapper(self.classifier)
         for data in dataset:
             assert isinstance(data, DataInstance)
-            res = self.attacker(self.classifier, data.x, data.target)
+            clsf_wrapper.set_meta(data.meta)
+            res = self.attacker(clsf_wrapper, data.x, data.target)
             if res is None:
                 info = self.__update(data.x, None)
             else:

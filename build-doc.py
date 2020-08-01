@@ -81,9 +81,6 @@ def make_data_manager(path):
     return opt
 
 def make_data(path):
-    opt = "=====================\nAll data\n=====================\n\n"
-    opt += ".. _label-apis-data:\n\n"
-
     import pkgutil
     cats = {
 
@@ -108,19 +105,16 @@ def make_data(path):
                 "package":  pack
             })
     
-    first = True
+
+    
     for cat in cats.keys():
-        if first:
-            first = False
-        else:
-            opt += "-" * 36 + "\n\n"
-        
-        opt += cat + "\n" + ("=" * (2 + len(cat))) + "\n\n"
+        opt = "=====================\n%s\n=====================\n\n" % cat
+        opt += ".. _label-data-%s:\n\n" % cat
         for data in cats[cat]:
             opt += data["name"] + "\n" + ("-" * (2 + len(data["name"]))) + "\n\n"
             opt += ".. py:data:: " + cat + "." + data["name"] + "\n\n"
             opt += "    .. automodule:: OpenAttack.data." + data["package"] + "\n\n"
-    open(path, "w", encoding="utf-8").write(opt)
+        open(os.path.join(path, cat + ".rst"), "w", encoding="utf-8").write(opt)
     return opt
 
 def make_metric(path):
@@ -145,7 +139,13 @@ def make_substitute(path):
         opt += "    :members: __call__\n\n"
     opt += "-" * 36 + "\n\n"
 
-    for name in getSubClasses(OpenAttack.substitutes, OpenAttack.Substitute):
+    subs = getSubClasses(OpenAttack.substitutes, OpenAttack.Substitute)
+    
+    embed_based_idx = subs.index("EmbedBasedSubstitute")
+    if embed_based_idx != -1:
+        subs[0], subs[embed_based_idx] = subs[embed_based_idx], subs[0]
+
+    for name in subs:
         cls = OpenAttack.substitutes.__dict__[name]
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
         opt += ".. autoclass:: OpenAttack.substitutes.%s(OpenAttack.substitutes.%s)\n" % (name, cls.__base__.__name__)
@@ -190,7 +190,7 @@ def main(path):
     make_attack_eval(os.path.join(path, "attack_eval.rst"))
     make_classifier(os.path.join(path, "classifier.rst"))
     make_data_manager(os.path.join(path, "data_manager.rst"))
-    make_data(os.path.join(path, "data.rst"))
+    make_data(os.path.join(path, "..", "data"))
     make_metric(os.path.join(path, "metric.rst"))
     make_substitute(os.path.join(path, "substitute.rst"))
     make_text_processor(os.path.join(path, "text_processor.rst"))

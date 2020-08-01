@@ -47,7 +47,7 @@ class DataManager(object):
         """
         :param str data_name: The name of resource that you want to load. You can find all the available resource names in ``DataManager.AVAILABLE_DATAS``. *Note: all the names are* **CASE-SENSITIVE**.
         :param bool cached: If **cached** is *True*, DataManager will lookup the cache before load it to avoid duplicate disk IO. If **cached** is *False*, DataManager will directly load data from disk. **Default:** *True*.
-        :return: data, for details see :doc:`APIs of data </apis/data>` (size, type, description etc).
+        :return: data, for details see the documentation for "Data" (size, type, description etc).
         :rtype: Any
 
         :raises UnknownDataException: For loading an unavailable data.
@@ -80,6 +80,7 @@ class DataManager(object):
     def loadDataset(cls, data_name, cached=True):
         """
         This method is equivalent to ``DataManager.load("Dataset." + data_name)``.
+        :rtype: Dataset
         """
         return cls.load("Dataset." + data_name, cached=cached)
     
@@ -118,7 +119,8 @@ class DataManager(object):
     def get(cls, data_name):
         """
         :param str data_name: The name of data.
-        :return: 
+        :return: Relative path of data.
+        :rtype: str
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException

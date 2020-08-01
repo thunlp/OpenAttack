@@ -16,10 +16,10 @@ CharSubstitute
 
 ------------------------------------
 
-CounterFittedSubstitute
--------------------------
+EmbedBasedSubstitute
+----------------------
 
-.. autoclass:: OpenAttack.substitutes.CounterFittedSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
+.. autoclass:: OpenAttack.substitutes.EmbedBasedSubstitute(OpenAttack.substitutes.WordSubstitute)
     :members:
 
 DCESSubstitute
@@ -34,10 +34,10 @@ ECESSubstitute
 .. autoclass:: OpenAttack.substitutes.ECESSubstitute(OpenAttack.substitutes.CharSubstitute)
     :members:
 
-EmbedBasedSubstitute
-----------------------
+CounterFittedSubstitute
+-------------------------
 
-.. autoclass:: OpenAttack.substitutes.EmbedBasedSubstitute(OpenAttack.substitutes.WordSubstitute)
+.. autoclass:: OpenAttack.substitutes.CounterFittedSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
     :members:
 
 GloveSubstitute

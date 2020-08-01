@@ -4,3 +4,4 @@ from .zip_downloader import make_zip_downloader
 from .visualizer import visualizer, result_visualizer
 from .bert_model import BertClassifier
 from .dataset import Dataset, DataInstance
+from .nli_wrapper import NLIWrapper

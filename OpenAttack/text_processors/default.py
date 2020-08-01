@@ -78,6 +78,7 @@ class DefaultTextProcessor(TextProcessor):
     def get_ner(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordNER` , :py:data:`.TProcess.NLTKSentTokenizer`
+        :Package Requirements: * **Java**
 
         This method uses NLTK tokenizer and Stanford NER toolkit which requires Java installed.
         """
@@ -180,6 +181,7 @@ class DefaultTextProcessor(TextProcessor):
     def get_parser(self, sentence):
         """
         :Data Requirements: :py:data:`.TProcess.StanfordParser`
+        :Package Requirements: * **Java**
 
         This method uses Stanford LexParser to generate a lexical tree.
         """
@@ -235,6 +237,13 @@ class DefaultTextProcessor(TextProcessor):
         return ret
 
     def detokenizer(self, tokens):
+        """
+        :param list tokens: A list of token.
+        :return: A detokenized sentence.
+        :rtype: str
+        
+        This method is the inverse function of get_tokens which reads a list of tokens and returns a sentence.
+        """
         all_tuple = True
         for it in tokens:
             if not isinstance(it, tuple):

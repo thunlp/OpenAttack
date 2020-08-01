@@ -1,6 +1,7 @@
 """
 :type: function
 :Size: 603.979MB
+:Package Requirements: * **Java**
 
 Model files for Stanford Parser.
 `[page] <https://nlp.stanford.edu/software/lex-parser.shtml>`__
