@@ -22,8 +22,6 @@ class HowNetSubstitute(WordSubstitute):
         self.hownet_dict = DataManager.load("AttackAssist.HowNet")
         self.wn = DataManager.load("TProcess.NLTKWordNet")
         self.en_word_list = self.hownet_dict.get_en_words()
-        # self.hownet_dict = OpenHowNet.HowNetDict()
-        # self.wnl = WordNetLemmatizer()
 
     def __call__(self, word, pos_tag, threshold=None):
         pp = "noun"
@@ -41,7 +39,6 @@ class HowNetSubstitute(WordSubstitute):
         if pos_tag is None:
             return [word]
         word_candidate = []
-        # pos_tag = 'noun' 'verb' 'adj' 'adv'
         if pos_tag not in pos_set:
             raise UnknownPOSException(word, pos_tag)
 
@@ -80,8 +77,6 @@ class HowNetSubstitute(WordSubstitute):
             # sememe
             wd_sememes = self.hownet_dict.get_sememes_by_word(wd, structured=False, lang="en", merge=False)
             wd_sememe_sets = [t['sememes'] for t in wd_sememes]
-            # print("w1_sememes: " + word_sememe_sets)
-            # print("w2_sememes: " + wd_sememe_sets)
             if len(wd_sememes) == 0:
                 continue
             can_be_sub = False
@@ -98,9 +93,7 @@ class HowNetSubstitute(WordSubstitute):
         word_candidate_1 = []
         for wd in word_candidate:
             wdlist = wd.split(' ')
-            # print("000", wd, len(wdlist))
             if len(wdlist) == 1:
-                # print("111", wd)
                 word_candidate_1.append(wd)
         ret = []
         for wd in word_candidate_1:

@@ -5,10 +5,6 @@ from ..substitutes import CounterFittedSubstitute
 from ..exceptions import WordNotInDictionaryException
 import random
 import numpy as np
-# from spacy.lang.en import English
-# import nltk
-# from nltk.tokenize import TreebankWordTokenizer
-# from spacy.lang.en import English
 
 
 DEFAULT_CONFIG = {
@@ -41,7 +37,6 @@ class TextBuggerAttacker(Attacker):
         * **x_orig** : Input sentence.
         """
         y_orig = clsf.get_pred([x_orig])[0]
-        # x = self.treebank.tokenize(x_orig)  # tokenize
         x = self.tokenize(x_orig)
         sentences_of_doc = self.get_sentences(x)
         ranked_sentences = self.rank_sentences(sentences_of_doc, clsf, y_orig)
@@ -52,16 +47,12 @@ class TextBuggerAttacker(Attacker):
                 ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
             else:
                 ranked_words = self.get_w_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
-            # ranked_words = self.get_word_importances(sentences_of_doc[sentence_index], clsf, y_orig)
             for word in ranked_words:
                 bug = self.selectBug(word, x_prime, clsf)
                 x_prime = self.replaceWithBug(x_prime, word, bug)
-                # x_prime_sentence = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x_prime)
                 x_prime_sentence = self.textprocessor.detokenizer(x_prime)
                 prediction = clsf.get_pred([x_prime_sentence])[0]
 
-                # if self.getSemanticSimilarity(x, x_prime, self.epsilon) <= self.epsilon:
-                #    return None  # elelelelelel
                 if target is None:
                     if prediction != y_orig:
                         return self.textprocessor.detokenizer(x_prime), prediction
@@ -71,15 +62,7 @@ class TextBuggerAttacker(Attacker):
         return None
 
     def get_sentences(self, x):
-        # original_review = nltk.tokenize.treebank.TreebankWordDetokenizer().detokenize(x)
-        # self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
-        # doc = self.nlp(original_review)
         return [self.textprocessor.detokenizer(x)]
-        '''original_review = self.textprocessor.detokenizer(x)
-        doc = self.nlp(original_review)
-        sentences = [sent.strip() for sent in doc]
-        # sentences = [sent.string.strip() for sent in doc]
-        return sentences'''
 
     def rank_sentences(self, sentences, clsf, target_all):
         map_sentence_to_loss = {}  # 与原文不同
@@ -94,8 +77,6 @@ class TextBuggerAttacker(Attacker):
         return sentences_sorted_by_loss
 
     def get_word_importances(self, sentence, clsf, y_orig):
-
-        # sentence_tokens = self.treebank.tokenize(sentence)
         sentence_tokens = self.tokenize(sentence)
         word_losses = {}
         for curr_token in sentence_tokens:
@@ -110,7 +91,6 @@ class TextBuggerAttacker(Attacker):
     def get_w_word_importances(self, sentence, clsf, y_orig):  # white
         from collections import OrderedDict
 
-        # sentence = self.textprocessor.detokenizer(self.tokenize(sentence))
         sentence_tokens = self.tokenize(sentence)
         prob, grad = clsf.get_grad([sentence_tokens], [y_orig])
         grad = grad[0]
@@ -130,7 +110,6 @@ class TextBuggerAttacker(Attacker):
         return word_losses
 
     def getSemanticSimilarity(x, x_prime, epsilon):
-        # to be continue
         return epsilon + 1
 
     def selectBug(self, original_word, x_prime, clsf):
@@ -184,7 +163,6 @@ class TextBuggerAttacker(Attacker):
             return res[0][0]
         except WordNotInDictionaryException:
             return word
-        return res
 
     def bug_insert(self, word):
         if len(word) >= 6:
@@ -255,6 +233,5 @@ class TextBuggerAttacker(Attacker):
         return neighbors
 
     def tokenize(self, sent):
-        # tokens = sent.strip().split()
         tokens = list(map(lambda x: x[0], self.textprocessor.get_tokens(sent)))
         return tokens
