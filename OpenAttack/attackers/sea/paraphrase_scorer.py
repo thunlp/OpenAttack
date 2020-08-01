@@ -15,8 +15,7 @@ DEFAULT_TO_PATHS = ['data/TranslationModels/english_french_model_acc_71.05_ppl_3
 DEFAULT_BACK_PATHS = ['data/TranslationModels/french_english_model_acc_68.51_ppl_4.43_e13.pt', 'data/TranslationModels/portuguese_english_model_acc_69.93_ppl_5.04_e13.pt']
 
 def choose_forward_translation(sentence, to_translator, back_translator, n=5):
-    # chooses the to_translation that gives the best back_score to
-    # sentence given back_translation
+
     translations = to_translator.translate([sentence], n_best=n,
                                            return_from_mapping=True)[0]
     mappings = [x[2] for x in translations if x[0]]
@@ -25,7 +24,7 @@ def choose_forward_translation(sentence, to_translator, back_translator, n=5):
     return translations[np.argmax(scores)], mappings[np.argmax(scores)]
 
 def normalize_ll(x):
-    # normalizes vector of log likelihoods
+
     max_ = x.max()
     b = np.exp(x - max_)
     return b / b.sum()
@@ -103,7 +102,7 @@ class ParaphraseScorer(object):
         return sorted(zip(others, n_scores), key=lambda x:x[1], reverse=True)
 
     def weight_by_edit_distance(self, sentence, distribution):
-        # Distribution is a list of (text, weight) tuples, unnormalized
+
         others = [x[0] for x in distribution]
         n_scores = np.array([x[1] for x in distribution])
         import editdistance
@@ -127,7 +126,7 @@ class ParaphraseScorer(object):
 
    
     def generate_paraphrases(self, sentence, topk=10, threshold=None, edit_distance_cutoff=None, penalize_unks=True, frequent_ngrams=None):
-        # returns a list of (sentence, score).
+
         assert threshold or topk
         encoder_states = []
         contexts = []
@@ -151,7 +150,6 @@ class ParaphraseScorer(object):
         if threshold:
             threshold = threshold + orig_score
 
-        # Always include original sentence in this
         orig = onmt_model.clean_text(sentence)
         output = dict([(orig, orig_score)])
         orig_ids = np.array([self.global_stoi[onmt.IO.BOS_WORD]] + [self.global_stoi[x] if x in self.global_stoi else onmt.IO.UNK for x in orig.split()])
@@ -253,7 +251,7 @@ class ParaphraseScorer(object):
                     if tag == 'replace':
                         for i1, j1 in zip_longest(range(i1, i2), range(j1, j2)):
                             if i1 is None:
-                                i1 = i2# - 1
+                                i1 = i2
                                 possibles.append([i1 - 1, i1])
                             elif j1 is None:
                                 possibles.append([i1])
@@ -268,7 +266,7 @@ class ParaphraseScorer(object):
             if frequent_ngrams is not None:
                 for i, p_rep in enumerate(prev_distance_rep):
                     for idx, v in orig_itoi.items():
-                        # I'm ignoring UNKs here and letting them be fixed in the next iteration
+
                         if idx == onmt.IO.UNK:
                             continue
                         candidate = p_rep + [v]
@@ -286,7 +284,7 @@ class ParaphraseScorer(object):
             if edit_distance_cutoff is not None:
                 for i, p_rep in enumerate(prev_distance_rep):
                     for idx, v in orig_itoi.items():
-                        # I'm ignoring UNKs here and letting them be fixed in the next iteration
+
                         if idx == onmt.IO.UNK:
                             continue
                         candidate = p_rep + [v]

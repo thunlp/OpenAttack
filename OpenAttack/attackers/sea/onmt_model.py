@@ -40,7 +40,6 @@ class OnmtModel(object):
                 batch_size = 1, n_best = 5, max_sent_length = 300, replace_unk = True, verbose = True, attn_debug = True, 
                 dump_beam = "", dynamic_dict = True, share_vocab = True, alpha = 0.0, beta = 0.0, cuda=True)
         opt = argparse.Namespace(**opt)
-        #opt = parser.parse_args(( '-model %s -src /tmp/a -tgt /tmp/b -output /tmp/c -gpu %d -verbose -beam_size 5 -batch_size 1 -n_best 5 -replace_unk' % (model_path, gpu_id)).split()) # noqa
         opt.cuda = opt.gpu > -1
         if opt.cuda:
             torch.cuda.set_device(opt.gpu)
@@ -93,8 +92,7 @@ class OnmtModel(object):
         return self.translator.fields['tgt'].vocab
 
     def translate(self, sentences, n_best=1, return_from_mapping=False):
-        # Returns a 2d list (len(sentences), n(best)) of pairs, where each
-        # is a translation and a score
+
         sentences = [clean_text(x) for x in sentences]
         data = ONMTDataset2(sentences, None, self.translator.fields,
                             None)
@@ -107,7 +105,7 @@ class OnmtModel(object):
         out = []
         scores = []
         mappings = []
-        # gold = []
+
         self.translator.opt.n_best = n_best
         prev_beam_size = self.translator.opt.beam_size
         vocab = self.translator.fields['tgt'].vocab
@@ -115,11 +113,11 @@ class OnmtModel(object):
             self.translator.opt.beam_size = n_best
         batch = next(testData.__iter__())
         _, lens = batch.src
-        # This only works if batch_size is one
+
 
         predBatch, goldBatch, predScore, goldScore, attn, src = (
             self.translator.translate(batch, data))
-        # This is doing replace_unk
+
         if self.translator.opt.replace_unk:
             src_example = batch.dataset.examples[batch.indices[0].data.item()].src
             for i, x in enumerate(predBatch):
@@ -215,11 +213,9 @@ class ONMTDataset2(torchtext.data.Dataset):
         self.src_vocabs = []
         for i, src_line in enumerate(src_path):
             src_line = src_line.split()
-            # if len(src_line) == 0:
-            #     skip[i] = True
-            #     continue
+
             if self.type_ == "text":
-                # Check truncation condition.
+
                 if opt is not None and opt.src_seq_length_trunc != 0:
                     src_line = src_line[:opt.src_seq_length_trunc]
                 src, src_feats, _ = extractFeatures(src_line)
@@ -230,12 +226,10 @@ class ONMTDataset2(torchtext.data.Dataset):
                 examples.append(d)
                 src_words.append(src)
 
-                # Create dynamic dictionaries
                 if opt is None or opt.dynamic_dict:
-                    # a temp vocab of a single source example
+
                     src_vocab = torchtext.vocab.Vocab(Counter(src))
 
-                    # mapping source tokens to indices in the dynamic dict
                     src_map = torch.LongTensor(len(src)).fill_(0)
                     for j, w in enumerate(src):
                         src_map[j] = src_vocab.stoi[w]
@@ -247,7 +241,6 @@ class ONMTDataset2(torchtext.data.Dataset):
             for i, tgt_line in enumerate(tgt_path):
                 tgt_line = tgt_line.split()
 
-                # Check truncation condition.
                 if opt is not None and opt.tgt_seq_length_trunc != 0:
                     tgt_line = tgt_line[:opt.tgt_seq_length_trunc]
 
@@ -256,7 +249,7 @@ class ONMTDataset2(torchtext.data.Dataset):
 
                 if opt is None or opt.dynamic_dict:
                     src_vocab = self.src_vocabs[i]
-                    # Map target tokens to indices in the dynamic dict
+
                     mask = torch.LongTensor(len(tgt)+2).fill_(0)
                     for j in range(len(tgt)):
                         mask[j+1] = src_vocab.stoi[tgt[j]]
@@ -392,9 +385,9 @@ class ONMTDataset2(torchtext.data.Dataset):
         fields["tgt"].build_vocab(train, max_size=opt.tgt_vocab_size,
                                   min_freq=opt.tgt_words_min_frequency)
 
-        # Merge the input and output vocabularies.
+
         if opt.share_vocab:
-            # `tgt_vocab_size` is ignored when sharing vocabularies
+
             merged_vocab = onmt.IO.merge_vocabs(
                 [fields["src"].vocab, fields["tgt"].vocab],
                 vocab_size=opt.src_vocab_size)

@@ -88,7 +88,6 @@ class ReplaceRule:
         self.replace_sequence = replace_sequence
 
     def apply(self, token_sequence, status_only=False, return_position=False, fix_apostrophe=True):
-        # Returns (status, [new_texts]), where status can be False (doesn't apply)
         token_sequence = [Token('<s>', '<s>', '<s>')] + token_sequence + [Token('</s>', '</s>', '</s>')]
         match_idx = 0
         size_seq = len(self.op_sequence)
@@ -133,8 +132,6 @@ class ReplaceRule:
         return True, ret_text
 
     def apply_to_texts(self, token_sequences, idxs_only=False, fix_apostrophe=True):
-        # returns (idxs, new_texts), where
-        # idxs is the indices where rule applies, and texts is the results text
         idxs = []
         new_texts = []
         for i, token_seq in enumerate(token_sequences):
