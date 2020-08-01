@@ -100,9 +100,7 @@ class DeepWordBugAttacker(Attacker):
                 tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))  # ##
             softmax = torch.nn.Softmax(dim=1)
             nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-            # losses[i] = F.nll_loss(tempoutput, torch.tensor([[y_orig]], dtype=torch.long), reduce=False)
             losses[i] = nll_lossed  # ##
-            # print(" ".join(tempinputs), nll_lossed)
         return losses
 
     def temporal(self, clsf, inputs, y_orig):
@@ -115,7 +113,6 @@ class DeepWordBugAttacker(Attacker):
             tempinputs = inputs[: i + 1]
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
-            # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
             print(self.config["processor"].detokenizer(tempinputs), losses1[i])
         for i in range(1, len(inputs)):
@@ -132,7 +129,6 @@ class DeepWordBugAttacker(Attacker):
             tempinputs = inputs[i:]
             with torch.no_grad():
                 tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
-            # losses1[i] = F.nll_loss(tempoutput, y_orig, reduce=False)
             losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])

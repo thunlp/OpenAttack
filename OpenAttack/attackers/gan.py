@@ -101,7 +101,6 @@ class GANAttacker(Attacker):
             mus = z.repeat(self.nsamples, 1)
             delta = torch.FloatTensor(mus.size()).uniform_(-1 * right_curr, right_curr)
             dist = np.array([np.sqrt(np.sum(x ** 2)) for x in delta.cpu().numpy()])
-            # print(dist)
             perturb_z = Variable(mus + delta)  # ####  volatile=True
 
             x_tilde = self.gan_gen(perturb_z)  # perturb
@@ -114,8 +113,6 @@ class GANAttacker(Attacker):
                 words = [self.idx2word[x] for x in sample_idx]
                 if "<eos>" in words:
                     words = words[:words.index("<eos>")]
-                # adv_prob.append(clsf.get_pred([" ".join(words)])[0])
-                # sentences.append(" ".join(words))
                 adv_prob.append(clsf.get_pred([self.config["processor"].detokenizer(words)])[0])
                 sentences.append(self.config["processor"].detokenizer(words))
             for i in range(self.nsamples):
@@ -131,8 +128,6 @@ class GANAttacker(Attacker):
                 right_curr *= 2
             else:
                 idx_adv = get_min(index_adv, dist)
-                # x_adv = x_tilde[idx_adv]
-                # d_adv = float(dist[idx_adv])
                 return sentences[idx_adv], clsf.get_pred([sentences[idx_adv]])[0]
         return None
 
@@ -186,7 +181,6 @@ class GANAttacker(Attacker):
 
         masked_output = flattened_output.masked_select(output_mask).view(-1, ntokens)
 
-        # max_vals, max_indices = torch.max(masked_output, 1)
         max_values, max_indices = torch.max(output, 2)
         max_indices = max_indices.view(output.size(0), -1).data.cpu().numpy()
         target = target.view(output.size(0), -1).data.cpu().numpy()
@@ -199,7 +193,6 @@ class GANAttacker(Attacker):
             for i in range(len(words)):
                 if words[i] is "<oov>":
                     words[i] = ""
-            # sent = " ".join(words)
             sent = self.config["processor"].detokenizer(words)
             pred = clsf.get_pred([sent])[0]
             if tt is None:
