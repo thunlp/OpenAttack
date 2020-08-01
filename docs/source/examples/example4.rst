@@ -126,4 +126,4 @@ Complete Code
     if __name__ == "__main__":
         main()
 
-Run ``python examples/custom_measurement.py`` to see visualized results.
+Run ``python examples/custom_eval.py`` to see visualized results.
