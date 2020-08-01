@@ -1,3 +1,6 @@
+'''
+This example code shows how to  how to use a genetic algorithm-based attack model to attack BiLSTM on the SST dataset.
+'''
 import OpenAttack
 
 def main():

@@ -1,3 +1,6 @@
+'''
+This example code shows how to design a simple customized attack model which shuffles the tokens in the original sentence.
+'''
 import OpenAttack
 import random
 
@@ -8,28 +11,28 @@ class MyAttacker(OpenAttack.Attacker):
         # By default, :py:class:`.DefaultTextProcessor` is used. 
     
     def __call__(self, clsf, x_orig, target=None):
+        # Generate a potential adversarial example
         x_new = self.swap(x_orig)
-        # Generate a candidate sentence
-
-        y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
+        
         # Get the preidictions of victim classifier
+        y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
 
+        # Check for untargeted or targeted attack
         if (target is None and y_orig != y_new) or target == y_new:
-            # Check for untargeted or targeted attack
             return x_new, y_new
         else:
             # Failed
             return None
     
     def swap(self, sentence):
-        tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
         # Get tokens of sentence
-
+        tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
+        
+        # Shuffle tokens to generate a potential adversarial example
         random.shuffle(tokens)
-        # Shuffle tokens to generate a candidate sentence
-
+        
+        # Return the potential adversarial example
         return self.processor.detokenizer(tokens)
-        # Return the candidate sentence
 
 def main():
     clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
