@@ -120,7 +120,6 @@ def disqualify_rules(rule_scores, rule_flips, rule_precsupports, min_precision=0
 def choose_rules_coverage(rule_scores, rule_flips, rule_supports, rule_precsupports, val_length, k=10,
                           metric='max', min_precision=0, min_flips=0, min_bad_score=-99999, max_bad_proportion = 1, max_bad_sum=99999999, exp=True,
                           frequent_scores_on_all=None, disqualified=None, start_from=None):
-    # coverage * score
     current_score = np.zeros(val_length)
     chosen_rules = []
     rule_precisions = []

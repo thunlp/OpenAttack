@@ -84,7 +84,7 @@ class TextFoolerAttacker(Attacker):
         x_copy = x_orig
         if target is None:
             targeted = False
-            target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
+            target = clsf.get_pred([x_orig])[0]  
         else:
             targeted = True
         orig_probs = clsf.get_prob([x_orig])
@@ -97,14 +97,14 @@ class TextFoolerAttacker(Attacker):
 
         len_text = len(x_orig)
         if len_text < self.config["sim_score_window"]:
-            self.config["sim_score_threshold"] = 0.1  # shut down the similarity thresholding function
+            self.config["sim_score_threshold"] = 0.1  
         half_sim_score_window = (self.config["sim_score_window"] - 1) // 2
 
 
-        # get the pos and verb tense info
+
         pos_ls = list(map(lambda x: x[1], self.config["processor"].get_tokens(x_copy)))
 
-        # get importance score
+
 
         leave_1_texts = [x_orig[:ii] + ['<oov>'] + x_orig[min(ii + 1, len_text):] for ii in range(len_text)]
         leave_1_probs = clsf.get_prob([self.config["processor"].detokenizer(sentence) for sentence in leave_1_texts])
@@ -122,7 +122,7 @@ class TextFoolerAttacker(Attacker):
                 print(idx, len(x_orig), import_scores.shape, x_orig, len(leave_1_texts))
 
 
-        # find synonyms
+
         synonym_words = [
             self.get_neighbours(word, pos)
             if word not in self.config["skip_words"]
@@ -135,14 +135,14 @@ class TextFoolerAttacker(Attacker):
             if synonyms:
                 synonyms_all.append((idx, synonyms))
 
-        # start replacing and attacking
+
         text_prime = x_orig[:]
         text_cache = text_prime[:]
         for idx, synonyms in synonyms_all:
             new_texts = [text_prime[:idx] + [synonym] + text_prime[min(idx + 1, len_text):] for synonym in synonyms]
             new_probs = clsf.get_prob([self.config["processor"].detokenizer(sentence) for sentence in new_texts])
 
-            # compute semantic similarity
+
             if idx >= half_sim_score_window and len_text - idx - 1 >= half_sim_score_window:
                 text_range_min = idx - half_sim_score_window
                 text_range_max = idx + half_sim_score_window + 1
@@ -161,9 +161,9 @@ class TextFoolerAttacker(Attacker):
             if len(new_probs.shape) < 2:
                 new_probs = new_probs.unsqueeze(0)
             new_probs_mask = orig_label != np.argmax(new_probs, axis=-1)
-            # prevent bad synonyms
+
             new_probs_mask *= (semantic_sims >= self.config["sim_score_threshold"])
-            # prevent incompatible pos
+
             synonyms_pos_ls = [list(map(lambda x: x[1], self.config["processor"].get_tokens(self.config["processor"].detokenizer(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
                                if len(new_text) > 10 else list(map(lambda x: x[1], self.config["processor"].get_tokens(self.config["processor"].detokenizer(new_text))))[idx] for new_text in new_texts]
 

@@ -77,7 +77,7 @@ class SEAAttacker(Attacker):
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
-            target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
+            target = clsf.get_pred([x_orig])[0]  
         else:
             targeted = True
 
