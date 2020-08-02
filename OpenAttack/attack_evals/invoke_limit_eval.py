@@ -9,36 +9,37 @@ class InvokeLimitException(Exception):
 
 class InvokeLimitClassifierWrapper(Classifier):
     def __init__(self, clsf, invoke_limit):
-        self.invoke_limit = invoke_limit
-        self.clsf = clsf
-        self.brk = False
+        self.__invoke_limit = invoke_limit
+        self.__clsf = clsf
+        self.__brk = False
+        self.__invoke = 0
 
     def clear(self):
-        self.invoke = 0
+        self.__invoke = 0
     
     def test(self, limit=True):
-        self.brk = limit
+        self.__brk = limit
     
     def get_invoke(self):
-        return self.invoke
+        return self.__invoke
     
-    def get_pred(self, input_):
-        if self.brk and self.invoke >= self.invoke_limit:
+    def get_pred(self, input_, meta):
+        if self.__brk and self.__invoke >= self.__invoke_limit:
             raise InvokeLimitException()
-        self.invoke += len(input_)
-        return self.clsf.get_pred(input_)
+        self.__invoke += len(input_)
+        return self.__clsf.get_pred(input_, meta)
     
-    def get_prob(self, input_):
-        if self.brk and self.invoke >= self.invoke_limit:
+    def get_prob(self, input_, meta):
+        if self.__brk and self.__invoke >= self.__invoke_limit:
             raise InvokeLimitException()
-        self.invoke += len(input_)
-        return self.clsf.get_prob(input_)
+        self.__invoke += len(input_)
+        return self.__clsf.get_prob(input_, meta)
     
-    def get_grad(self, input_, labels):
-        if self.brk and self.invoke > self.invoke_limit:
+    def get_grad(self, input_, labels, meta):
+        if self.__brk and self.__invoke > self.__invoke_limit:
             raise InvokeLimitException()
-        self.invoke += len(input_)
-        return self.clsf.get_grad(input_, labels)
+        self.__invoke += len(input_)
+        return self.__clsf.get_grad(input_, labels, meta)
 
 class InvokeLimitAttackerWrapper(Attacker):
     def __init__(self, attacker, clsf):
@@ -99,7 +100,7 @@ class InvokeLimitedAttackEval(DefaultAttackEval):
         return info
 
     def update(self, info):
-        super().update(info)
+        info = super().update(info)
         if "Queries" in info:
             if "invoke" not in self.__result:
                 self.__result["invoke"] = 0

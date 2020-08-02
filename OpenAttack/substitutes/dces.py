@@ -1,6 +1,5 @@
 from .base import CharSubstitute
 from ..data_manager import DataManager
-# from ..exceptions import
 import numpy as np
 
 

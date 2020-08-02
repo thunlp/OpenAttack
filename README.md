@@ -126,13 +126,19 @@ attack_eval.eval(dataset, visualize=True)
 
 OpenAttack incorporates many handy components which can be easily assembled into new attack model. 
 
-[Here](./examples/custom_attacker.py) gives an example of how to design a simple word swap attack model.
+[Here](./examples/custom_attacker.py) gives an example of how to design a simple attack model which shuffles the tokens in the original sentence.
 
 #### Advanced: Adversarial Training
 
 OpenAttack can easily generate adversarial examples by attacking instances in the training set, which can be added to original training data set to retrain a more robust victim model, i.e., adversarial training. 
 
 [Here](./examples/adversarial_training.py)  gives an example of how to conduct adversarial training with OpenAttack.
+
+#### Advanced: Design a Customized Evaluation Metric
+
+OpenAttack supports designing a customized adversarial attack evaluation metric.
+
+[Here](./examples/custom_eval.py)  gives an example of how to add BLEU score as a customized evaluation metric to evaluate adversarial attacks.
 
 ## Attack Models
 
