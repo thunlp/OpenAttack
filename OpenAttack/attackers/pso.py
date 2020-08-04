@@ -97,7 +97,6 @@ class PSOAttacker(Attacker):
         if np.sum(neighbours_nums) == 0:
             return None
 
-
         pop = self.generate_population(
                 clsf, x_orig, neighbours,neighbours_nums,x_len, target, targeted)
         part_elites = copy.deepcopy(pop)
@@ -240,8 +239,8 @@ class PSOAttacker(Attacker):
             if word != x_cur[pos]:
                 new_list.append(self.do_replace(x_cur,pos,word))
                 rep_words.append(word)
-        if len(new_list) == 0:
-            return x_cur
+        if len(new_list)==0:
+            return 0,x_cur[pos]
         new_list.append(x_cur)
 
         pred_scores = clsf.get_prob(self.make_batch(new_list))[:, target]
