@@ -41,8 +41,6 @@ DEFAULT_CONFIG = {
     "skip_words": DEFAULT_SKIP_WORDS,
     "pop_size": 20,
     "max_iters": 20,
-    "neighbour_threshold": 0.5,
-    "top_n1": 20,
     "processor": DefaultTextProcessor(),
     "substitute": None,
 }
@@ -53,11 +51,9 @@ class GeneticAttacker(Attacker):
         """
         :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
         :param int pop_size: Genetic algorithm popluation size. **Default:** 20
-        :param int max_iter: Maximum generations of genetic algorithm. **Default:** 20
-        :param float neighbour_threshold: Threshold used in substitute module. **Default:** 0.5
-        :param int top_n1: Maximum candidates of word substitution. **Default:** 20
+        :param int max_iter: Maximum generations of pso algorithm. **Default:** 20
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
+        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`hownet`
         :Classifier Capacity: Probability
         Generating Natural Language Adversarial Examples. Moustafa Alzantot, Yash Sharma, Ahmed Elgohary, Bo-Jhang Ho, Mani Srivastava, Kai-Wei Chang. EMNLP 2018.
         `[pdf] <https://www.aclweb.org/anthology/D18-1316.pdf>`__
@@ -92,7 +88,7 @@ class GeneticAttacker(Attacker):
             for word, pos in zip(x_orig, x_pos)
         ]
         neighbours = [
-            self.get_neighbours(word, pos, self.config["top_n1"])
+            self.get_neighbours(word, pos)
             if word not in self.config["skip_words"]
             else []
             for word, pos in zip(x_orig, x_pos)
@@ -294,20 +290,17 @@ class GeneticAttacker(Attacker):
         h_score = np.array(h_score)
         return h_score, w_list
     def get_neighbour_num(self, word, pos):
-        threshold = self.config["neighbour_threshold"]
-        cnt = 0
         try:
-            return len(self.config["substitute"](word, pos, threshold=threshold))
+            return len(self.config["substitute"](word, pos))
         except WordNotInDictionaryException:
             return 0
 
-    def get_neighbours(self, word, pos, num):
-        threshold = self.config["neighbour_threshold"]
+    def get_neighbours(self, word, pos):
         try:
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, pos, threshold=threshold)[:num],
+                    self.config["substitute"](word, pos),
                 )
             )
         except WordNotInDictionaryException:
