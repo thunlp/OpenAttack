@@ -10,3 +10,4 @@ from .viper import VIPERAttacker
 from .deepwordbug import DeepWordBugAttacker
 from .gan import GANAttacker
 from .textbugger import TextBuggerAttacker
+from .pso import PSOAttacker
