@@ -46,7 +46,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class PSOAttacker(Attacker):
+class GeneticAttacker(Attacker):
     def __init__(self, **kwargs):
         """
         :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
