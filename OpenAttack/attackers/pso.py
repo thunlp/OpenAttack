@@ -173,7 +173,7 @@ class PSOAttacker(Attacker):
                 else:
                     new_pop.append(x)
             pop = new_pop
-            pop_preds = clsf.get_prob(self.make_batch(pop))[:, target]
+            pop_preds = clsf.get_prob(self.make_batch(pop))
             pop_scores = pop_preds[:, target]
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
