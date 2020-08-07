@@ -55,9 +55,9 @@ class GeneticAttacker(Attacker):
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
         :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`hownet`
         :Classifier Capacity: Probability
-        Word-level Textual Adversarial Attacking as Combinatorial Optimization. Yuan Zang, Fanchao Qi, Chenghao Yang, Zhiyuan Liu, Meng Zhang, Qun Liu and Maosong Sun. ACL 2020.
-        `[pdf] <https://www.aclweb.org/anthology/2020.acl-main.540.pdf>`__
-        `[code] <https://github.com/thunlp/SememePSO-Attack>`__
+        Generating Natural Language Adversarial Examples. Moustafa Alzantot, Yash Sharma, Ahmed Elgohary, Bo-Jhang Ho, Mani Srivastava, Kai-Wei Chang. EMNLP 2018.
+        `[pdf] <https://www.aclweb.org/anthology/D18-1316.pdf>`__
+        `[code] <https://github.com/nesl/nlp_adversarial_examples>`__
 
         """
         self.config = DEFAULT_CONFIG.copy()
