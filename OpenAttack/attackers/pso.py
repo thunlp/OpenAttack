@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 from ..text_processors import DefaultTextProcessor
-from ..substitutes import HowNetSubstitute
+from ..substitutes import hownet
 from ..exceptions import WordNotInDictionaryException
 from ..utils import check_parameters
 from ..attacker import Attacker
@@ -63,7 +63,7 @@ class PSOAttacker(Attacker):
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         if self.config["substitute"] is None:
-            self.config["substitute"] = HowNetSubstitute()
+            self.config["substitute"] = hownet()
 
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
