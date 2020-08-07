@@ -40,6 +40,12 @@ HotFlipAttacker
 .. autoclass:: OpenAttack.attackers.HotFlipAttacker(OpenAttack.Attacker)
     :members: __init__
 
+PSOAttacker
+-------------
+
+.. autoclass:: OpenAttack.attackers.PSOAttacker(OpenAttack.Attacker)
+    :members: __init__
+
 PWWSAttacker
 --------------
 

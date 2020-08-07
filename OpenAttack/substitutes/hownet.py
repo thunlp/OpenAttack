@@ -10,7 +10,7 @@ pos_set = set(pos_list)
 class HowNetSubstitute(WordSubstitute):
     """
     :Package Requirements: OpenHowNet
-    :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`TProcess.NLTKWordNet`
+    :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
 
     An implementation of :py:class:`.WordSubstitute`.
 
