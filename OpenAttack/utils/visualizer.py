@@ -151,7 +151,11 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=2
     """
     Visualization tools used in :py:class:`.DefaultAttackEval`.
     """
-    cols = os.get_terminal_size().columns
+    try:
+        cols = os.get_terminal_size().columns
+    except OSError:
+        cols = 80
+
     headline = "Sample: %d " % idx
     headline = headline + ("=" * (cols - len(headline) - 1)) + "\n"
     stream_writer(headline)
@@ -195,7 +199,10 @@ def result_visualizer(result, stream_writer):
     """
     Visualization tools used in :py:class:`.DefaultAttackEval`.
     """
-    cols = os.get_terminal_size().columns
+    try:
+        cols = os.get_terminal_size().columns
+    except OSError:
+        cols = 80
 
     left = []
     right = []
