@@ -1,5 +1,4 @@
 <h1 align="center">OpenAttack</h1>
-
 <p align="center">
   <a target="_blank">
     <img src="https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master" alt="Github Runner Covergae Status">
@@ -179,6 +178,7 @@ Following table illustrates the comparison of the attack models.
 |     SEA     |    Decision     |   Sentence   | Rule-based paraphrasing                             |
 |    SCPN     |      Blind      |   Sentence   | Paraphrasing                                        |
 |     GAN     |    Decision     |   Sentence   | Text generation by encoder-decoder                  |
+|  SememePSO  |      Score      |     Word     | Particle Swarm Optimization-based word substitution |
 | TextFooler  |      Score      |     Word     | Greedy word substitution                            |
 |    PWWS     |      Score      |     Word     | Greedy word substitution                            |
 |   Genetic   |      Score      |     Word     | Genetic algorithm-based word substitution           |
