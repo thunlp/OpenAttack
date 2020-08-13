@@ -18,7 +18,7 @@ def LOAD(path):
             DataInstance(
                 x=it[0],
                 y=it[2],
-                meta= { "reference": it[1] }
+                meta=it[1]
             ) for it in data
         ], copy=False)
 
