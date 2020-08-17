@@ -5,7 +5,7 @@
     * transformers
     * pytorch
 
-Pretrained ROBERTA model on SST dataset. See :py:data:`Dataset.SST` for detail.
+Pretrained ROBERTA model on SST-2 dataset. See :py:data:`Dataset.SST` for detail.
 """
 
 from OpenAttack.utils import make_zip_downloader, RobertaClassifier
