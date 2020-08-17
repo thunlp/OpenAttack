@@ -25,8 +25,6 @@ class DeepWordBugAttacker(Attacker):
         :param string scoring: Scoring function used to compute word importance, ``["replaceone", "temporal", "tail", "combined"]``. **Default:** replaceone
         :param string transformer: Transform function to modify a word, ``["homoglyph", "swap"]``. **Default:** homoglyph
 
-        :Package Requirements:
-            * torch
         :Classifier Capacity: Probability
 
         Black-box Generation of Adversarial Text Sequences to Evade Deep Learning Classifiers. Ji Gao, Jack Lanchantin, Mary Lou Soffa, Yanjun Qi. IEEE SPW 2018.
@@ -40,7 +38,6 @@ class DeepWordBugAttacker(Attacker):
         self.power = self.config["power"]
 
     def __call__(self, clsf, x_orig, target=None):
-        import torch
         """
         * **clsf** : **Classifier** .
         * **x_orig** : Input sentence.
@@ -48,7 +45,7 @@ class DeepWordBugAttacker(Attacker):
         y_orig = clsf.get_pred([x_orig])[0]
         inputs = x_orig.strip().lower().split(" ")
         losses = self.scorefunc(self.scoring, clsf, inputs, y_orig)  # 每个词消失后的loss向量
-        sorted, indices = torch.sort(losses, descending=True)
+        indices = np.argsort(losses)
 
         advinputs = inputs[:]
         t = 0
@@ -90,46 +87,32 @@ class DeepWordBugAttacker(Attacker):
 
     # scoring functions
     def replaceone(self, clsf, inputs, y_orig):
-        import torch
-
-        losses = torch.zeros(len(inputs))
+        losses = np.zeros(len(inputs))
         for i in range(len(inputs)):
             tempinputs = inputs[:]  # ##
             tempinputs[i] = self.config['unk']
-            with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([" ".join(tempinputs)]))  # ##
-            softmax = torch.nn.Softmax(dim=1)
-            nll_lossed = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-            losses[i] = nll_lossed  # ##
+            tempoutput = clsf.get_prob([" ".join(tempinputs)])
+            losses[i] = 1 - tempoutput[0][y_orig]
         return losses
 
     def temporal(self, clsf, inputs, y_orig):
-        import torch
-        softmax = torch.nn.Softmax(dim=1)
-
-        losses1 = torch.zeros(len(inputs))
-        dloss = torch.zeros(len(inputs))
+        losses1 = np.zeros(len(inputs))
+        dloss = np.zeros(len(inputs))
         for i in range(len(inputs)):
             tempinputs = inputs[: i + 1]
-            with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
-            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
-            print(self.config["processor"].detokenizer(tempinputs), losses1[i])
+            tempoutput = clsf.get_prob([self.config["processor"].detokenizer(tempinputs)])
+            losses1[i] = 1 - tempoutput[0][y_orig]
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
 
     def temporaltail(self, clsf, inputs, y_orig):
-        import torch
-        softmax = torch.nn.Softmax(dim=1)
-
-        losses1 = torch.zeros(len(inputs))
-        dloss = torch.zeros(len(inputs))
+        losses1 = np.zeros(len(inputs))
+        dloss = np.zeros(len(inputs))
         for i in range(len(inputs)):
             tempinputs = inputs[i:]
-            with torch.no_grad():
-                tempoutput = torch.from_numpy(clsf.get_prob([self.config["processor"].detokenizer(tempinputs)]))
-            losses1[i] = -1 * torch.log(softmax(tempoutput))[0][y_orig].item()
+            tempoutput = clsf.get_prob([self.config["processor"].detokenizer(tempinputs)])
+            losses1[i] = 1 - tempoutput[0][y_orig]
         for i in range(1, len(inputs)):
             dloss[i] = abs(losses1[i] - losses1[i - 1])
         return dloss
