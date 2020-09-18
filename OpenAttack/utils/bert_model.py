@@ -93,6 +93,7 @@ class BertClassifier(Classifier):
         self.__model = BertModel(model_path, num_labels, max_len, device)
         self.word2id = self.__model.word2id
         self.embedding = self.__model.embedding
+
     
     def to(self, device):
         self.__model.to(device)
