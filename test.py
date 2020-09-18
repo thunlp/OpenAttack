@@ -19,6 +19,7 @@ attackers = [
     OpenAttack.attackers.HotFlipAttacker(),
     OpenAttack.attackers.PWWSAttacker(),
     OpenAttack.attackers.SCPNAttacker(),
+    OpenAttack.attackers.PSOAttacker(),
 ]
 
 for attacker in attackers:

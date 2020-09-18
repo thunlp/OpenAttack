@@ -14,5 +14,5 @@ DOWNLOAD = make_zip_downloader(URL, "english.pickle")
 
 
 def LOAD(path):
-    return __import__("nltk").data.load(os.path.join(path, "english.pickle")).tokenize
+    return __import__("nltk").data.load("file:" + os.path.join(path, "english.pickle")).tokenize
 
