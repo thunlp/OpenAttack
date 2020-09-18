@@ -91,7 +91,7 @@ class RobertaClassifier(Classifier):
     def __init__(self, model_path, num_labels, max_len = 100, device="cpu"):
         self.__model = RobertaModel(model_path, num_labels, max_len, device)
         self.word2id = self.__model.word2id
-        self.embedding = self.__model.model.roberta.embeddings.word_embeddings.weight.detach().numpy()
+        self.embedding = self.__model.model.roberta.embeddings.word_embeddings.weight.detach().cpu().numpy()
     
     def to(self, device):
         self.__model.to(device)
