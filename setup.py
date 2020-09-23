@@ -1,8 +1,5 @@
 import setuptools
-
-"""
-Guide: https://setuptools.readthedocs.io/en/latest/setuptools.html
-"""
+from OpenAttack.version import VERSION
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -14,7 +11,7 @@ with  open("requirements.txt") as freq:
 
 setuptools.setup(
     name="OpenAttack",  # Replace with your own username
-    version="1.1.1",
+    version=VERSION,
     author="THUNLP",
     author_email="thunlp@gmail.com",
     description="OpenAttack",
