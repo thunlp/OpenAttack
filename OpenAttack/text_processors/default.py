@@ -2,7 +2,14 @@ from ..text_processor import TextProcessor
 from ..data_manager import DataManager
 
 
-
+class Tokenizer:
+    def __init__(self, sent_tokenizer, word_tokenizer):
+        self.sent_tokenizer = sent_tokenizer
+        self.word_tokenizer = word_tokenizer
+    
+    def __call__(self, sent_):
+        sentences = self.sent_tokenizer(sent_)
+        return [token for sent in sentences for token in self.word_tokenizer(sent)]
 
 class DefaultTextProcessor(TextProcessor):
     """
@@ -20,10 +27,7 @@ class DefaultTextProcessor(TextProcessor):
     
     def __make_tokenizer(self, sent_tokenizer):
         word_tokenizer = __import__("nltk").WordPunctTokenizer().tokenize
-        def tokenize(sent):
-            sentences = sent_tokenizer(sent)
-            return [token for sent in sentences for token in word_tokenizer(sent)]
-        return tokenize
+        return Tokenizer(sent_tokenizer, word_tokenizer)
 
     def get_tokens(self, sentence):
         """
