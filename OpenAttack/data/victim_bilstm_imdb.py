@@ -10,11 +10,10 @@ Pretrained BiLSTM model on IMDB dataset. See :py:data:`Dataset.IMDB` for detail.
 NAME = "Victim.BiLSTM.IMDB"
 DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/bilstm_imdb.pth"
 
+try:
 
-def LOAD(path):
     import torch
     import torch.nn as nn
-    import OpenAttack
 
     class SentimentRNN(nn.Module):
         def __init__(self, vocab_size, output_size, embedding_dim, hidden_dim, n_layers, bidirectional=True,
@@ -62,8 +61,12 @@ def LOAD(path):
                 hidden = (weight.new(self.n_layers * number, batch_size, self.hidden_dim).zero_(),
                           weight.new(self.n_layers * number, batch_size, self.hidden_dim).zero_())
             return hidden
+    def LOAD(path):
+        import OpenAttack
+        model = SentimentRNN(9998, 1, 300, 256, 2, True)
+        model.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage))
 
-    model = SentimentRNN(9998, 1, 300, 256, 2, True)
-    model.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage))
-
-    return OpenAttack.classifiers.PytorchClassifier(model, token_unk="UNK", require_length=True, device="cpu")
+        return OpenAttack.classifiers.PytorchClassifier(model, token_unk="UNK", require_length=True, device="cpu")
+except ModuleNotFoundError as e:
+    def LOAD(path):
+        raise ModuleNotFoundError(e)
