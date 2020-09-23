@@ -54,4 +54,4 @@ try:
 
 except ModuleNotFoundError as e :
     def LOAD(path):
-        raise ModuleNotFoundError(e)
+        raise e

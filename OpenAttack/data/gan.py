@@ -653,4 +653,4 @@ try:
         return word2idx, autoencoder, inverter, gan_gen, gan_disc
 except ModuleNotFoundError as e:
     def LOAD(path):
-        raise ModuleNotFoundError(e)
+        raise e

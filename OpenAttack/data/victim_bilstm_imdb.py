@@ -69,4 +69,4 @@ try:
         return OpenAttack.classifiers.PytorchClassifier(model, token_unk="UNK", require_length=True, device="cpu")
 except ModuleNotFoundError as e:
     def LOAD(path):
-        raise ModuleNotFoundError(e)
+        raise e
