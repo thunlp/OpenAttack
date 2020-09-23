@@ -1,4 +1,6 @@
 import OpenAttack
+sys.path.insert(0, "..")
+
 from attackers import get_attackers
 def main():
     dataset = OpenAttack.loadDataset("SST")[0][:5]

@@ -6,7 +6,7 @@ def get_attackers(dataset, clsf):
 
 
     attackers = [
-        OpenAttack.attackers.FDAttacker(word2id=clsf.config["word2id"], embedding=clsf.config["embedding"]),
+        OpenAttack.attackers.FDAttacker(word2id=clsf.word2id, embedding=clsf.embedding),
         OpenAttack.attackers.SEAAttacker(rules=rules),
         OpenAttack.attackers.UATAttacker(triggers=triggers),
         OpenAttack.attackers.TextBuggerAttacker(),

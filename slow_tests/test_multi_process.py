@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "..")
+
 import OpenAttack
 from attackers import get_attackers
 
