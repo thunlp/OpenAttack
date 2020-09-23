@@ -10,7 +10,6 @@ class DefaultTextProcessor(TextProcessor):
     """
 
     def __init__(self):
-        self.nltk = __import__("nltk")
         self.__tokenize = None
         self.__tag = None  # LazyLoad
         self.__lemmatize = None
