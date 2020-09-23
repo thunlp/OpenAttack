@@ -1,5 +1,5 @@
 import OpenAttack
-from .attackers import get_attackers
+from attackers import get_attackers
 
 def main():
     import multiprocessing
