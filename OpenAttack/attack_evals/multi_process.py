@@ -9,7 +9,6 @@ def worker(data):
     
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
-    print(data)
     clsf_wrapper = MetaClassifierWrapper(classifier)
     clsf_wrapper.set_meta(data.meta)
     res = attacker(clsf_wrapper, data.x, data.target)
