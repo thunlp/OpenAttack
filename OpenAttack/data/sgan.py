@@ -17,14 +17,13 @@ DOWNLOAD = make_zip_downloader(URL)
 def to_gpu(gpu, var):
     return var
 
-
-def LOAD(path):
+try:
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
     from torch.autograd import Variable
     from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-    import os
+    import os, json
 
     class MLP_D(nn.Module):
         def __init__(self, ninput, noutput, layers,
@@ -633,27 +632,29 @@ def LOAD(path):
 
             return max_indices
 
+    def LOAD(path):
+        word2idx = json.load(open(os.path.join(path, 'vocab.json'), 'r'))
+        ntokens = len(word2idx)
+        autoencoder = Seq2SeqCAE(emsize=300,
+                                nhidden=300,
+                                ntokens=ntokens,
+                                nlayers=1,
+                                noise_radius=0.2,
+                                hidden_init=False,
+                                dropout=0.0,
+                                conv_layer='500-700-1000',
+                                conv_windows='3-3-3',
+                                conv_strides='1-2-2',
+                                gpu=False)
+        inverter = MLP_I_AE(ninput=300, noutput=100, layers='300-300')
+        gan_gen = MLP_G(ninput=100, noutput=300, layers='300-300')
+        gan_disc = MLP_D(ninput=300, noutput=1, layers='300-300')
+        autoencoder.load_state_dict(torch.load(os.path.join(path, 'a.pkl')))
+        inverter.load_state_dict(torch.load(os.path.join(path, 'i.pkl')))
+        gan_gen.load_state_dict(torch.load(os.path.join(path, 'g.pkl')))
+        gan_disc.load_state_dict(torch.load(os.path.join(path, 'd.pkl')))
 
-
-    word2idx = __import__("json").load(open(os.path.join(path, 'vocab.json'), 'r'))
-    ntokens = len(word2idx)
-    autoencoder = Seq2SeqCAE(emsize=300,
-                             nhidden=300,
-                             ntokens=ntokens,
-                             nlayers=1,
-                             noise_radius=0.2,
-                             hidden_init=False,
-                             dropout=0.0,
-                             conv_layer='500-700-1000',
-                             conv_windows='3-3-3',
-                             conv_strides='1-2-2',
-                             gpu=False)
-    inverter = MLP_I_AE(ninput=300, noutput=100, layers='300-300')
-    gan_gen = MLP_G(ninput=100, noutput=300, layers='300-300')
-    gan_disc = MLP_D(ninput=300, noutput=1, layers='300-300')
-    autoencoder.load_state_dict(torch.load(os.path.join(path, 'a.pkl')))
-    inverter.load_state_dict(torch.load(os.path.join(path, 'i.pkl')))
-    gan_gen.load_state_dict(torch.load(os.path.join(path, 'g.pkl')))
-    gan_disc.load_state_dict(torch.load(os.path.join(path, 'd.pkl')))
-
-    return word2idx, autoencoder, inverter, gan_gen, gan_disc
+        return word2idx, autoencoder, inverter, gan_gen, gan_disc
+except ModuleNotFoundError as e:
+    def LOAD(path):
+        raise e

@@ -12,11 +12,7 @@ class UniversalSentenceEncoder:
         `[pdf] <https://arxiv.org/pdf/1803.11175>`__
         `[page] <https://tfhub.dev/google/universal-sentence-encoder/4>`__
         """
-        import logging
-        import tensorflow as tf
-        import os
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-        tf.get_logger().setLevel(logging.ERROR)
+        
         import tensorflow_hub as hub
         from ..data_manager import DataManager
         self.embed = hub.load( DataManager.load("AttackAssist.UniversalSentenceEncoder") )
@@ -30,3 +26,6 @@ class UniversalSentenceEncoder:
         """
         ret = self.embed([sentA, sentB]).numpy()
         return ret[0].dot(ret[1]) / (np.linalg.norm(ret[0]) * np.linalg.norm(ret[1]))
+
+    def __reduce__(self):
+        return UniversalSentenceEncoder, tuple()
