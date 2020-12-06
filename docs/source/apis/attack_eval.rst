@@ -22,3 +22,9 @@ InvokeLimitedAttackEval
 .. autoclass:: OpenAttack.attack_evals.InvokeLimitedAttackEval(OpenAttack.AttackEval)
     :members: __init__, measure, update, get_result, clear, eval, eval_results
 
+MultiProcessAttackEval
+------------------------
+
+.. autoclass:: OpenAttack.attack_evals.MultiProcessAttackEval(OpenAttack.AttackEval)
+    :members: __init__, measure, update, get_result, clear, eval, eval_results
+

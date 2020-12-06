@@ -157,13 +157,11 @@ class PSOAttacker(Attacker):
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
@@ -184,13 +182,11 @@ class PSOAttacker(Attacker):
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
@@ -222,7 +218,6 @@ class PSOAttacker(Attacker):
 
     def mutate(self, x_cur, w_select_probs, w_list):
         x_len = w_select_probs.shape[0]
-        # print('w_select_probs:',w_select_probs)
         rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
         return self.do_replace(x_cur, rand_idx, w_list[rand_idx])
 
@@ -288,8 +283,6 @@ class PSOAttacker(Attacker):
             prob_list.append(p)
 
         prob_list = self.norm(prob_list)
-        # print('neighbours_len:',neighbours_len)
-        # print('prob_list:',prob_list)
 
         h_score = prob_list
         h_score = np.array(h_score)
