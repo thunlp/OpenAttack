@@ -6,3 +6,7 @@ from .hownet import HowNetSubstitute
 from .wordnet import WordNetSubstitute
 from .glove import GloveSubstitute
 from .word2vec import Word2VecSubstitute
+from .chinese_sim_char import ChineseSimCharSubstitute
+from .chinese_fyh_char import ChineseFYHCharSubstitute
+from .chinese_hownet import ChineseHowNetSubstitute
+from .chinese_wordnet import ChineseWordNetSubstitute
