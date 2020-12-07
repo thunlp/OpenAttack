@@ -190,10 +190,10 @@ class DefaultAttackEval(AttackEval):
     
     def __get_mistakes(self, sent):
         if self.__config["language_tool"] is None:
-            import language_tool_python
-            self.__config["language_tool"] = language_tool_python.LanguageTool('en-US')
+            from ..metric import LanguageTool
+            self.__config["language_tool"] = LanguageTool()
         
-        return len(self.__config["language_tool"].check(sent))
+        return len(self.__config["language_tool"](sent))
     
     def __get_fluency(self, sent):
         if self.__config["language_model"] is None:
