@@ -1,5 +1,8 @@
 import setuptools
-from OpenAttack.version import VERSION
+
+VERSION = "test"
+with open("OpenAttack/version.py", "r") as fver:
+    VERSION = fver.read().replace("VERSION", "").replace("=", "").replace("\"", "").strip()
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
