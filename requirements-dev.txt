@@ -7,3 +7,4 @@ tensorflow>=2.0.0
 sphinx
 sphinx_rtd_theme
 twine
+language_tool_python
