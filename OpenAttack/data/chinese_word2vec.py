@@ -8,7 +8,7 @@ from OpenAttack.utils import WordVector, make_zip_downloader
 
 NAME = "AttackAssist.ChineseWord2Vec"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/chinese-merge-word-embedding.txt.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/chinese-merge-word-embedding.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "chinese-merge-word-embedding.txt")
 
 

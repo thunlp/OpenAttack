@@ -12,7 +12,7 @@ from OpenAttack.utils import make_zip_downloader, XlnetClassifier
 
 NAME = "Victim.XLNET.SST"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/xlnet_sst.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/xlnet_sst.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):
