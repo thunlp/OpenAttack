@@ -7,7 +7,7 @@ A subset of :py:data:`.Dataset.SST`, used to evaluate attackers and classifiers.
 import pickle
 
 NAME = "Dataset.SST.sample"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/dataset/SST.sample.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/SST.sample.pkl"
 
 def LOAD(path):
     data = pickle.load(open(path, "rb"))

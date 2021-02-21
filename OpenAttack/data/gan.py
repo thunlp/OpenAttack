@@ -11,7 +11,7 @@ import os
 from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.GAN"
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/GNAE.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/GNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 try:

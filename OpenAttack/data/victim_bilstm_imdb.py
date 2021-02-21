@@ -8,7 +8,7 @@ Pretrained BiLSTM model on IMDB dataset. See :py:data:`Dataset.IMDB` for detail.
 """
 
 NAME = "Victim.BiLSTM.IMDB"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/bilstm_imdb.pth"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/victim/bilstm_imdb.pth"
 
 try:
 

@@ -10,7 +10,7 @@ from OpenAttack.utils import WordVector, make_zip_downloader
 
 NAME = "AttackAssist.Word2Vec"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/word2vec.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/word2vec.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

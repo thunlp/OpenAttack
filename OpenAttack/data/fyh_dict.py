@@ -10,7 +10,7 @@ from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.FYH"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/fyh_dict.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/fyh_dict.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

@@ -7,7 +7,7 @@ IMDB dataset which is used to train victim models.
 import pickle
 
 NAME = "Dataset.IMDB"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/dataset/imdb.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/imdb.pkl"
 
 
 def LOAD(path):

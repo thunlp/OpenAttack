@@ -11,7 +11,7 @@ import os
 
 NAME = "TProcess.StanfordParser"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/stanford_parser_small.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/stanford_parser_small.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

@@ -1,2 +1,2 @@
 NAME = "test"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/test.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/test.pkl"

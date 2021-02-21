@@ -11,7 +11,7 @@ import os
 
 NAME = "AttackAssist.UniversalSentenceEncoder"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/usencoder.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/usencoder.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

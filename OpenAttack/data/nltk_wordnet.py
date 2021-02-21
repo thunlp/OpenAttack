@@ -9,7 +9,7 @@ from OpenAttack.utils import make_zip_downloader
 
 NAME = "TProcess.NLTKWordNet"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/wordnet.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/wordnet.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 class Lemmatizer:
