@@ -11,4 +11,4 @@ from .nli_wrapper import NLIWrapper
 
 
 from .tf_fix import init_tensorflow
-init_tensorflow()
+# init_tensorflow()
