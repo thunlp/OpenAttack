@@ -1,13 +1,8 @@
-import torch
 import copy
 import time
 import numpy as np
 from ..utils import check_parameters
 from ..attacker import Attacker
-from transformers import BertConfig, BertTokenizer
-from transformers import BertForSequenceClassification, BertForMaskedLM
-from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
-
 
 DEFAULT_CONFIG = {
     "token_unk": "<UNK>",
@@ -78,6 +73,9 @@ class BERTAttacker(Attacker):
         `[pdf] <https://arxiv.org/abs/2004.09984>`__
         `[code] <https://github.com/LinyangLee/BERT-Attack>`__
         """
+        from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+        import torch
+
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
@@ -97,6 +95,7 @@ class BERTAttacker(Attacker):
             self.cos_mat, self.w2i, self.i2w = None, {}, {}
 
     def __call__(self, clsf, x_orig, target=None):
+        import torch
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
@@ -238,6 +237,7 @@ class BERTAttacker(Attacker):
         return masked_words
     
     def get_important_scores(self, words, tgt_model, orig_prob, orig_label, orig_probs, tokenizer, batch_size, max_length):
+        import torch
         masked_words = self._get_masked(words)
         texts = [' '.join(words) for words in masked_words]  # list of text of masked words
         leave_1_probs = torch.Tensor(tgt_model.get_prob(texts))
@@ -254,6 +254,7 @@ class BERTAttacker(Attacker):
         return import_scores
 
     def get_bpe_substitues(self, substitutes, tokenizer, mlm_model):
+        import torch
         # substitutes L, k
 
         substitutes = substitutes[0:12, 0:4] # maximum BPE candidates
