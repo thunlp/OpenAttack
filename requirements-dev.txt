@@ -3,7 +3,7 @@ numpy
 black
 tqdm
 torch>=1.5.0
-tensorflow==2.4.0
+tensorflow<2.3.0
 sphinx
 sphinx_rtd_theme
 twine
