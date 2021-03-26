@@ -6,14 +6,15 @@ SST dataset which is used to train victim models.
 `[page] <https://nlp.stanford.edu/sentiment/>`__
 """
 import pickle
+import os
+import datasets
 
 NAME = "Dataset.SST"
 DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/sst.pkl"
 
 
 def LOAD(path):
-    from OpenAttack.utils import Dataset, DataInstance
-
+    '''
     def mapping(data):
         return Dataset([
             DataInstance(
@@ -21,6 +22,9 @@ def LOAD(path):
                 y=it[1]
             ) for it in data
         ], copy=False)
-
+    
     train, valid, test = pickle.load(open(path, "rb"))
     return mapping(train), mapping(valid), mapping(test)
+    '''
+    return datasets.load_dataset(os.path.join(os.getcwd(), "data", "sst_model.py"), data_files=path)
+    #return datasets.load_dataset('sst')
