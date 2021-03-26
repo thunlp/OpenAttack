@@ -1,4 +1,4 @@
-from .default import MetaClassifierWrapper, DefaultAttackEval
+from .default import DefaultAttackEval
 import multiprocessing, logging
 
 logger = logging.getLogger(__name__)
@@ -9,9 +9,7 @@ def worker(data):
     
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
-    clsf_wrapper = MetaClassifierWrapper(classifier)
-    clsf_wrapper.set_meta(data.meta)
-    res = attacker(clsf_wrapper, data.x, data.target)
+    res = attacker(classifier, data["x"], data["target"])
     return data, res
 
 def worker_init(attacker, classifier):
@@ -42,9 +40,9 @@ class MultiProcessEvalMixin(object):
         with multiprocessing.Pool(self.num_process, initializer=worker_init, initargs=(self.attacker, self.classifier)) as pool:
             for data, res in pool.imap(worker, _iter_gen(), chunksize=self.chunk_size):
                 if res is None:
-                    info = self.__update(data.x, None)
+                    info = self.__update(data["x"], None)
                 else:
-                    info = self.__update(data.x, res[0])
+                    info = self.__update(data["x"], res[0])
                 if not info["Succeed"]:
                     yield (data, None, None, info)
                 else:

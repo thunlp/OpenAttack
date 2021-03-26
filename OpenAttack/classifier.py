@@ -6,7 +6,7 @@ class Classifier(metaclass=abc.ABCMeta):
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_pred(self, input_, meta):
+    def get_pred(self, input_):
         """
         :param list input_: A list of sentences which we want to predict.
         :param dict meta: Meta of DataInstance (**Optional parameter**).
@@ -15,9 +15,9 @@ class Classifier(metaclass=abc.ABCMeta):
 
         This is used to get the predictions of a batch of sentences.
         """
-        return self.get_prob(input_, meta).argmax(axis=1)
+        return self.get_prob(input_).argmax(axis=1)
 
-    def get_prob(self, input_, meta):
+    def get_prob(self, input_):
         """
         :param list input_: A list of sentences of which we want to get the probabilities.
         :param dict meta: Meta of DataInstance (**Optional parameter**).
@@ -29,9 +29,9 @@ class Classifier(metaclass=abc.ABCMeta):
         from .text_processors import DefaultTextProcessor
         processor = DefaultTextProcessor()
         x_batch = [ list(map(lambda x:x[0], processor.get_tokens(sent))) for sent in input_ ]
-        return self.get_grad(x_batch, [0] * len(x_batch), meta)[0]
+        return self.get_grad(x_batch, [0] * len(x_batch))[0]
 
-    def get_grad(self, input_, labels, meta):
+    def get_grad(self, input_, labels):
         """
         :param list input_: A list of lists of tokens of which we want to get the gradients.
         :param list labels: A list of types based on which we want to get the gradients.
