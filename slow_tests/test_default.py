@@ -8,7 +8,10 @@ import OpenAttack
 
 from attackers import get_attackers
 def main():
-    dataset = OpenAttack.loadDataset("SST")[0][:5]
+    temp = []
+    for i in range(32):
+        temp.append(i)
+    dataset = OpenAttack.loadDataset("SST")["train"].select(temp)
     clsf = OpenAttack.loadVictim("BiLSTM.SST")
 
     attackers = get_attackers(dataset, clsf)
