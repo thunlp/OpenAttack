@@ -44,27 +44,12 @@ class SEAAttacker(Attacker):
         `[code] <https://github.com/marcotcr/sears>`__
 
         """
-        self.paraphrase_scorer = __import__("paraphrase_scorer", globals={
-            "__name__":__name__,
-            "__package__": __package__,
-        }, level=1)
-        self.onmt_model = __import__("onmt_model", globals={
-            "__name__":__name__,
-            "__package__": __package__,
-        }, level=1)
-        self.replace_rules = __import__("replace_rules", globals={
-            "__name__":__name__,
-            "__package__": __package__,
-        }, level=1)
-        self.rule_picking = __import__("rule_picking", globals={
-            "__name__":__name__,
-            "__package__": __package__,
-        }, level=1)
+        from . import replace_rules
 
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
         check_parameters(DEFAULT_CONFIG, self.config)
-        self.tokenizer = self.replace_rules.Tokenizer(self.config["processor"])
+        self.tokenizer = replace_rules.Tokenizer(self.config["processor"])
         self.x = self.config["rules"][0]
         self.really_frequent_rules = self.config["rules"][1]
         self.frequent_rules = self.config["rules"][2]
@@ -74,6 +59,8 @@ class SEAAttacker(Attacker):
 
 
     def __call__(self, clsf, x_orig, target=None):
+        from . import onmt_model
+
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
@@ -81,8 +68,7 @@ class SEAAttacker(Attacker):
         else:
             targeted = True
 
-
-        x_orig = [self.onmt_model.clean_text(x_orig.lower(), only_upper=False)]
+        x_orig = [onmt_model.clean_text(x_orig.lower(), only_upper=False)]
         x_orig = self.tokenizer.tokenize(x_orig)[0]
         for r in self.x:
             rid = self.really_frequent_rules[r]

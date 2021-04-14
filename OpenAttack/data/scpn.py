@@ -10,7 +10,7 @@ import os
 
 NAME = "AttackAssist.SCPN"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/scpn.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/scpn.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

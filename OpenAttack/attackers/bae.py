@@ -1,4 +1,3 @@
-import torch
 import copy
 import nltk
 import random
@@ -7,7 +6,6 @@ from ..utils import check_parameters
 from ..attacker import Attacker
 from ..metric import UniversalSentenceEncoder
 from transformers import BertConfig, BertTokenizer, BertForSequenceClassification, BertForMaskedLM
-
 
 DEFAULT_CONFIG = {
     "token_unk": "<UNK>",
@@ -78,6 +76,9 @@ class BAEAttacker(Attacker):
         This script is adapted from <https://github.com/LinyangLee/BERT-Attack> given the high similarity between the two attack methods.
         This attacker supports the 4 attack methods (BAE-R, BAE-I, BAE-R/I, BAE-R+I) in the paper. 
         """
+        from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+        import torch
+
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
        
@@ -107,6 +108,8 @@ class BAEAttacker(Attacker):
             raise NotImplementedError
 
     def __call__(self, clsf, x_orig, target=None):
+        import torch
+
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
@@ -308,6 +311,7 @@ class BAEAttacker(Attacker):
         return masked_words
     
     def get_important_scores(self, words, tgt_model, orig_prob, orig_label, orig_probs, tokenizer, batch_size, max_length):
+        import torch
         # masked_words = self._get_masked(words)
         masked_words = self._get_masked_insert(words)
         texts = [' '.join(words) for words in masked_words]  # list of text of masked words
@@ -326,6 +330,7 @@ class BAEAttacker(Attacker):
 
     ##### TODO: make this one of the substitute unit under ./substitures #####
     def get_substitues(self, masked_index, tokens, tokenizer, model, sub_mode, k, threshold=3.0):
+        import torch
         masked_tokens = copy.deepcopy(tokens)
 
         if sub_mode == "r":

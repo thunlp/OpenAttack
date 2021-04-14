@@ -37,3 +37,5 @@ loadDataset = DataManager.loadDataset
 loadAttackAssist = DataManager.loadAttackAssist
 loadVictim = DataManager.loadVictim
 loadTProcess = DataManager.loadTProcess
+
+from .version import VERSION as __version__

@@ -34,6 +34,24 @@ BertClassifier
 .. autoclass:: OpenAttack.utils.BertClassifier
     :members: 
 
+AlbertClassifier
+------------------
+
+.. autoclass:: OpenAttack.utils.AlbertClassifier
+    :members: 
+
+XlnetClassifier
+-----------------
+
+.. autoclass:: OpenAttack.utils.XlnetClassifier
+    :members: 
+
+RobertaClassifier
+-------------------
+
+.. autoclass:: OpenAttack.utils.RobertaClassifier
+    :members: 
+
 Dataset
 ---------
 
