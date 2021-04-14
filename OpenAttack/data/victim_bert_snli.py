@@ -12,7 +12,7 @@ from OpenAttack.utils import make_zip_downloader, BertClassifier
 
 NAME = "Victim.BERT.SNLI"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/bert_snli.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/bert_snli.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):

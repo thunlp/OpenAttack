@@ -30,7 +30,7 @@ class RobertaModel():
         sent_lens = []
         for i in range(len(corpus)):
             sentence = corpus[i]
-            result = self.tokenizer.encode_plus(sentence,max_length = self.max_len,pad_to_max_length = True,return_attention_mask = True, truncation=True)
+            result = self.tokenizer.encode_plus(sentence,max_length = self.max_len,padding='max_length',return_attention_mask = True, truncation=True)
             sent_lens.append( sum(result["attention_mask"]) - 2 )
             sentence_ids = result['input_ids']
             mask = result['attention_mask']
@@ -74,7 +74,10 @@ class RobertaModel():
             xs = torch.LongTensor([curr_sen]).to(self.device)
             masks = torch.LongTensor([curr_mask]).to(self.device)
             
-            loss, logits = self.model(input_ids = xs,attention_mask = masks, labels=labels[i:i+1])
+            outputs = self.model(input_ids = xs,attention_mask = masks, labels=labels[i:i+1])
+            loss = outputs.loss
+            logits = outputs.logits
+            #loss, logits = self.model(input_ids = xs,attention_mask = masks, labels=labels[i:i+1])
             logits = torch.nn.functional.softmax(logits,dim=-1)
             loss = - loss
             loss.backward()

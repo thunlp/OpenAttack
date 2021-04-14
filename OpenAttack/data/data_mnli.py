@@ -7,7 +7,7 @@ MNLI dataset which is used to train victim models.
 import pickle
 
 NAME = "Dataset.MNLI"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/dataset/mnli.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/mnli.pkl"
 
 
 def LOAD(path):

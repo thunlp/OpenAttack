@@ -12,7 +12,7 @@ from OpenAttack.utils import make_zip_downloader, AlbertClassifier
 
 NAME = "Victim.ALBERT.AG"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/albert_ag.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/albert_ag.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):

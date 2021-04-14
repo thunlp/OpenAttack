@@ -5,5 +5,5 @@
 Dictionary file for delemmatizer.
 """
 NAME = "TProcess.NLTKWordNetDelemma"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/word_delemma.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/word_delemma.pkl"
 # LOAD = pickle

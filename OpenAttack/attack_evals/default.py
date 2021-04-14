@@ -1,8 +1,8 @@
 from ..attack_eval import AttackEval
 from ..classifier import Classifier
-import json, sys, time
+import json, sys, time, datasets
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer, check_parameters, DataInstance, Dataset
+from ..utils import visualizer, result_visualizer, check_parameters
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
 
@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     "modification_rate": False,
     "running_time": True,
 }
-
+'''
 class MetaClassifierWrapper(Classifier):
     def __init__(self, clsf):
         self.__meta = None
@@ -39,6 +39,7 @@ class MetaClassifierWrapper(Classifier):
     
     def get_grad(self, input_, labels):
         return self.__clsf.get_grad(input_, labels, self.__meta)
+'''
 
 class DefaultAttackEval(AttackEval):
     """
@@ -112,23 +113,23 @@ class DefaultAttackEval(AttackEval):
 
         time_start = time.time()
         for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
-            x_orig = data.x
+            x_orig = data["x"]
             counter += 1
             if visualize:
                 try:
                     if x_adv is not None:
-                        res = self.classifier.get_prob([x_orig, x_adv], data.meta)
+                        res = self.classifier.get_prob([x_orig, x_adv])
                         y_orig = res[0]
                         y_adv = res[1]
                     else:
-                        y_orig = self.classifier.get_prob([x_orig], data.meta)[0]
+                        y_orig = self.classifier.get_prob([x_orig])[0]
                 except ClassifierNotSupportException:
                     if x_adv is not None:
-                        res = self.classifier.get_pred([x_orig, x_adv], data.meta)
+                        res = self.classifier.get_pred([x_orig, x_adv])
                         y_orig = int(res[0])
                         y_adv = int(res[1])
                     else:
-                        y_orig = int(self.classifier.get_pred([x_orig], data.meta)[0])
+                        y_orig = int(self.classifier.get_pred([x_orig])[0])
 
                 if self.__progress_bar:
                     visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
@@ -165,15 +166,15 @@ class DefaultAttackEval(AttackEval):
         """
         self.clear()
 
-        clsf_wrapper = MetaClassifierWrapper(self.classifier)
+        # clsf_wrapper = MetaClassifierWrapper(self.classifier)
         for data in dataset:
-            assert isinstance(data, DataInstance)
-            clsf_wrapper.set_meta(data.meta)
-            res = self.attacker(clsf_wrapper, data.x, data.target)
+            # assert isinstance(data, DataInstance)
+            # clsf_wrapper.set_meta(data["meta"])
+            res = self.attacker(self.classifier, data["x"], data["target"])
             if res is None:
-                info = self.__update(data.x, None)
+                info = self.__update(data["x"], None)
             else:
-                info = self.__update(data.x, res[0])
+                info = self.__update(data["x"], res[0])
             if not info["Succeed"]:
                 yield (data, None, None, info)
             else:
@@ -190,10 +191,10 @@ class DefaultAttackEval(AttackEval):
     
     def __get_mistakes(self, sent):
         if self.__config["language_tool"] is None:
-            import language_tool_python
-            self.__config["language_tool"] = language_tool_python.LanguageTool('en-US')
+            from ..metric import LanguageTool
+            self.__config["language_tool"] = LanguageTool()
         
-        return len(self.__config["language_tool"].check(sent))
+        return len(self.__config["language_tool"](sent))
     
     def __get_fluency(self, sent):
         if self.__config["language_model"] is None:
@@ -353,18 +354,14 @@ class DefaultAttackEval(AttackEval):
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
 
-        ret = []
+        ret = {"x": [],  "y": [], "pred": [], "original": [], "info": []}
         for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
             if x_adv is not None:
-                ret.append(DataInstance (
-                    x=x_adv,
-                    y=data.y,
-                    pred=y_adv,
-                    meta={
-                        "original": data.x,
-                        "info": info
-                    }
-                ))
-        return Dataset(ret)
+                ret["x"].append(x_adv)
+                ret["y"].append(data["y"])
+                ret["pred"].append(y_adv)
+                ret["original"].append(data["x"])
+                ret["info"].append(info)
+        return datasets.Datasetfrom_dict(ret)
             
             

@@ -11,7 +11,7 @@ from OpenAttack.utils import WordVector, make_zip_downloader
 
 NAME = "AttackAssist.CounterFit"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/counter-fitted-vectors.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")
 
 

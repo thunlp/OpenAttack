@@ -56,7 +56,6 @@ class PWWSAttacker(Attacker):
         H = [ (idx, w_star[idx][0], S_softmax[idx] * w_star[idx][1]) for idx in range(len(x_orig)) ]
 
         H = sorted(H, key=lambda x:-x[2])
-
         ret_sent = x_orig.copy()
         for i in range(len(H)):
             idx, wd, _ = H[i]

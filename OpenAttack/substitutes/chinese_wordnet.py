@@ -27,13 +27,13 @@ class ChineseWordNetSubstitute(WordSubstitute):
 
     def __call__(self, word, pos_tag, threshold=None):
         from nltk.corpus import wordnet as wn
-        if pos_tag[:2] == "JJ":
+        if pos_tag[:1] == "a":
             pp = "adj"
-        elif pos_tag[:2] == "VB":
-            pp = "verb"
-        elif pos_tag[:2] == "NN":
+        elif pos_tag[:1] == "v":
+            pp = "verb"    
+        elif pos_tag[:1] == "n":
             pp = "noun"
-        elif pos_tag[:2] == "RB":
+        elif pos_tag[:1] == "d":
             pp = "adv"
         else:
             pp = None
