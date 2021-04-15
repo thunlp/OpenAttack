@@ -133,7 +133,7 @@ class SEAAttacker(Attacker):
         ps = paraphrase_scorer.ParaphraseScorer(to_paths=to_paths, back_paths=back_paths, gpu_id=config["gpu_id"], cuda=config["cuda"])
         tokenizer = replace_rules.Tokenizer(config["processor"])
 
-        val_for_onmt = [onmt_model.clean_text(sentence.x.lower(), only_upper=False) for sentence in sentence_list]
+        val_for_onmt = [onmt_model.clean_text(sentence["x"].lower(), only_upper=False) for sentence in sentence_list]
 
         orig_scores = {}
         flips = collections.defaultdict(lambda: [])

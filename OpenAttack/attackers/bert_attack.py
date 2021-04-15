@@ -1,19 +1,21 @@
 import copy
-import time
 import numpy as np
 from ..utils import check_parameters
 from ..attacker import Attacker
+from transformers import BertConfig, BertTokenizer, BertForSequenceClassification, BertForMaskedLM
+from ..exceptions import WordNotInDictionaryException
+from ..substitutes import CounterFittedSubstitute
 
 DEFAULT_CONFIG = {
     "token_unk": "<UNK>",
     "mlm_path": 'bert-base-uncased',
-    "num_label": 2,
-    "k": 5,
-    "use_bpe": 0,
-    "use_sim_mat": 0,
+    "k": 36,
+    "use_bpe": 1,
+    "use_sim_mat": 1,
     "threshold_pred_score": 0.3,
     "max_length": 512,
-    "batch_size": 32
+    "batch_size": 32,
+    "device": None
 }
 
 filter_words = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
@@ -59,10 +61,9 @@ class BERTAttacker(Attacker):
         """
         :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
         :param: str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
-        :param: int num_label: the number of labels predicted by the classifier.  **Default:** 2
-        :param: int k: the k most important words / sub-words to substitute for. **Default:** 5
-        :param: int use_bpe:  whether use bpe. **Default:** 0
-        :param: int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 0
+        :param: int k: the k most important words / sub-words to substitute for. **Default:** 36
+        :param: int use_bpe:  whether use bpe. **Default:** 1
+        :param: int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 1
         :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
         :param: int max_length: the maximum length of an input sentence. **Default:** 512
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
@@ -81,7 +82,10 @@ class BERTAttacker(Attacker):
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.tokenizer_mlm = BertTokenizer.from_pretrained(self.config['mlm_path'], do_lower_case=True)
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        if self.config["device"] is not None:
+            self.device = self.config["device"]
+        else:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         config_atk = BertConfig.from_pretrained(self.config['mlm_path'])
         self.mlm_model = BertForMaskedLM.from_pretrained(self.config['mlm_path'], config=config_atk).to(self.device)
         self.k = self.config['k']
@@ -89,15 +93,17 @@ class BERTAttacker(Attacker):
         self.threshold_pred_score = self.config['threshold_pred_score']
         self.max_length = self.config['max_length']
         self.batch_size = self.config['batch_size']
-        if self.config['use_sim_mat'] == 1:
-            self.cos_mat, self.w2i, self.i2w = self.get_sim_embed('data_defense/counter-fitted-vectors.txt', 'data_defense/cos_sim_counter_fitting.npy')
-        else:        
-            self.cos_mat, self.w2i, self.i2w = None, {}, {}
+        # if self.config['use_sim_mat'] == 1:
+        #     # data counter fit vectors
+        #     self.cos_mat, self.w2i, self.i2w = self.get_sim_embed('data_defense/counter-fitted-vectors.txt', 'data_defense/cos_sim_counter_fitting.npy')
+        # else:        
+        #     self.cos_mat, self.w2i, self.i2w = None, {}, {}
 
     def __call__(self, clsf, x_orig, target=None):
         import torch
         x_orig = x_orig.lower()
         if target is None:
+            # targeted
             targeted = False
             target = clsf.get_pred([x_orig])[0]  # calc x_orig's prediction
         else:
@@ -119,7 +125,6 @@ class BERTAttacker(Attacker):
         orig_probs = orig_probs[0].squeeze()
         orig_probs = torch.softmax(orig_probs, -1)
        
-        orig_label = torch.argmax(orig_probs)
         current_prob = orig_probs.max()
 
         sub_words = ['[CLS]'] + sub_words[:2] + sub_words[2:max_length - 2] + ['[SEP]']
@@ -131,7 +136,7 @@ class BERTAttacker(Attacker):
         word_predictions = word_predictions[1:len(sub_words) + 1, :]
         word_pred_scores_all = word_pred_scores_all[1:len(sub_words) + 1, :]
 
-        important_scores = self.get_important_scores(words, clsf, current_prob, orig_label, orig_probs,
+        important_scores = self.get_important_scores(words, clsf, current_prob, target, orig_probs,
                                                 tokenizer, self.batch_size, max_length)
         feature.query += int(len(words))
         list_of_index = sorted(enumerate(important_scores), key=lambda x: x[1], reverse=True)
@@ -153,6 +158,15 @@ class BERTAttacker(Attacker):
 
             substitutes = self.get_substitues(substitutes, tokenizer, self.mlm_model, self.use_bpe, word_pred_scores, self.threshold_pred_score)
 
+            if self.config['use_sim_mat']:
+                CFS = CounterFittedSubstitute()
+                try:
+                    cfs_output = CFS(tgt_word, threshold=0.4)
+                    cos_sim_subtitutes = [elem[0] for elem in cfs_output]
+                    substitutes = list(set(substitutes) & set(cos_sim_subtitutes))
+                except WordNotInDictionaryException:
+                    pass
+                    # print("The target word is not representable by counter fitted vectors. Keeping the substitutes output by the MLM model.")
             most_gap = 0.0
             candidate = None
             
@@ -164,9 +178,9 @@ class BERTAttacker(Attacker):
 
                 if substitute in filter_words:
                     continue
-                if substitute in self.w2i and tgt_word in self.w2i:
-                    if self.cos_mat[self.w2i[substitute]][self.w2i[tgt_word]] < 0.4:
-                        continue
+                # if substitute in self.w2i and tgt_word in self.w2i:
+                #     if self.cos_mat[self.w2i[substitute]][self.w2i[tgt_word]] < 0.4:
+                #         continue
                 
                 temp_replace = final_words
                 temp_replace[top_index[0]] = substitute
@@ -180,7 +194,7 @@ class BERTAttacker(Attacker):
                 temp_prob = torch.softmax(temp_prob, -1)
                 temp_label = torch.argmax(temp_prob)
 
-                if temp_label != orig_label:
+                if (not targeted and temp_label) != target or (targeted and temp_label == target):
                     feature.change += 1
                     final_words[top_index[0]] = substitute
                     feature.changes.append([keys[top_index[0]][0], substitute, tgt_word])
@@ -188,7 +202,7 @@ class BERTAttacker(Attacker):
                     feature.success = 4
                     return feature.final_adverse, temp_label
                 else:
-                    label_prob = temp_prob[orig_label]
+                    label_prob = temp_prob[target]
                     gap = current_prob - label_prob
                     if gap > most_gap:
                         most_gap = gap

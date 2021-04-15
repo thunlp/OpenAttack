@@ -6,17 +6,21 @@ logger = logging.getLogger(__name__)
 # TODO: not tested on tf yet
 
 def worker(data):
-    
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
+
     clsf_wrapper = MetaClassifierWrapper(classifier)
     clsf_wrapper.set_meta(data)
-    res = attacker(clsf_wrapper, data["x"], data["target"])
+    if "target" in data:
+        res = attacker(classifier, data["x"], data["target"])
+    else:
+        res = attacker(classifier, data["x"])
     return data, res
 
 def worker_init(attacker, classifier):
     globals()['$WORKER_ATTACKER'] = attacker
     globals()['$WORKER_CLASSIFIER'] = classifier
+    signal.signal(signal.SIGUSR1, debug)  # Register handler
 
 class MultiProcessEvalMixin(object):
     def __init__(self, *args, num_process=1, chunk_size=None, **kwargs):

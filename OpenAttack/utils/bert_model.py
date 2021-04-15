@@ -2,7 +2,9 @@ import numpy as np
 import pickle, os
 from ..classifier import Classifier
 
-class BertModel():
+from .transformers_hook import HookCloser
+
+class BertModelWrapper:
     def __init__(self, model_path, num_labels, max_len = 100, device="cpu"):
         import transformers
         self.tokenizer = transformers.BertTokenizer.from_pretrained(model_path)
@@ -10,7 +12,10 @@ class BertModel():
         self.model = transformers.BertForSequenceClassification.from_pretrained(model_path, num_labels=num_labels,output_hidden_states=False)
         self.model.eval()
         self.model.to(self.device)
-        self.hook = self.model.bert.embeddings.word_embeddings.register_forward_hook(self.__hook_fn)
+
+        self.curr_embedding = None
+        self.hook = self.model.bert.embeddings.word_embeddings.register_forward_hook(HookCloser(self))
+        
         self.max_len = max_len
 
         self.word2id = pickle.load(open(os.path.join(model_path, "bert_word2id.pkl"), "rb"))
@@ -20,10 +25,6 @@ class BertModel():
         self.device = device
         self.model.to(self.device)
         return self
-
-    def __hook_fn(self, module, input_, output_):
-        self.curr_embedding = output_
-        output_.retain_grad()
 
     def tokenize_corpus(self,corpus):
         tokenized_list = []
@@ -92,7 +93,7 @@ class BertModel():
 
 class BertClassifier(Classifier):
     def __init__(self, model_path, num_labels, max_len = 100, device="cpu"):
-        self.__model = BertModel(model_path, num_labels, max_len, device)
+        self.__model = BertModelWrapper(model_path, num_labels, max_len, device)
         self.word2id = self.__model.word2id
         self.embedding = self.__model.embedding
 

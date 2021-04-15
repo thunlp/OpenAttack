@@ -296,14 +296,19 @@ class PSOAttacker(Attacker):
         x_len = w_select_probs.shape[0]
 
         rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
-        while x_cur[rand_idx] != x_orig[rand_idx] and np.sum(x_orig != x_cur) < np.sum(np.sign(w_select_probs)):
-
+        
+        while x_cur[rand_idx] != x_orig[rand_idx] and self.sum_diff(x_orig, x_cur) < np.sum(np.sign(w_select_probs)):
             rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
-
 
         replace_list = neigbhours[rand_idx]
         return self.select_best_replacement(clsf, rand_idx, x_cur, x_orig, target, replace_list, targeted)
 
+    def sum_diff(self, x_orig, x_cur):
+        ret = 0
+        for wa, wb in zip(x_orig, x_cur):
+            if wa != wb:
+                ret += 1
+        return ret
 
     def norm(self, n):
 
