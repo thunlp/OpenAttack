@@ -1,28 +1,22 @@
 import copy
-import time
 import nltk
 import random
 import numpy as np
-from ..text_processors import DefaultTextProcessor
-from ..substitutes import WordNetSubstitute
 from ..utils import check_parameters
 from ..attacker import Attacker
-from ..exceptions import WordNotInDictionaryException
 from ..metric import UniversalSentenceEncoder
-
-
+from transformers import BertConfig, BertTokenizer, BertForSequenceClassification, BertForMaskedLM
 
 DEFAULT_CONFIG = {
     "token_unk": "<UNK>",
     "mlm_path": 'bert-base-uncased',
-    "num_label": 2,
-    "k": 5,
-    "use_sim_mat": 0,
+    "k": 50,
     "threshold_pred_score": 0.3,
     "max_length": 512,
     "batch_size": 32,
     "replace_rate": 1.0,
-    "insert_rate": 0.0
+    "insert_rate": 0.0,
+    "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 }
 
 filter_words = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
@@ -68,8 +62,7 @@ class BAEAttacker(Attacker):
         """
         :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
         :param: str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
-        :param: int num_label: the number of labels predicted by the classifier.  **Default:** 2
-        :param: int k: the k most important words / sub-words to substitute for. **Default:** 5
+        :param: int k: the k most important words / sub-words to substitute for. **Default:** 50
         :param: int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 0
         :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
         :param: int max_length: the maximum length of an input sentence. **Default:** 512
@@ -92,7 +85,7 @@ class BAEAttacker(Attacker):
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.tokenizer_mlm = BertTokenizer.from_pretrained(self.config['mlm_path'], do_lower_case=True)
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = self.config['device']
 
         config_atk = BertConfig.from_pretrained(self.config['mlm_path'])
         self.mlm_model = BertForMaskedLM.from_pretrained(self.config['mlm_path'], config=config_atk).to(self.device)
@@ -100,10 +93,7 @@ class BAEAttacker(Attacker):
         self.threshold_pred_score = self.config['threshold_pred_score']
         self.max_length = self.config['max_length']
         self.batch_size = self.config['batch_size']
-        if self.config['use_sim_mat'] == 1:
-            self.cos_mat, self.w2i, self.i2w = self.get_sim_embed('data_defense/counter-fitted-vectors.txt', 'data_defense/cos_sim_counter_fitting.npy')
-        else:        
-            self.cos_mat, self.w2i, self.i2w = None, {}, {}
+
         self.replace_rate = self.config['replace_rate']
         self.insert_rate = self.config['insert_rate']
         if self.replace_rate == 1.0 and self.insert_rate == 0.0:
@@ -143,20 +133,18 @@ class BAEAttacker(Attacker):
         orig_probs = orig_probs[0].squeeze()
         orig_probs = torch.softmax(orig_probs, -1)
        
-        orig_label = torch.argmax(orig_probs)
         current_prob = orig_probs.max()
 
         sub_words = ['[CLS]'] + sub_words[:max_length - 2] + ['[SEP]']
        
         input_ids_ = torch.tensor([tokenizer.convert_tokens_to_ids(sub_words)])
         word_predictions = self.mlm_model(input_ids_.to(self.device))[0].squeeze()  # seq-len(sub) vocab
-        
         word_pred_scores_all, word_predictions = torch.topk(word_predictions, self.k, -1)  # seq-len k
 
         word_predictions = word_predictions[1:len(sub_words) + 1, :]
         word_pred_scores_all = word_pred_scores_all[1:len(sub_words) + 1, :]
 
-        important_scores = self.get_important_scores(words, clsf, current_prob, orig_label, orig_probs,
+        important_scores = self.get_important_scores(words, clsf, current_prob, target, orig_probs,
                                                 tokenizer, self.batch_size, max_length)
         feature.query += int(len(words))
         list_of_index = sorted(enumerate(important_scores), key=lambda x: x[1], reverse=True)
@@ -208,9 +196,7 @@ class BAEAttacker(Attacker):
                     continue  # filter out sub-word
                 if substitute in filter_words:
                     continue
-                if substitute in self.w2i and tgt_word in self.w2i:
-                    if self.cos_mat[self.w2i[substitute]][self.w2i[tgt_word]] < 0.4:
-                        continue
+
                 if self.sub_mode == 3:
                     if i < replace_sub_len:
                         temp_sub_mode = 0
@@ -237,11 +223,16 @@ class BAEAttacker(Attacker):
                    raise NotImplementedError
     
                 temp_text = tokenizer.convert_tokens_to_string(temp_replace)
-                # temporarily disable the USE constraint since we'll use it to evaluate attack results
-                # encoder = UniversalSentenceEncoder()
-                # use_score = encoder(temp_text, x_orig)
-                # if use_score < 0.8:
-                #     continue
+                
+                encoder = UniversalSentenceEncoder()
+                use_score = encoder(temp_text, x_orig)
+                
+                # From TextAttack's implementation: Finally, since the BAE code is based on the TextFooler code, we need to
+                # adjust the threshold to account for the missing / pi in the cosine
+                # similarity comparison. So the final threshold is 1 - (1 - 0.8) / pi
+                # = 1 - (0.2 / pi) = 0.936338023.
+                if use_score < 0.936:
+                    continue
                 inputs = tokenizer.encode_plus(temp_text, None, add_special_tokens=True, max_length=max_length, )
                 input_ids = torch.tensor(inputs["input_ids"]).unsqueeze(0).to(self.device)
                 seq_len = input_ids.size(1)
@@ -251,7 +242,7 @@ class BAEAttacker(Attacker):
                 temp_prob = torch.softmax(temp_prob, -1)
                 temp_label = torch.argmax(temp_prob)
 
-                if temp_label != orig_label:
+                if (not targeted and temp_label != target) or (targeted and temp_label == target):
                     feature.change += 1
                     if is_replace:
                         final_words[top_index[0]] = substitute
@@ -368,7 +359,6 @@ class BAEAttacker(Attacker):
 
         predicted_indices = torch.topk(predictions[0, masked_index], self.k)[1]
         predicted_tokens = tokenizer.convert_ids_to_tokens(predicted_indices)
-        
         return predicted_tokens
     
     def get_sim_embed(self, embed_path, sim_path):
