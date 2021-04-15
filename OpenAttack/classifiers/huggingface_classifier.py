@@ -65,12 +65,13 @@ class HuggingfaceClassifier(ClassifierBase):
         
 
     def get_prob(self, input_):        
-        return self.model.predict(input_, [0] * len(input_))[0]
+        return self.predict(input_, [0] * len(input_))[0]
 
     def get_grad(self, input_, labels):
-        return self.model.predict(input_, labels, tokenize=False)
+        ret = self.predict(input_, labels, tokenize=False)
+        return ret[0], ret[1]
 
-    def predict(self,sen_list, labels=None):
+    def predict(self, sen_list, labels=None):
         import torch
         
         sen_list = [
@@ -104,7 +105,9 @@ class HuggingfaceClassifier(ClassifierBase):
             xs = torch.LongTensor([curr_sen]).to(self.device)
             masks = torch.LongTensor([curr_mask]).to(self.device)
             
-            loss, logits = self.model(input_ids = xs,attention_mask = masks, labels=labels[i:i+1])
+            outputs, all_hidden_states = self.model(input_ids = xs,attention_mask = masks, output_hidden_states=True, labels=labels[i:i+1])
+            loss = outputs.loss
+            logits = outputs.logits
             logits = torch.nn.functional.softmax(logits,dim=-1)
             loss = - loss
             loss.backward()
@@ -115,4 +118,7 @@ class HuggingfaceClassifier(ClassifierBase):
         max_len = max(sent_lens)
         result = np.array(result)
         result_grad = torch.stack(result_grad).cpu().numpy()[:, 1:1 + max_len]
-        return result, result_grad
+        return result, result_grad, all_hidden_states
+
+    def get_hidden_states(self, input_, labels=None):
+        return self.predict(input_, labels, tokenize=False)[2]

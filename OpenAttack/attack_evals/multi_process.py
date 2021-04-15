@@ -1,4 +1,4 @@
-from .default import DefaultAttackEval
+from .default import DefaultAttackEval, MetaClassifierWrapper
 import multiprocessing, logging
 
 logger = logging.getLogger(__name__)
@@ -9,7 +9,9 @@ def worker(data):
     
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
-    res = attacker(classifier, data["x"], data["target"])
+    clsf_wrapper = MetaClassifierWrapper(classifier)
+    clsf_wrapper.set_meta(data)
+    res = attacker(clsf_wrapper, data["x"], data["target"])
     return data, res
 
 def worker_init(attacker, classifier):
