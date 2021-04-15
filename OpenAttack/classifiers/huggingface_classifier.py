@@ -6,15 +6,11 @@ from ..exceptions import ClassifierNotSupportException
 
 DEFAULT_CONFIG = {
     "device": None,
-    "processor": DefaultTextProcessor(),
-    "embedding": None,
+    "embedding_layer": None,
     "word2id": None,
     "max_len": None,
-    "tokenization": False,
-    "padding": False,
     "token_unk": "<UNK>",
     "token_pad": "<PAD>",
-    "require_length": False
 }
 
 
@@ -23,15 +19,11 @@ class HuggingfaceClassifier(ClassifierBase):
         """
         :param transformers.Module model: Huggingface model for classification.
         :param str device: Device of pytorch model. **Default:** "cpu" if cuda is not available else "cuda"
-        :param TextProcessor processor: Text processor used for tokenization. **Default:** :any:`DefaultTextProcessor`
         :param dict word2id: A dict maps token to index. If it's not None, torch.LongTensor will be passed to model. **Default:** None
-        :param np.ndarray embedding: Word vector matrix of shape (vocab_size, vector_dim). If it's not None, torch.FloatTensor of shape (batch_size, max_input_len, vector_dim) will be passed to model.``word2id`` and ``embedding`` options are both required to support get_grad. **Default:** None
+        :param transformers.model.embeddings.word_embeddings embedding_layer: The module of embedding_layer used in transformers models. For example, ``BertModel.bert.embeddings.word_embeddings``. ``word2id`` and ``embedding`` options are both required to support get_grad. **Default:** None
         :param int max_len: Max length of input tokens. If input token list is too long, it will be truncated. Uses None for no truncation. **Default:** None
-        :param bool tokenization: If it's False, raw sentences will be passed to model, otherwise tokenized sentences will be passed. This option will be ignored if ``word2id`` is setted. **Default:** False
-        :param bool padding: If it's True, add paddings to the end of sentences. This will be ignored if ``word2id`` option setted. **Default:** False
         :param str token_unk: Token for unknown tokens. **Default:** ``"<UNK>"``
         :param str token_unk: Token for padding. **Default:** ``"<PAD>"``
-        :param bool require_length: If it's True, a list of lengths for each sentence will be passed to the model as the second parameter. **Default:** False
 
         :Package Requirements: * **pytorch**
         """
@@ -42,7 +34,8 @@ class HuggingfaceClassifier(ClassifierBase):
         self.config["device"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.config.update(kwargs)
         self.to(self.config["device"])
-        self.hook = self.config["embedding"].register_forward_hook(self.__hook_fn)
+        if self.config["embedding_layer"] != None:
+            self.hook = self.config["embedding_layer"].register_forward_hook(self.__hook_fn)
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
         super().__init__(**self.config)
@@ -111,7 +104,8 @@ class HuggingfaceClassifier(ClassifierBase):
             logits = torch.nn.functional.softmax(logits,dim=-1)
             loss = - loss
             loss.backward()
-            result_grad.append(self.curr_embedding.grad[0].clone())
+            if self.config["embedding_layer"] != None:
+                result_grad.append(self.curr_embedding.grad[0].clone())
             result.append(logits.cpu().detach().numpy()[0])
             self.curr_embedding.grad.zero_()
 
