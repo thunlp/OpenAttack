@@ -7,7 +7,7 @@ AG News dataset which is used to train victim models.
 import pickle
 
 NAME = "Dataset.AG"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/dataset/sst.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/sst.pkl"
 
 
 def LOAD(path):

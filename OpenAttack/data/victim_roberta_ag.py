@@ -12,7 +12,7 @@ from OpenAttack.utils import make_zip_downloader, RobertaClassifier
 
 NAME = "Victim.ROBERTA.AG"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/roberta_ag.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/roberta_ag.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):

@@ -22,8 +22,10 @@ class ClassifierBase(Classifier):
         if self.config["word2id"] is not None:
             self.config["tokenization"] = True
             self.config["padding"] = True
+            self.word2id = self.config["word2id"]
         if self.config["embedding"] is not None:
             self.config["padding"] = True
+            self.embedding = self.config["embedding"]
 
     def pad_list(self, sent, pd, length):
         ret = sent.copy()

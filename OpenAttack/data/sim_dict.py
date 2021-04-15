@@ -5,5 +5,5 @@
 Dictionary file for ChineseSIMChar substitute.
 """
 NAME = "AttackAssist.SIM"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/sim_dict.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/sim_dict.pkl"
 # LOAD = pickle

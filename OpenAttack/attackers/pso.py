@@ -54,17 +54,13 @@ class PSOAttacker(Attacker):
         :param int max_iter: Maximum generations of pso algorithm. **Default:** 20
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
         :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`hownet`
-
         :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
         :Package Requirements: * **OpenHowNet**
-
         :Classifier Capacity: Probability
         
         Word-level Textual Adversarial Attacking as Combinatorial Optimization. Yuan Zang, Fanchao Qi, Chenghao Yang, Zhiyuan Liu, Meng Zhang, Qun Liu and Maosong Sun. ACL 2020.
-
         `[pdf] <https://www.aclweb.org/anthology/2020.acl-main.540.pdf>`__
         `[code] <https://github.com/thunlp/SememePSO-Attack>`__
-
         """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
@@ -360,8 +356,6 @@ class PSOAttacker(Attacker):
     def count_change_ratio(self, x, x_orig, x_len):
         change_ratio = float(np.sum(x != x_orig)) / float(x_len)
         return change_ratio
-
-
 
 
 

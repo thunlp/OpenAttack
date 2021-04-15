@@ -19,8 +19,6 @@
 
 OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation. 
 
-![demo](./docs/source/images/demo.gif)
-
 ## Features & Uses
 
 OpenAttack has following features:
@@ -66,6 +64,7 @@ After installation, you can try running `demo.py` to check if OpenAttack works w
 python demo.py
 ```
 
+![demo](./docs/source/images/demo.gif)
 ## Usage Examples
 
 #### Basic: Use Built-in Attacks

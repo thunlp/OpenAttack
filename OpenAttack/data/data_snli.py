@@ -7,7 +7,7 @@ SNLI dataset which is used to train victim models.
 import pickle
 
 NAME = "Dataset.SNLI"
-DOWNLOAD = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/dataset/snli.pkl"
+DOWNLOAD = "https://cdn.data.thunlp.org/TAADToolbox/dataset/snli.pkl"
 
 
 def LOAD(path):
