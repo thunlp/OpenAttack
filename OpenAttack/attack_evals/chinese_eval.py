@@ -19,12 +19,12 @@ class ChineseAttackEval(DefaultAttackEval):
         self.__attacker = self.attacker
         self.__classifier = self.classifier
 
-    def __get_tokens(self, sent):
+    def get_tokens(self, sent):
         import thulac
         tl = thulac.thulac(seg_only=True)
         return list(t[0] for t in tl.cut(sent))
 
-    def __get_fluency(self, sent):
+    def get_fluency(self, sent):
         if self.__config["language_model"] is None:
             from ..metric import GPT2LMCH
             self.__config["language_model"] = GPT2LMCH()
@@ -33,7 +33,7 @@ class ChineseAttackEval(DefaultAttackEval):
             return 1
         return self.__config["language_model"](sent)
 
-    def __get_mistakes(self, sent):
+    def get_mistakes(self, sent):
         if self.__config["language_tool"] is None:
             import language_tool_python
             self.__config["language_tool"] = language_tool_python.LanguageTool('zh-CN')
