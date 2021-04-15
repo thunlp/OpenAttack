@@ -170,7 +170,10 @@ class DefaultAttackEval(AttackEval):
         for data in dataset:
             # assert isinstance(data, DataInstance)
             # clsf_wrapper.set_meta(data["meta"])
-            res = self.attacker(self.classifier, data["x"], data["target"])
+            if "target" in data:
+                res = self.attacker(self.classifier, data["x"], data["target"])
+            else:
+                res = self.attacker(self.classifier, data["x"])
             if res is None:
                 info = self.__update(data["x"], None)
             else:

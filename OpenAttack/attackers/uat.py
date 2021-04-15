@@ -90,9 +90,9 @@ class UATAttacker(Attacker):
 
                 x = [
                     list(map(lambda x: x[0], config["processor"].get_tokens(sent)))
-                        for sent in list(map(lambda x: x.x, batch))
+                        for sent in batch["x"]
                 ]
-                y = list(map(lambda x: x.y, batch))
+                y = batch["y"]
 
                 nw_beams = [ ( curr_trigger,  0 ) ]
                 for i in range(config["trigger_len"]):
