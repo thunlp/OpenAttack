@@ -9,7 +9,10 @@ def worker(data):
     
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
-    res = attacker(classifier, data["x"], data["target"])
+    if "target" in data:
+        res = attacker(classifier, data["x"], data["target"])
+    else:
+        res = attacker(classifier, data["x"])
     return data, res
 
 def worker_init(attacker, classifier):

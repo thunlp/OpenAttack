@@ -1,6 +1,7 @@
 import numpy as np 
 import pickle, os
 from ..classifier import Classifier
+from .transformers_hook import HookCloser
 
 class RobertaModel():
     def __init__(self, model_path, num_labels, max_len = 100, device="cpu"):
@@ -10,7 +11,9 @@ class RobertaModel():
         self.model = transformers.RobertaForSequenceClassification.from_pretrained(model_path, num_labels=num_labels,output_hidden_states=False)
         self.model.eval()
         self.model.to(self.device)
-        self.hook = self.model.roberta.embeddings.word_embeddings.register_forward_hook(self.__hook_fn)
+
+        self.curr_embedding = None
+        self.hook = self.model.roberta.embeddings.word_embeddings.register_forward_hook(HookCloser(self))
         self.max_len = max_len
         
         self.word2id = pickle.load(open(os.path.join(model_path, "roberta_word2id.pkl"), "rb"))
@@ -19,10 +22,6 @@ class RobertaModel():
         self.device = device
         self.model.to(self.device)
         return self
-
-    def __hook_fn(self, module, input_, output_):
-        self.curr_embedding = output_
-        output_.retain_grad()
 
     def tokenize_corpus(self,corpus):
         tokenized_list = []
