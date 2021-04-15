@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
     "batch_size": 32,
     "replace_rate": 1.0,
     "insert_rate": 0.0,
-    "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    "device": None
 }
 
 filter_words = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
@@ -81,11 +81,14 @@ class BAEAttacker(Attacker):
 
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
-       
+        self.encoder = UniversalSentenceEncoder()
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.tokenizer_mlm = BertTokenizer.from_pretrained(self.config['mlm_path'], do_lower_case=True)
-        self.device = self.config['device']
+        if self.config["device"] is not None:
+            self.device = self.config['device']
+        else:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         config_atk = BertConfig.from_pretrained(self.config['mlm_path'])
         self.mlm_model = BertForMaskedLM.from_pretrained(self.config['mlm_path'], config=config_atk).to(self.device)
@@ -224,8 +227,8 @@ class BAEAttacker(Attacker):
     
                 temp_text = tokenizer.convert_tokens_to_string(temp_replace)
                 
-                encoder = UniversalSentenceEncoder()
-                use_score = encoder(temp_text, x_orig)
+                
+                use_score = self.encoder(temp_text, x_orig)
                 
                 # From TextAttack's implementation: Finally, since the BAE code is based on the TextFooler code, we need to
                 # adjust the threshold to account for the missing / pi in the cosine
@@ -255,7 +258,7 @@ class BAEAttacker(Attacker):
                     feature.success = 4
                     return feature.final_adverse, temp_label
                 else:
-                    label_prob = temp_prob[orig_label]
+                    label_prob = temp_prob[target]
                     gap = current_prob - label_prob
                     if gap > most_gap:
                         most_gap = gap

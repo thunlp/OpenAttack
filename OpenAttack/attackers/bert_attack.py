@@ -15,7 +15,7 @@ DEFAULT_CONFIG = {
     "threshold_pred_score": 0.3,
     "max_length": 512,
     "batch_size": 32,
-    "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    "device": None
 }
 
 filter_words = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
@@ -82,7 +82,10 @@ class BERTAttacker(Attacker):
         check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
         self.tokenizer_mlm = BertTokenizer.from_pretrained(self.config['mlm_path'], do_lower_case=True)
-        self.device = self.config["device"]
+        if self.config["device"] is not None:
+            self.device = self.config["device"]
+        else:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         config_atk = BertConfig.from_pretrained(self.config['mlm_path'])
         self.mlm_model = BertForMaskedLM.from_pretrained(self.config['mlm_path'], config=config_atk).to(self.device)
         self.k = self.config['k']
