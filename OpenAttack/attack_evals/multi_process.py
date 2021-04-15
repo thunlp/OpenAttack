@@ -1,4 +1,4 @@
-from .default import DefaultAttackEval
+from .default import DefaultAttackEval, MetaClassifierWrapper
 import multiprocessing, logging
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,9 @@ def debug(sig, frame):
 def worker(data):
     attacker = globals()["$WORKER_ATTACKER"]
     classifier = globals()["$WORKER_CLASSIFIER"]
+
+    clsf_wrapper = MetaClassifierWrapper(classifier)
+    clsf_wrapper.set_meta(data)
     if "target" in data:
         res = attacker(classifier, data["x"], data["target"])
     else:

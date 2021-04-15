@@ -85,7 +85,11 @@ class UATAttacker(Attacker):
         for epoch in range(config["epoch"]):
             for num_iter in tqdm( range( (len(dataset) + config["batch_size"] - 1) // config["batch_size"] ) ):
                 cnt = num_iter * config["batch_size"]
-                batch = dataset[ cnt: cnt + config["batch_size"] ]
+                temp = []
+                for i in range(cnt, cnt + config["batch_size"], 1):
+                    temp.append(i)
+                batch = dataset.select(temp)
+                #batch = dataset[ cnt: cnt + config["batch_size"] ]
                 cnt += config["batch_size"]
 
                 x = [

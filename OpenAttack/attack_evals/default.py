@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     "modification_rate": False,
     "running_time": True,
 }
-'''
+
 class MetaClassifierWrapper(Classifier):
     def __init__(self, clsf):
         self.__meta = None
@@ -39,7 +39,7 @@ class MetaClassifierWrapper(Classifier):
     
     def get_grad(self, input_, labels):
         return self.__clsf.get_grad(input_, labels, self.__meta)
-'''
+
 
 class DefaultAttackEval(AttackEval):
     """
@@ -118,18 +118,18 @@ class DefaultAttackEval(AttackEval):
             if visualize:
                 try:
                     if x_adv is not None:
-                        res = self.classifier.get_prob([x_orig, x_adv])
+                        res = self.classifier.get_prob([x_orig, x_adv], data)
                         y_orig = res[0]
                         y_adv = res[1]
                     else:
-                        y_orig = self.classifier.get_prob([x_orig])[0]
+                        y_orig = self.classifier.get_prob([x_orig], data)[0]
                 except ClassifierNotSupportException:
                     if x_adv is not None:
-                        res = self.classifier.get_pred([x_orig, x_adv])
+                        res = self.classifier.get_pred([x_orig, x_adv], data)
                         y_orig = int(res[0])
                         y_adv = int(res[1])
                     else:
-                        y_orig = int(self.classifier.get_pred([x_orig])[0])
+                        y_orig = int(self.classifier.get_pred([x_orig], data)[0])
 
                 if self.__progress_bar:
                     visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
@@ -166,10 +166,10 @@ class DefaultAttackEval(AttackEval):
         """
         self.clear()
 
-        # clsf_wrapper = MetaClassifierWrapper(self.classifier)
+        clsf_wrapper = MetaClassifierWrapper(self.classifier)
         for data in dataset:
             # assert isinstance(data, DataInstance)
-            # clsf_wrapper.set_meta(data["meta"])
+            clsf_wrapper.set_meta(data)
             if "target" in data:
                 res = self.attacker(self.classifier, data["x"], data["target"])
             else:
