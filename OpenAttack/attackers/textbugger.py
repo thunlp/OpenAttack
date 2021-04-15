@@ -85,7 +85,7 @@ class TextBuggerAttacker(Attacker):
             tempoutput = clsf.get_prob([sentence_without])[0]
             ret = max(tempoutput[y_orig], 1e-3)
             word_losses[curr_token] = -np.log(ret)
-        word_losses = [(k, v) for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}]
+        word_losses = {(k, v) for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
 
     def get_w_word_importances(self, sentence, clsf, y_orig):  # white
@@ -106,7 +106,7 @@ class TextBuggerAttacker(Attacker):
                 word_losses[curr_token] = dist[i]
             else:
                 word_losses[curr_token] = 0
-        word_losses = [(k, v) for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)]
+        word_losses = {(k, v) for k, v in sorted(word_losses.items(), key=lambda item: -item[1], reverse=True)}
         return word_losses
 
     def getSemanticSimilarity(x, x_prime, epsilon):
