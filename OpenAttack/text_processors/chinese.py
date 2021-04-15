@@ -19,16 +19,27 @@ class ChineseTextProcessor(TextProcessor):
 
     def get_tokens(self, sentence):
         """
-        :Data Requirements: :py:data:`TProcess.NLTKSentTokenizer` , :py:data:`.TProcess.NLTKPerceptronPosTagger`
-
-        This method uses ``nltk.WordPunctTokenizer()`` for word tokenization and
-        ``nltk.tag.PerceptronTagger()`` to generate POS tag in "Penn tagset".
+        method: thulac
         """
+        dict = {
+            'v': 'VBD',
+            'n': 'NN',
+            'r': 'PRP',
+            't': 'NN',
+            'm': 'DT',
+            'f': 'IN',
+            'a': 'JJ',
+            'd': 'RB'
+        }
         import thulac
         thu = thulac.thulac()
         lists = thu.cut(sentence)
         ans = []
         for i in range(len(lists)):
+            if lists[i][1] in dict:
+                lists[i][1] = dict[lists[i][1]]
+            else:
+                lists[i][1] = 'NONE'
             ans.append(tuple(lists[i]))
         return ans
 
