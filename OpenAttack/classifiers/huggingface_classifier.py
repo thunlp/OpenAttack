@@ -1,8 +1,9 @@
 import numpy as np
 from . import ClassifierBase
 from ..text_processors import DefaultTextProcessor
-from ..utils import check_parameters
+from ..utils import check_parameters, HookCloser
 from ..exceptions import ClassifierNotSupportException
+
 
 DEFAULT_CONFIG = {
     "device": None,
@@ -35,16 +36,13 @@ class HuggingfaceClassifier(ClassifierBase):
         self.config.update(kwargs)
         self.to(self.config["device"])
         if self.config["embedding_layer"] != None:
-            self.hook = self.config["embedding_layer"].register_forward_hook(self.__hook_fn)
+            self.curr_embedding = None
+            self.hook = self.config["embedding_layer"].register_forward_hook( HookCloser(self) )
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
         super().__init__(**self.config)
         self.model.to(self.config["device"])
 
-    def __hook_fn(self, module, input_, output_):
-        self.curr_embedding = output_
-        output_.retain_grad()
-    
     def to(self, device):
         """
         :param str device: Device that moves model to.
@@ -106,8 +104,9 @@ class HuggingfaceClassifier(ClassifierBase):
             loss.backward()
             if self.config["embedding_layer"] != None:
                 result_grad.append(self.curr_embedding.grad[0].clone())
+                self.curr_embedding.grad.zero_()
             result.append(logits.cpu().detach().numpy()[0])
-            self.curr_embedding.grad.zero_()
+            
 
         max_len = max(sent_lens)
         result = np.array(result)
