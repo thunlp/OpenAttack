@@ -20,7 +20,6 @@ def worker(data):
 def worker_init(attacker, classifier):
     globals()['$WORKER_ATTACKER'] = attacker
     globals()['$WORKER_CLASSIFIER'] = classifier
-    signal.signal(signal.SIGUSR1, debug)  # Register handler
 
 class MultiProcessEvalMixin(object):
     def __init__(self, *args, num_process=1, chunk_size=None, **kwargs):
