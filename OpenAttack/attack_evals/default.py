@@ -365,6 +365,6 @@ class DefaultAttackEval(AttackEval):
                 ret["pred"].append(y_adv)
                 ret["original"].append(data["x"])
                 ret["info"].append(info)
-        return datasets.Datasetfrom_dict(ret)
+        return datasets.Dataset.from_dict(ret)
             
             

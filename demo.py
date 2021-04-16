@@ -2,7 +2,7 @@ import OpenAttack
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
-from tqdm import tqdm
+import datasets
 
 def make_model():
     class MyClassifier(OpenAttack.Classifier):
@@ -22,6 +22,11 @@ def make_model():
             return np.array(ret)
     return MyClassifier()
 
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
 
 def main():
 
@@ -31,7 +36,7 @@ def main():
     print("Build model")
     clsf = make_model()
 
-    dataset = OpenAttack.DataManager.loadDataset("SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
     options = {

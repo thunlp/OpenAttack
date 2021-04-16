@@ -3,7 +3,12 @@ import nltk
 import numpy as np
 from tqdm import tqdm
 
-
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+    
 def main():
     OpenAttack.DataManager.download("Dataset.SST")
     OpenAttack.DataManager.download("Victim.ROBERTA.SST")
@@ -14,7 +19,7 @@ def main():
     print("Build model")
     clsf = OpenAttack.DataManager.loadVictim("ROBERTA.SST")
 
-    dataset = OpenAttack.DataManager.loadDataset("SST")[0][:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
     options = {
