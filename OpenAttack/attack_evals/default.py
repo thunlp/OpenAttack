@@ -132,9 +132,9 @@ class DefaultAttackEval(AttackEval):
                         y_orig = int(self.classifier.get_pred([x_orig], data)[0])
 
                 if self.__progress_bar:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
                 else:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write)
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
         
         res = self.get_result()
         if self.__config["running_time"]:

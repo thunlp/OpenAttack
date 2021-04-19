@@ -1,7 +1,6 @@
 from ..text_processor import TextProcessor
 from ..data_manager import DataManager
 
-
 class ChineseTextProcessor(TextProcessor):
     """
     An implementation of :class:`OpenAttack.TextProcessor` mainly uses ``nltk`` toolkit.
@@ -21,7 +20,7 @@ class ChineseTextProcessor(TextProcessor):
         """
         method: thulac
         """
-        dict = {
+        mapping = {
             'v': 'VBD',
             'n': 'NN',
             'r': 'PRP',
@@ -31,17 +30,19 @@ class ChineseTextProcessor(TextProcessor):
             'a': 'JJ',
             'd': 'RB'
         }
-        import thulac
-        thu = thulac.thulac()
-        lists = thu.cut(sentence)
+
+        if self.__tokenize is None:
+            import jieba.posseg as pseg
+            self.__tokenize = pseg.cut
+
         ans = []
-        for i in range(len(lists)):
-            if lists[i][1] in dict:
-                lists[i][1] = dict[lists[i][1]]
+        for pair in self.__tokenize(sentence):  
+            if pair.flag[0] in mapping:
+                ans.append((pair.word, mapping[ pair.flag[0] ]))
             else:
-                lists[i][1] = 'NONE'
-            ans.append(tuple(lists[i]))
+                ans.append((pair.word, "OTHER" ))
         return ans
+
 
     def get_lemmas(self, token_and_pos):
         """
@@ -92,4 +93,4 @@ class ChineseTextProcessor(TextProcessor):
         :rtype: str
 
         """
-        return ' '.join(tokens)
+        return ''.join(tokens)

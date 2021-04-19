@@ -18,4 +18,4 @@ DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):
     from OpenAttack import Classifier
-    return BertClassifier( os.path.join(path, "checkpoint-45000-0.552-best"), 5)
+    return BertClassifier( path, 5)
