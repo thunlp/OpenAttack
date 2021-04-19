@@ -132,9 +132,9 @@ class DefaultAttackEval(AttackEval):
                         y_orig = int(self.classifier.get_pred([x_orig], data)[0])
 
                 if self.__progress_bar:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer)
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
                 else:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write)
+                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
         
         res = self.get_result()
         if self.__config["running_time"]:
@@ -197,7 +197,7 @@ class DefaultAttackEval(AttackEval):
             from ..metric import LanguageTool
             self.__config["language_tool"] = LanguageTool()
         
-        return len(self.__config["language_tool"](sent))
+        return self.__config["language_tool"](sent)
     
     def __get_fluency(self, sent):
         if self.__config["language_model"] is None:
@@ -365,6 +365,6 @@ class DefaultAttackEval(AttackEval):
                 ret["pred"].append(y_adv)
                 ret["original"].append(data["x"])
                 ret["info"].append(info)
-        return datasets.Datasetfrom_dict(ret)
+        return datasets.Dataset.from_dict(ret)
             
             

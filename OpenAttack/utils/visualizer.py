@@ -1,14 +1,39 @@
 import os
 import numpy as np
-import nltk
 
-tokenizer = nltk.WordPunctTokenizer().tokenize
+widths = [
+    (126,    1), (159,    0), (687,     1), (710,   0), (711,   1), 
+    (727,    0), (733,    1), (879,     0), (1154,  1), (1161,  0), 
+    (4347,   1), (4447,   2), (7467,    1), (7521,  0), (8369,  1), 
+    (8426,   0), (9000,   1), (9002,    2), (11021, 1), (12350, 2), 
+    (12351,  1), (12438,  2), (12442,   0), (19893, 2), (19967, 1),
+    (55203,  2), (63743,  1), (64106,   2), (65039, 1), (65059, 0),
+    (65131,  2), (65279,  1), (65376,   2), (65500, 1), (65510, 2),
+    (120831, 1), (262141, 2), (1114109, 1),
+]
+ 
+def char_width( o ):
+    global widths
+    if o == 0xe or o == 0xf:
+        return 0
+    for num, wid in widths:
+        if o <= num:
+            return wid
+    return 1
+
+def sent_len(s):
+    assert isinstance(s, str)
+    ret = 0
+    for it in s:
+        ret += char_width(ord(it))
+    return ret
+
 def right_bar_print(info, key_len=20, val_len=10):
     ret = []
     ret.append( " " * (key_len + val_len) )
     for key, val in info.items():
         row = " %s: " % (key[:key_len - 3])
-        row += " " * (key_len - len(row))
+        row += " " * (key_len - sent_len(row))
         if isinstance(val, bool):
             if val:
                 row += " yes" + " " * (val_len - 4)
@@ -16,24 +41,24 @@ def right_bar_print(info, key_len=20, val_len=10):
                 row += " no" + " " * (val_len - 3)
         elif isinstance(val, int):
             val_str = " %d" % val
-            row += val_str + " " * (val_len - len(val_str))
+            row += val_str + " " * (val_len - sent_len(val_str))
         elif isinstance(val, float):
             val_str = " %.5g" % val
-            if len(val_str) > val_len:
+            if sent_len(val_str) > val_len:
                 val_str = (" %.7f" % val)[:val_len]
-            row += val_str + " " * (val_len - len(val_str))
+            row += val_str + " " * (val_len - sent_len(val_str))
         else:
             val_str = (" %s" % val)[:val_len]
-            row += val_str + " " * (val_len - len(val_str))
+            row += val_str + " " * (val_len - sent_len(val_str))
         ret.append(row)
     ret.append( " " * (key_len + val_len) )
     return ret
 
 def word_align(wordA, wordB):
-    if len(wordA) < len(wordB):
-        wordA += " " * (len(wordB) - len(wordA))
+    if sent_len(wordA) < sent_len(wordB):
+        wordA += " " * (sent_len(wordB) - sent_len(wordA))
     else:
-        wordB += " " * (len(wordA) - len(wordB))
+        wordB += " " * (sent_len(wordA) - sent_len(wordB))
     return wordA, wordB
 
 def levenshtein_visual(a, b):
@@ -80,7 +105,7 @@ def levenshtein_visual(a, b):
         q -= 1
     return ret[::-1]
 
-def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
+def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer):
     ret = []
 
     assert isinstance(y_orig, int) == isinstance(y_adv, int)
@@ -88,7 +113,7 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
         head_str = "Label: %d --> %d" % (y_orig, y_adv)
     else:
         head_str = "Label: %d (%.2lf%%) --> %d (%.2lf%%)" % (y_orig.argmax(), y_orig.max() * 100, y_adv.argmax(), y_adv.max() * 100)
-    ret.append(("\033[32m%s\033[0m" % head_str) + " " * (max_len - len(head_str)))
+    ret.append(("\033[32m%s\033[0m" % head_str) + " " * (max_len - sent_len(head_str)))
     ret.append(" " * max_len)
     
     token_orig = tokenizer(x_orig)
@@ -99,12 +124,12 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
     curr2 = ""
     length = 0
     for tokenA, tokenB in pairs:
-        assert len(tokenA) == len(tokenB)
+        assert sent_len(tokenA) == sent_len(tokenB)
         if length + len(tokenA) + 1 > max_len:
             ret.append(curr1 + " " * (max_len - length))
             ret.append(curr2 + " " * (max_len - length))
             ret.append(" " * max_len)
-            length = len(tokenA) + 1
+            length = sent_len(tokenA) + 1
             if tokenA.lower() == tokenB.lower():
                 curr1 = tokenA + " "
                 curr2 = tokenB + " "
@@ -112,7 +137,7 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len):
                 curr1 = "\033[1;31m" + tokenA + "\033[0m" + " "
                 curr2 = "\033[1;32m" + tokenB + "\033[0m" + " "
         else:
-            length += 1 + len(tokenA)
+            length += 1 + sent_len(tokenA)
             if tokenA.lower() == tokenB.lower():
                 curr1 += tokenA + " "
                 curr2 += tokenB + " "
@@ -132,22 +157,22 @@ def left_bar_failed(x_orig, y_orig, max_len):
         head_str = "Label: %d --> Failed!" % y_orig
     else:
         head_str = "Label: %d (%.2lf%%) --> Failed!" % (y_orig.argmax(), y_orig.max() * 100)
-    ret.append(("\033[31m%s\033[0m" % head_str) + " " * (max_len - len(head_str)))
+    ret.append(("\033[31m%s\033[0m" % head_str) + " " * (max_len - sent_len(head_str)))
     ret.append(" " * max_len)
     tokens = x_orig.split()
     curr = ""
     for tk in tokens:
-        if len(curr) + len(tk) + 1 > max_len:
-            ret.append(curr + " " * (max_len - len(curr)))
+        if sent_len(curr) + sent_len(tk) + 1 > max_len:
+            ret.append(curr + " " * (max_len - sent_len(curr)))
             curr = tk + " "
         else:
             curr += tk + " "
-    if len(curr) > 0:
-        ret.append(curr + " " * (max_len - len(curr)))
+    if sent_len(curr) > 0:
+        ret.append(curr + " " * (max_len - sent_len(curr)))
     ret.append(" " * max_len)
     return ret
 
-def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=25, val_len=10):
+def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, tokenizer, key_len=25, val_len=10):
     """
     Visualization tools used in :py:class:`.DefaultAttackEval`.
     """
@@ -157,7 +182,7 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=2
         cols = 80
 
     headline = "Sample: %d " % idx
-    headline = headline + ("=" * (cols - len(headline) - 1)) + "\n"
+    headline = headline + ("=" * (cols - sent_len(headline) - 1)) + "\n"
     stream_writer(headline)
 
     max_len = cols - 1 - key_len - val_len
@@ -167,7 +192,7 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, key_len=2
         # Failed
         left = left_bar_failed(x_orig, y_orig, max_len)
     else:
-        left = left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len)
+        left = left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer)
     
     if len(left) < len(right):
         delta = len(right) - len(left)

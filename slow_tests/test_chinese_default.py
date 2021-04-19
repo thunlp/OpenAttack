@@ -10,15 +10,16 @@ from wrapper import TimeCalcClsf
 
 def dataset_mapping(x):
     return {
-        "x": x["sentence"],
-        "y": 1 if x["label"] > 0.5 else 0,
+        "x": x["review_body"],
+        "y": x["stars"],
     }
 
 def main():
     import multiprocessing
     if multiprocessing.get_start_method() != "spawn":
         multiprocessing.set_start_method("spawn", force=True)
-    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:100]").map(function=dataset_mapping)
+    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:5]").map(dataset_mapping)
+    
     clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
     attackers = get_attackers_on_chinese(dataset, clsf)
 
@@ -28,7 +29,7 @@ def main():
         try:
             st = time.perf_counter()
             print(
-                OpenAttack.attack_evals.DefaultAttackEval(attacker, time_clsf, progress_bar=False).eval(dataset),
+                OpenAttack.attack_evals.ChineseAttackEval(attacker, time_clsf, progress_bar=True).eval(dataset, visualize=True),
                 time_clsf.total_time,
                 time.perf_counter() - st
             )
