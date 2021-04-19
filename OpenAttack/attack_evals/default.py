@@ -197,7 +197,7 @@ class DefaultAttackEval(AttackEval):
             from ..metric import LanguageTool
             self.__config["language_tool"] = LanguageTool()
         
-        return len(self.__config["language_tool"](sent))
+        return self.__config["language_tool"](sent)
     
     def __get_fluency(self, sent):
         if self.__config["language_model"] is None:

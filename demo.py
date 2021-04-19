@@ -28,31 +28,39 @@ def dataset_mapping(x):
         "y": 1 if x["label"] > 0.5 else 0,
     }
 
+class MultiprocessInvoke(OpenAttack.attack_evals.multi_process.MultiProcessEvalMixin, OpenAttack.attack_evals.InvokeLimitedAttackEval):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+import multiprocessing
+if multiprocessing.get_start_method() != "spawn":
+    multiprocessing.set_start_method("spawn", force=True)
+    
 def main():
 
     print("New Attacker")
-    attacker = OpenAttack.attackers.PWWSAttacker()
+    attacker = OpenAttack.attackers.PSOAttacker()
 
     print("Build model")
-    clsf = make_model()
+    clsf = OpenAttack.loadVictim("BERT.SST").to("cuda:0")
 
-    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
+    dataset = datasets.load_dataset("sst", split="train[:100]").map(function=dataset_mapping)
 
     print("Start attack")
     options = {
         "success_rate": True,
-        "fluency": False,
-        "mistake": False,
-        "semantic": False,
+        "fluency": True,
+        "mistake": True,
+        "semantic": True,
         "levenstein": True,
-        "word_distance": False,
+        "word_distance": True,
         "modification_rate": True,
         "running_time": True,
 
         "invoke_limit": 500,
         "average_invoke": True
     }
-    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options )
+    attack_eval = MultiprocessInvoke(attacker, clsf, **options, num_process=4, progress_bar=True)
     attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ Pretrained BERT model on Amazon Reviews (Chinese) dataset.
 """
 
 from OpenAttack.utils import make_zip_downloader, BertClassifier
+import os
 
 NAME = "Victim.BERT.AMAZON_ZH"
 
@@ -17,4 +18,4 @@ DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):
     from OpenAttack import Classifier
-    return BertClassifier(path, 5)
+    return BertClassifier( os.path.join(path, "checkpoint-45000-0.552-best"), 5)

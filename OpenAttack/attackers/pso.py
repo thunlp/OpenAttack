@@ -266,6 +266,7 @@ class PSOAttacker(Attacker):
             if np.random.uniform() < prob[i]:
                 x_new[i] = x1[i]
         return x_new
+        
     def select_best_replacement(self, clsf, pos, x_cur, x_orig, target, replace_list,targeted):
 
         new_x_list = [self.do_replace(
