@@ -125,7 +125,7 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer):
     length = 0
     for tokenA, tokenB in pairs:
         assert sent_len(tokenA) == sent_len(tokenB)
-        if length + len(tokenA) + 1 > max_len:
+        if length + sent_len(tokenA) + 1 > max_len:
             ret.append(curr1 + " " * (max_len - length))
             ret.append(curr2 + " " * (max_len - length))
             ret.append(" " * max_len)

@@ -13,7 +13,7 @@ def main():
     chinese_substitute = OpenAttack.substitutes.ChineseHowNetSubstitute()
 
     print("New Attacker")
-    attacker = OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute)
+    attacker = OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=None)
 
     print("Building model")
     clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
