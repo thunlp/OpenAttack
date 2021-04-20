@@ -22,13 +22,13 @@ class ChineseHowNetSubstitute(WordSubstitute):
         self.zh_word_list = self.hownet_dict.get_zh_words()
 
     def __call__(self, word, pos_tag, threshold=None):
-        if pos_tag[:1] == "a":
+        if pos_tag[:2] == "JJ":
             pp = "adj"
-        elif pos_tag[:1] == "v":
-            pp = "verb"    
-        elif pos_tag[:1] == "n":
+        elif pos_tag[:2] == "VB":
+            pp = "verb"
+        elif pos_tag[:2] == "NN":
             pp = "noun"
-        elif pos_tag[:1] == "d":
+        elif pos_tag[:2] == "RB":
             pp = "adv"
         else:
             pp = None
