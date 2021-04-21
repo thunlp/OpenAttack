@@ -4,24 +4,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
 import datasets
 
-def make_model():
-    class MyClassifier(OpenAttack.Classifier):
-        def __init__(self):
-            try:
-                self.model = SentimentIntensityAnalyzer()
-            except LookupError:
-                nltk.download('vader_lexicon')
-                self.model = SentimentIntensityAnalyzer()
-            
-        def get_prob(self, input_):
-            ret = []
-            for sent in input_:
-                res = self.model.polarity_scores(sent)
-                prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 1e-6)
-                ret.append(np.array([1 - prob, prob]))
-            return np.array(ret)
-    return MyClassifier()
-
 def dataset_mapping(x):
     return {
         "x": x["review_body"],
@@ -39,10 +21,10 @@ if multiprocessing.get_start_method() != "spawn":
 def main():
     print("Loading chinese processor and substitute")
     chinese_processor = OpenAttack.text_processors.ChineseTextProcessor()
-    chinese_substitute = OpenAttack.substitutes.ChineseWord2VecSubstitute()
+    chinese_substitute = OpenAttack.substitutes.ChineseCiLinSubstitute()
 
     print("New Attacker")
-    attacker = OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute)
+    attacker = OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=None)
 
     print("Building model")
     clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
@@ -53,7 +35,7 @@ def main():
     print("Start attack")
     options = {
         "success_rate": True,
-        "fluency": False,
+        "fluency": True,
         "mistake": True,
         "semantic": True,
         "levenstein": True,

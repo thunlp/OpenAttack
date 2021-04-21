@@ -2,7 +2,7 @@ import math
 
 
 class GPT2LMCH:
-    def __init__(self, use_tf=False):
+    def __init__(self):
         """
         :param bool use_tf: If true, uses tensorflow GPT-2-Chinese model.
         :Package Requirements:
@@ -15,7 +15,6 @@ class GPT2LMCH:
         import os
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         import transformers
-        self.use_tf = use_tf
 
         self.tokenizer = transformers.BertTokenizer.from_pretrained("mymusise/EasternFantasyNoval")
         self.lm = transformers.TFGPT2LMHeadModel.from_pretrained("mymusise/EasternFantasyNoval")
