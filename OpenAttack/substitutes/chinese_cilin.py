@@ -1,6 +1,7 @@
 import random
 from .base import WordSubstitute
 from ..data_manager import DataManager
+from ..exceptions import WordNotInDictionaryException
 
 
 class ChineseCiLinSubstitute(WordSubstitute):
@@ -18,7 +19,7 @@ class ChineseCiLinSubstitute(WordSubstitute):
 
     def __call__(self, word, pos_tag, threshold=None):
         if word not in self.cilin_dict:
-            return None
+            raise WordNotInDictionaryException()
         sym_words = self.cilin_dict[word]
         ret = []
         for sym_word in sym_words:
