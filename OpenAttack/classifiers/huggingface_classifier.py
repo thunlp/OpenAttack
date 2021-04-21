@@ -8,10 +8,8 @@ from ..exceptions import ClassifierNotSupportException
 DEFAULT_CONFIG = {
     "device": None,
     "embedding_layer": None,
-    "word2id": None,
     "max_len": None,
-    "token_unk": "<UNK>",
-    "token_pad": "<PAD>",
+    "tokenizer": None,
 }
 
 
@@ -20,11 +18,9 @@ class HuggingfaceClassifier(ClassifierBase):
         """
         :param transformers.Module model: Huggingface model for classification.
         :param str device: Device of pytorch model. **Default:** "cpu" if cuda is not available else "cuda"
-        :param dict word2id: A dict maps token to index. If it's not None, torch.LongTensor will be passed to model. **Default:** None
         :param transformers.model.embeddings.word_embeddings embedding_layer: The module of embedding_layer used in transformers models. For example, ``BertModel.bert.embeddings.word_embeddings``. ``word2id`` and ``embedding`` options are both required to support get_grad. **Default:** None
+        :param transformers.Tokenizer tokenizer: Huggingface tokenizer for classification. **Default:** None
         :param int max_len: Max length of input tokens. If input token list is too long, it will be truncated. Uses None for no truncation. **Default:** None
-        :param str token_unk: Token for unknown tokens. **Default:** ``"<UNK>"``
-        :param str token_unk: Token for padding. **Default:** ``"<PAD>"``
 
         :Package Requirements: * **pytorch**
         """
@@ -59,44 +55,30 @@ class HuggingfaceClassifier(ClassifierBase):
         return self.predict(input_, [0] * len(input_))[0]
 
     def get_grad(self, input_, labels):
-        ret = self.predict(input_, labels, tokenize=False)
+        ret = self.predict(input_, labels)
         return ret[0], ret[1]
 
     def predict(self, sen_list, labels=None):
         import torch
-        
-        sen_list = [
-            sen[:self.config["max_len"] - 2] for sen in sen_list
-        ]
         sent_lens = [ len(sen) for sen in sen_list ]
-        attentions = np.array([
-            [1] * (len(sen) + 2) + [0] * (self.config["max_len"] - 2 - len(sen))
-            for sen in sen_list
-        ], dtype='int64')
-        sen_list = [
-            [self.word2id[token] if token in self.word2id else self.word2id[self.config["token_unk"]] for token in sen]
-             + [self.word2id[self.config["token_pad"]]] * (self.config["max_len"] - 2 - len(sen))
-            for sen in sen_list
-        ]
-        tokeinzed_sen = np.array([
-            [self.word2id["[CLS]"]] + sen + [self.word2id["[SEP]"]]
-            for sen in sen_list
-        ], dtype='int64')
-
+        tokenized_batch = self.config["tokenizer"](sen_list, padding=True, truncation=True, max_length=self.config["max_len"], return_tensors="pt")
+        tokeinzed_sen = tokenized_batch["input_ids"].numpy().tolist()
+        attentions = tokenized_batch["attention_mask"].numpy().tolist()
         result = []
         result_grad = []
         
         if labels is None:
             labels = [0] * len(sen_list)
-        labels = torch.LongTensor(labels).to(self.device)
+        labels = torch.LongTensor(labels).to(self.config["device"])
 
         for i in range(len(tokeinzed_sen)):
             curr_sen = tokeinzed_sen[i]
             curr_mask = attentions[i]
-            xs = torch.LongTensor([curr_sen]).to(self.device)
-            masks = torch.LongTensor([curr_mask]).to(self.device)
+            xs = torch.LongTensor([curr_sen]).to(self.config["device"])
+            masks = torch.LongTensor([curr_mask]).to(self.config["device"])
             
-            outputs, all_hidden_states = self.model(input_ids = xs,attention_mask = masks, output_hidden_states=True, labels=labels[i:i+1])
+            outputs = self.model(input_ids = xs,attention_mask = masks, output_hidden_states=True, labels=labels[i:i+1])
+            all_hidden_states = outputs.hidden_states
             loss = outputs.loss
             logits = outputs.logits
             logits = torch.nn.functional.softmax(logits,dim=-1)
@@ -110,8 +92,11 @@ class HuggingfaceClassifier(ClassifierBase):
 
         max_len = max(sent_lens)
         result = np.array(result)
-        result_grad = torch.stack(result_grad).cpu().numpy()[:, 1:1 + max_len]
+        if self.config["embedding_layer"] != None:
+            result_grad = torch.stack(result_grad).cpu().numpy()[:, 1:1 + max_len]
+        else:
+            result_grad = 0
         return result, result_grad, all_hidden_states
 
     def get_hidden_states(self, input_, labels=None):
-        return self.predict(input_, labels, tokenize=False)[2]
+        return self.predict(input_, labels)[2]
