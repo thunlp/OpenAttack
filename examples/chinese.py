@@ -10,7 +10,7 @@ def dataset_mapping(x):
 def main():
     print("Loading chinese processor and substitute")
     chinese_processor = OpenAttack.text_processors.ChineseTextProcessor()
-    chinese_substitute = OpenAttack.substitutes.ChineseHowNetSubstitute()
+    chinese_substitute = OpenAttack.substitutes.ChineseCiLinSubstitute()
 
     print("New Attacker")
     attacker = OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=None)
