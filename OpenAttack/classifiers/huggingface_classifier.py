@@ -55,6 +55,32 @@ class HuggingfaceClassifier(ClassifierBase):
         self.model.to(device)
         return self
         
+    def get_prob(self, input_):
+        import torch
+        sent_lens = [ len(sen) for sen in sen_list ]
+        tokenized_batch = self.config["tokenizer"](sen_list, padding=True, truncation=True, max_length=self.config["max_len"], return_tensors="pt")
+        tokeinzed_sen = tokenized_batch["input_ids"].numpy().tolist()
+        attentions = tokenized_batch["attention_mask"].numpy().tolist()
+
+        result = []
+
+        for i in range(len(tokeinzed_sen)):
+            curr_sen = tokeinzed_sen[i]
+            curr_mask = attentions[i]
+            xs = torch.LongTensor([curr_sen]).to(self.config["device"])
+            masks = torch.LongTensor([curr_mask]).to(self.config["device"])
+            
+            outputs = self.model(input_ids = xs, attention_mask = masks,)
+            loss = outputs.loss
+            logits = outputs.logits
+            logits = torch.nn.functional.softmax(logits,dim=-1)
+            loss = - loss
+            loss.backward()
+            result.append(logits.cpu().detach().numpy()[0])
+            
+        max_len = max(sent_lens)
+        result = np.array(result)
+        return result
 
     def get_grad(self, input_, labels):
         ret = self.predict(input_, labels)
