@@ -39,7 +39,7 @@ if multiprocessing.get_start_method() != "spawn":
 def main():
 
     print("New Attacker")
-    attacker = OpenAttack.attackers.PSOAttacker()
+    attacker = OpenAttack.attackers.PWWSAttacker()
 
     print("Build model")
     clsf = OpenAttack.loadVictim("BERT.SST").to("cuda:0")
