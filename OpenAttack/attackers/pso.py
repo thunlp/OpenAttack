@@ -54,17 +54,13 @@ class PSOAttacker(Attacker):
         :param int max_iter: Maximum generations of pso algorithm. **Default:** 20
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
         :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`hownet`
-
         :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
         :Package Requirements: * **OpenHowNet**
-
         :Classifier Capacity: Probability
         
         Word-level Textual Adversarial Attacking as Combinatorial Optimization. Yuan Zang, Fanchao Qi, Chenghao Yang, Zhiyuan Liu, Meng Zhang, Qun Liu and Maosong Sun. ACL 2020.
-
         `[pdf] <https://www.aclweb.org/anthology/2020.acl-main.540.pdf>`__
         `[code] <https://github.com/thunlp/SememePSO-Attack>`__
-
         """
         self.config = DEFAULT_CONFIG.copy()
         self.config.update(kwargs)
@@ -73,11 +69,13 @@ class PSOAttacker(Attacker):
 
         check_parameters(DEFAULT_CONFIG.keys(), self.config)
 
+
     def __call__(self, clsf, x_orig, target=None):
         """
         * **clsf** : **Classifier** .
         * **x_orig** : Input sentence.
         """
+        self.invoke_dict = {}
         x_orig = x_orig.lower()
         if target is None:
             targeted = False
@@ -90,7 +88,7 @@ class PSOAttacker(Attacker):
 
         x_len = len(x_orig)
         neighbours_nums = [
-            self.get_neighbour_num(word, pos) if word not in self.config["skip_words"] else 0
+            min(self.get_neighbour_num(word, pos),10) if word not in self.config["skip_words"] else 0
             for word, pos in zip(x_orig, x_pos)
         ]
         neighbours = [
@@ -102,12 +100,19 @@ class PSOAttacker(Attacker):
 
         if np.sum(neighbours_nums) == 0:
             return None
-
-        pop = self.generate_population(
-                clsf, x_orig, neighbours,neighbours_nums,x_len, target, targeted)
+        w_select_probs = neighbours_nums / np.sum(neighbours_nums)
+        tem = self.generate_population(
+                clsf, x_orig, neighbours,w_select_probs,x_len, target, targeted)
+        if tem is None:
+            return None
+        if tem[0] is None:
+            if targeted:
+                return self.config["processor"].detokenizer(tem[2]), target
+            else:
+                return self.config["processor"].detokenizer(tem[2]), np.argmax(tem[1])
+        pop_preds,pop=tem
+        pop_scores=pop_preds[:,target]
         part_elites = copy.deepcopy(pop)
-        pop_preds = clsf.get_prob(self.make_batch(pop))
-        pop_scores = pop_preds[:, target]
         part_elites_scores = pop_scores
         if targeted:
             all_elite_score = np.max(pop_scores)
@@ -152,16 +157,18 @@ class PSOAttacker(Attacker):
                     pop[id] = self.turn(part_elites[id], pop[id], turn_prob, x_len)
                 if np.random.uniform() < P2:
                     pop[id] = self.turn(all_elite, pop[id], turn_prob, x_len)
-            pop_preds = clsf.get_prob(self.make_batch(pop))
+            pop_preds = self.predict_batch(clsf,pop)
             pop_scores = pop_preds[:, target]
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
+                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
+                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
@@ -172,21 +179,30 @@ class PSOAttacker(Attacker):
                 change_ratio = self.count_change_ratio(x, x_orig, x_len)
                 p_change = 1 - 2 * change_ratio
                 if np.random.uniform() < p_change:
-                    new_h, new_w_list = self.gen_h_score(clsf,x_len, target,targeted,neighbours_nums, neighbours, x)
-                    new_pop.append(self.mutate(x, new_h, new_w_list))
+                    tem = self.perturb(clsf, x, x_orig, neighbours, w_select_probs, target,targeted)
+                    if tem is None:
+                        return None
+                    if tem[0] is None:
+                        if targeted:
+                            return self.config["processor"].detokenizer(tem[2]), target
+                        else:
+                            return self.config["processor"].detokenizer(tem[2]), np.argmax(tem[1])
+                    new_pop.append(tem[1])
                 else:
                     new_pop.append(x)
             pop = new_pop
-            pop_preds = clsf.get_prob(self.make_batch(pop))
+            pop_preds = self.predict_batch(clsf,pop)
             pop_scores = pop_preds[:, target]
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
+                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
+                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
@@ -211,20 +227,38 @@ class PSOAttacker(Attacker):
                     all_elite = elite
                     all_elite_score = np.min(pop_scores)
         return None #Failed
+
+    def predict_batch(self, clsf, sentences):
+
+        return np.array([self.predict(clsf, s) for s in sentences])
+    def predict(self, clsf, sentence):
+        if tuple(sentence) in self.invoke_dict:
+            return self.invoke_dict[tuple(sentence)]
+
+        tem=clsf.get_prob(self.make_batch([sentence]))[0]
+
+        self.invoke_dict[tuple(sentence)]=tem
+        return tem
     def do_replace(self, x_cur, pos, new_word):
         x_new = x_cur.copy()
         x_new[pos] = new_word
         return x_new
 
-    def mutate(self, x_cur, w_select_probs, w_list):
-        x_len = w_select_probs.shape[0]
-        rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
-        return self.do_replace(x_cur, rand_idx, w_list[rand_idx])
 
-    def generate_population(self, clsf,x_orig,neighbours_list,neighbours_len,x_len, target, targeted):
-        h_score, w_list = self.gen_h_score(clsf,x_len, target,targeted,neighbours_len, neighbours_list, x_orig)
-        return [self.mutate(x_orig, h_score, w_list) for _ in
-                range(self.config["pop_size"])]
+    def generate_population(self, clsf, x_orig,neighbours_list,w_select_probs,x_len, target, targeted):
+        pop = []
+        pop_preds = []
+        for i in range(self.config["pop_size"]):
+            tem = self.perturb(clsf, x_orig, x_orig, neighbours_list, w_select_probs, target,targeted)
+            if tem is None:
+                return None
+            if tem[0] is None:
+                return [None,tem[1],tem[2]]
+            else:
+                pop_preds.append(tem[0])
+                pop.append(tem[1])
+        return np.array(pop_preds), pop
+
 
     def turn(self, x1, x2, prob, x_len):
         x_new = copy.deepcopy(x2)
@@ -233,24 +267,27 @@ class PSOAttacker(Attacker):
                 x_new[i] = x1[i]
         return x_new
 
-    def gen_most_change(self,clsf, pos, x_cur, target,targeted, replace_list):
-        new_list = []
-        rep_words = []
-        for word in replace_list:
-            if word != x_cur[pos]:
-                new_list.append(self.do_replace(x_cur,pos,word))
-                rep_words.append(word)
-        if len(new_list)==0:
-            return 0,x_cur[pos]
-        new_list.append(x_cur)
+    def perturb(self, clsf, x_cur, x_orig, neigbhours, w_select_probs, target, targeted):
 
-        pred_scores = clsf.get_prob(self.make_batch(new_list))[:, target]
-        if targeted:
-            new_scores = pred_scores[:-1] - pred_scores[-1]
-        else:
-            new_scores = pred_scores[-1] - pred_scores[:-1]
+        x_len = w_select_probs.shape[0]
 
-        return np.max(new_scores), new_list[np.argsort(new_scores)[-1]][pos]
+        rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
+        
+        while x_cur[rand_idx] != x_orig[rand_idx] and self.sum_diff(x_orig, x_cur) < np.sum(np.sign(w_select_probs)):
+            rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
+
+        replace_list = neigbhours[rand_idx]
+        sub_idx = np.random.choice(len(replace_list), 1)[0]
+        new_x = copy.deepcopy(x_cur)
+        new_x[rand_idx] = replace_list[sub_idx]
+        return new_x
+
+    def sum_diff(self, x_orig, x_cur):
+        ret = 0
+        for wa, wb in zip(x_orig, x_cur):
+            if wa != wb:
+                ret += 1
+        return ret
 
     def norm(self, n):
 
@@ -269,24 +306,7 @@ class PSOAttacker(Attacker):
 
         return new_n
 
-    def gen_h_score(self, clsf,x_len, target,targeted, neighbours_len, neigbhours_list, x_now):
 
-        w_list = []
-        prob_list = []
-        for i in range(x_len):
-            if neighbours_len[i] == 0:
-                w_list.append(x_now[i])
-                prob_list.append(0)
-                continue
-            p, w = self.gen_most_change(clsf,i, x_now, target,targeted,neigbhours_list[i])
-            w_list.append(w)
-            prob_list.append(p)
-
-        prob_list = self.norm(prob_list)
-
-        h_score = prob_list
-        h_score = np.array(h_score)
-        return h_score, w_list
     def get_neighbour_num(self, word, pos):
         try:
             return len(self.config["substitute"](word, pos))
@@ -320,13 +340,4 @@ class PSOAttacker(Attacker):
     def count_change_ratio(self, x, x_orig, x_len):
         change_ratio = float(np.sum(x != x_orig)) / float(x_len)
         return change_ratio
-
-
-
-
-
-
-
-
-
 
