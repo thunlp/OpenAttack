@@ -163,9 +163,10 @@ class DefaultAttackEval(AttackEval):
         def tqdm_writer(x):
             return tqdm.write(x, end="")
 
-        time_start = time.time()
+        
         if self.__config["num_process"] > 1:
             with self.__get_pool() as pool:
+                time_start = time.time()
                 for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset, pool), total=total_len) if progress_bar else self.eval_results(dataset)):
                     x_orig = data["x"]
                     counter += 1
@@ -189,7 +190,11 @@ class DefaultAttackEval(AttackEval):
                             visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
                         else:
                             visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
+                res = self.get_result()
+                if self.__config["running_time"]:
+                    res["Avg. Running Time"] = (time.time() - time_start) / counter
         else:
+            time_start = time.time()
             for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if progress_bar else self.eval_results(dataset)):
                 x_orig = data["x"]
                 counter += 1
@@ -212,10 +217,10 @@ class DefaultAttackEval(AttackEval):
                         visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
                     else:
                         visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
+            res = self.get_result()
+            if self.__config["running_time"]:
+                res["Avg. Running Time"] = (time.time() - time_start) / counter
         
-        res = self.get_result()
-        if self.__config["running_time"]:
-            res["Avg. Running Time"] = (time.time() - time_start) / counter
 
         if visualize:
             result_visualizer(res, sys.stdout.write)
