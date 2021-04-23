@@ -19,7 +19,7 @@ def main():
     if multiprocessing.get_start_method() != "spawn":
         multiprocessing.set_start_method("spawn", force=True)
     dataset = datasets.load_dataset("sst", split="train[:100]").map(function=dataset_mapping)
-    clsf = OpenAttack.loadVictim("BiLSTM.SST").to("cuda:0")
+    clsf = OpenAttack.loadVictim("BERT.SST").to("cuda:0")
 
     attackers = get_attackers(dataset, clsf)
 
@@ -29,7 +29,7 @@ def main():
         try:
             st = time.perf_counter()
             print(
-                OpenAttack.attack_evals.MultiProcessAttackEval(attacker, time_clsf, num_process=2, progress_bar=False).eval(dataset),
+                OpenAttack.attack_evals.DefaultAttackEval(attacker, time_clsf, num_process=2).eval(dataset, progress_bar=True),
                 time_clsf.total_time,
                 time.perf_counter() - st
             )

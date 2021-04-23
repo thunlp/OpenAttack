@@ -1,0 +1,24 @@
+FDAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 15, 'Attack Success Rate': 0.15, 'Avg. Running Time': 22.28981456041336} 78.25224279356189 2228.9817688150797
+UATAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 86, 'Attack Success Rate': 0.86, 'Avg. Running Time': 0.38233089685440064} 1.0255517004989088 38.233265130082145
+TextBuggerAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 99, 'Attack Success Rate': 0.99, 'Avg. Running Time': 1.102746388912201} 36.87752534309402 110.27483312599361
+TextFoolerAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 95, 'Attack Success Rate': 0.95, 'Avg. Running Time': 0.9179592680931091} 21.280015276977792 91.7961171111092
+VIPERAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 94, 'Attack Success Rate': 0.94, 'Avg. Running Time': 0.3678733468055725} 3.2619996939320117 36.787585659883916
+DeepWordBugAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 1, 'Attack Success Rate': 0.01, 'Avg. Running Time': 0.35542486667633055} 5.707238575676456 35.54270918108523
+GANAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 100, 'Attack Success Rate': 1.0, 'Avg. Running Time': 1.5925340485572814} 3.954899334348738 159.25359745509923
+GeneticAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 44, 'Attack Success Rate': 0.44, 'Avg. Running Time': 3.258501830101013} 119.65512751904316 325.850361275021
+HotFlipAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 42, 'Attack Success Rate': 0.42, 'Avg. Running Time': 1.2966518640518188} 10.47557150782086 129.66537890490144
+PWWSAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 94, 'Attack Success Rate': 0.94, 'Avg. Running Time': 0.42520044088363645} 15.048210935434327 42.520209948997945
+SCPNAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 73, 'Attack Success Rate': 0.73, 'Avg. Running Time': 2.50264209985733} 1.5132712335325778 250.26433447399177
+PSOAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 99, 'Attack Success Rate': 0.99, 'Avg. Running Time': 48.780342669487} 83.83635091548786 4878.034483008087

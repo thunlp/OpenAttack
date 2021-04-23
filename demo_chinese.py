@@ -1,7 +1,4 @@
 import OpenAttack
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import numpy as np
 import datasets
 
 def dataset_mapping(x):
@@ -9,10 +6,6 @@ def dataset_mapping(x):
         "x": x["review_body"],
         "y": x["stars"],
     }
-
-class MultiprocessInvoke(OpenAttack.attack_evals.multi_process.MultiProcessEvalMixin, OpenAttack.attack_evals.ChineseAttackEval):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 import multiprocessing
 if multiprocessing.get_start_method() != "spawn":
@@ -30,7 +23,7 @@ def main():
     clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
 
     print("Loading dataset")
-    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:5]").map(function=dataset_mapping)
+    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
     options = {
@@ -43,8 +36,8 @@ def main():
         "modification_rate": True,
         "running_time": True,
     }
-    attack_eval = MultiprocessInvoke(attacker, clsf, **options, num_process=2, progress_bar=True)
-    attack_eval.eval(dataset, visualize=True)
+    attack_eval = OpenAttack.attack_evals.ChineseAttackEval(attacker, clsf, **options, num_process=2)
+    attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":
     main()

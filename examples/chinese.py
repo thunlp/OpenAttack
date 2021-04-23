@@ -19,11 +19,11 @@ def main():
     clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
 
     print("Loading dataset")
-    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:5]").map(function=dataset_mapping)
+    dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
     attack_eval = OpenAttack.attack_evals.ChineseAttackEval(attacker, clsf)
-    attack_eval.eval(dataset, visualize=True)
+    attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":
     main()

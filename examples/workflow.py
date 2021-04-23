@@ -12,7 +12,7 @@ def dataset_mapping(x):
     
     
 def main():
-    clsf = OpenAttack.loadVictim("BiLSTM.SST")
+    clsf = OpenAttack.loadVictim("BERT.SST")
     # Victim.BiLSTM.SST is a pytorch model which is trained on Dataset.SST. It uses Glove vectors for word representation.
     # The load operation returns a PytorchClassifier that can be further used for Attacker and AttackEval.
 

@@ -7,7 +7,6 @@ class ChineseTextProcessor(TextProcessor):
     """
 
     def __init__(self):
-        self.nltk = __import__("nltk")
         self.__tokenize = None
         self.__tag = None  # LazyLoad
         self.__lemmatize = None
@@ -15,6 +14,11 @@ class ChineseTextProcessor(TextProcessor):
         self.__ner = None
         self.__parser = None
         self.__wordnet = None
+
+        import jieba
+        import jieba.posseg as pseg
+        self.__tokenize = pseg.cut
+        jieba.initialize()
 
     def get_tokens(self, sentence):
         """
@@ -31,9 +35,6 @@ class ChineseTextProcessor(TextProcessor):
             'd': 'RB'
         }
 
-        if self.__tokenize is None:
-            import jieba.posseg as pseg
-            self.__tokenize = pseg.cut
 
         ans = []
         for pair in self.__tokenize(sentence):  

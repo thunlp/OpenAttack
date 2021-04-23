@@ -24,7 +24,6 @@ class ChineseCiLinSubstitute(WordSubstitute):
         ret = []
         for sym_word in sym_words:
             ret.append((sym_word, 1))
-        random.shuffle(ret)
         if threshold is not None:
             ret = ret[:threshold]
         return ret

@@ -1,0 +1,22 @@
+FDAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 23, 'Attack Success Rate': 0.23, 'Avg. Running Time': 28.3622687292099} 541.8819406195544 2836.2271830458194
+UATAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 17, 'Attack Success Rate': 0.17, 'Avg. Running Time': 0.19207318305969237} 8.46561829559505 19.207483516074717
+TextBuggerAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 92, 'Attack Success Rate': 0.92, 'Avg. Running Time': 4.367289175987244} 675.2674409234896 436.7290767929517
+TextFoolerAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 90, 'Attack Success Rate': 0.9, 'Avg. Running Time': 3.2513795065879822} 519.1725409058854 325.13806808181107
+VIPERAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 24, 'Attack Success Rate': 0.24, 'Avg. Running Time': 2.0397148275375367} 372.3412948525511 203.97156877396628
+DeepWordBugAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 3, 'Attack Success Rate': 0.03, 'Avg. Running Time': 0.6221214628219605} 92.87517537688836 62.21232510032132
+GANAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 100, 'Attack Success Rate': 1.0, 'Avg. Running Time': 1.9992122077941894} 39.89241926372051 199.92138171195984
+GeneticAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 46, 'Attack Success Rate': 0.46, 'Avg. Running Time': 27.55710882663727} 4977.038826013915 2755.712911444716
+HotFlipAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 49, 'Attack Success Rate': 0.49, 'Avg. Running Time': 1.8150676941871644} 136.11253928067163 181.5078150620684
+PWWSAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 88, 'Attack Success Rate': 0.88, 'Avg. Running Time': 2.841427388191223} 524.548178514 284.14289586478844
+SCPNAttacker
+{'Total Attacked Instances': 100, 'Successful Instances': 76, 'Attack Success Rate': 0.76, 'Avg. Running Time': 2.29952791929245} 38.40722470590845 229.9529517898336

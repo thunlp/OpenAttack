@@ -28,10 +28,6 @@ def dataset_mapping(x):
         "y": 1 if x["label"] > 0.5 else 0,
     }
 
-class MultiprocessInvoke(OpenAttack.attack_evals.multi_process.MultiProcessEvalMixin, OpenAttack.attack_evals.InvokeLimitedAttackEval):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
 import multiprocessing
 if multiprocessing.get_start_method() != "spawn":
     multiprocessing.set_start_method("spawn", force=True)
@@ -60,8 +56,8 @@ def main():
         "invoke_limit": 500,
         "average_invoke": True
     }
-    attack_eval = MultiprocessInvoke(attacker, clsf, **options, num_process=4, progress_bar=True)
-    attack_eval.eval(dataset, visualize=True)
+    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options, num_process=4)
+    attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":
     main()
