@@ -208,7 +208,6 @@ class DefaultAttackEval(AttackEval):
                             y_adv = int(res[1])
                         else:
                             y_orig = int(self.classifier.get_pred([x_orig], data)[0])
-
                     if progress_bar:
                         visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
                     else:
@@ -277,7 +276,7 @@ class DefaultAttackEval(AttackEval):
                         yield (data, res[0], res[1], info)
         else:
             clsf_wrapper = MetaClassifierWrapper(self.classifier)
-            for data in dataset:
+            for data in _iter_gen():
                 # assert isinstance(data, DataInstance)
                 clsf_wrapper.set_meta(data)
                 if "target" in data:

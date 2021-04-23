@@ -82,11 +82,10 @@ class HuggingfaceClassifier(Classifier):
         ], dtype='int64')
         sen_list = [
             self.config["tokenizer"].convert_tokens_to_ids(sen)
-             + [self.__id_pad] * (batch_len - 2 - len(sen))
             for sen in sen_list
         ]
         tokeinzed_sen = np.array([
-            [self.__id_cls] + sen + [self.__id_sep]
+            [self.__id_cls] + sen + [self.__id_sep] + ([self.__id_pad] * (batch_len - 2 - len(sen)))
             for sen in sen_list
         ], dtype='int64')
 
