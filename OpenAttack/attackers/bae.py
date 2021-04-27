@@ -1,8 +1,10 @@
 import copy
-import nltk
+#import nltk
 import random
+import torch
 import numpy as np
 from ..utils import check_parameters
+from ..data_manager import DataManager
 from ..attacker import Attacker
 from ..metric import UniversalSentenceEncoder
 from transformers import BertConfig, BertTokenizer, BertForSequenceClassification, BertForMaskedLM
@@ -67,7 +69,10 @@ class BAEAttacker(Attacker):
         :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
         :param: int max_length: the maximum length of an input sentence. **Default:** 512
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
-
+        
+        :Package Requirements:
+            * torch, transformers, copy, random, numpy
+        :Data Requirements: :py:data:`.TProcess.NLTKPerceptronPosTagger`
         :Classifier Capacity: Probability
 
         BAE: BERT-based Adversarial Examples for Text Classification. Siddhant Garg, Goutham Ramakrishnan. EMNLP 2020. 
@@ -212,9 +217,10 @@ class BAEAttacker(Attacker):
                 is_insert = self.sub_mode == 1 or temp_sub_mode == 1 
                 if is_replace:
                     orig_word = temp_replace[top_index[0]]
-                    pos_tag_list_before = [elem[1] for elem in nltk.pos_tag(temp_replace)]
+                    pos_tagger = DataManager.load("TProcess.NLTKPerceptronPosTagger")
+                    pos_tag_list_before = [elem[1] for elem in pos_tagger(temp_replace)]
                     temp_replace[top_index[0]] = substitute
-                    pos_tag_list_after = [elem[1] for elem in nltk.pos_tag(temp_replace)]
+                    pos_tag_list_after = [elem[1] for elem in pos_tagger(temp_replace)]
                     # reverse temp_replace back to its original if pos_tag changes, and continue
                     # searching for the next best substitue
                     if pos_tag_list_after != pos_tag_list_before:
