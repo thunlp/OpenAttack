@@ -4,6 +4,20 @@ AttackAssist
 
 .. _label-data-AttackAssist:
 
+ChineseWord2Vec
+-----------------
+
+.. py:data:: AttackAssist.ChineseWord2Vec
+
+    .. automodule:: OpenAttack.data.chinese_word2vec
+
+CiLin
+-------
+
+.. py:data:: AttackAssist.CiLin
+
+    .. automodule:: OpenAttack.data.cilin_dict
+
 CounterFit
 ------------
 
@@ -17,6 +31,13 @@ DCES
 .. py:data:: AttackAssist.DCES
 
     .. automodule:: OpenAttack.data.dces
+
+FYH
+-----
+
+.. py:data:: AttackAssist.FYH
+
+    .. automodule:: OpenAttack.data.fyh_dict
 
 GAN
 -----
@@ -52,6 +73,13 @@ SGAN
 .. py:data:: AttackAssist.SGAN
 
     .. automodule:: OpenAttack.data.sgan
+
+SIM
+-----
+
+.. py:data:: AttackAssist.SIM
+
+    .. automodule:: OpenAttack.data.sim_dict
 
 TranslationModels
 -------------------

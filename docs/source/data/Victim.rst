@@ -46,6 +46,13 @@ BERT.SST
 
     .. automodule:: OpenAttack.data.victim_bert
 
+BERT.AMAZON_ZH
+----------------
+
+.. py:data:: Victim.BERT.AMAZON_ZH
+
+    .. automodule:: OpenAttack.data.victim_bert_amazon_zh
+
 BERT.MNLI
 -----------
 

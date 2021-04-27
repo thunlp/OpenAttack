@@ -5,6 +5,7 @@ from ..data_manager import DataManager
 class ChineseSimCharSubstitute(CharSubstitute):
     """
     :Data Requirements: :py:data:`.AttackAssist.SIM`
+    
     An implementation of :py:class:`.CharSubstitute`.
     """
 
