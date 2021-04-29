@@ -9,7 +9,7 @@ class Classifier(metaclass=abc.ABCMeta):
     def get_pred(self, input_, meta):
         """
         :param list input_: A list of sentences which we want to predict.
-        :param dict meta: Meta of DataInstance (**Optional parameter**).
+        :param dict meta: Meta of data (**Optional parameter**).
         :return: The result is a 1-dim numpy.array, *[pred1, pred2, ...]*.
         :rtype: numpy.array(dtype=numpy.long)
 
@@ -20,7 +20,7 @@ class Classifier(metaclass=abc.ABCMeta):
     def get_prob(self, input_, meta):
         """
         :param list input_: A list of sentences of which we want to get the probabilities.
-        :param dict meta: Meta of DataInstance (**Optional parameter**).
+        :param dict meta: Meta of data (**Optional parameter**).
         :return: The result is a 2-dim numpy.array. The first dimension represents sentences and the second dimension represents probabilities of every type.
         :rtype: numpy.array(dtype=numpy.float)
 

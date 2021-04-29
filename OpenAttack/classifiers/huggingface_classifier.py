@@ -99,4 +99,8 @@ class HuggingfaceClassifier(ClassifierBase):
         return result, result_grad, all_hidden_states
 
     def get_hidden_states(self, input_, labels=None):
+        """
+        :param list input_: A list of sentences of which we want to get the hidden states in the model.
+        :rtype torch.tensor
+        """
         return self.predict(input_, labels)[2]
