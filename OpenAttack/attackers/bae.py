@@ -71,7 +71,7 @@ class BAEAttacker(Attacker):
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
         
         :Package Requirements:
-            * torch, transformers, copy, random, numpy
+            * torch
         :Data Requirements: :py:data:`.TProcess.NLTKPerceptronPosTagger`
         :Classifier Capacity: Probability
 

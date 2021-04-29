@@ -69,7 +69,7 @@ class BERTAttacker(Attacker):
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
         
         :Package Requirements:
-            * torch, transformers, numpy, random, copy
+            * torch
         :Classifier Capacity: Probability
 
         BERT-ATTACK: Adversarial Attack Against BERT Using BERT, Linyang Li, Ruotian Ma, Qipeng Guo, Xiangyang Xue, Xipeng Qiu, EMNLP2020
