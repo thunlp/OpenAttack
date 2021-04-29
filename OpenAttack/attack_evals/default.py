@@ -146,8 +146,7 @@ class DefaultAttackEval(AttackEval):
     
     def eval(self, dataset, total_len=None, visualize=False, progress_bar=False):
         """
-        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
-        :type dataset: list or generator
+        :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
         :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
         :param bool visualize: Display a visualized result for each instance and the summary.
         :return: Returns a dict of the summary.
@@ -246,13 +245,27 @@ class DefaultAttackEval(AttackEval):
 
     def eval_results(self, dataset, __pool=None):
         """
-        :param dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
-        :type dataset: Dataset or generator
-        :return: A generator which generates the result for each instance, *(DataInstance, x_adv, y_adv, info)*.
+        :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
+        :return: A generator which generates the result for each instance, *(data, x_adv, y_adv, info)*.
         :rtype: generator
         """
         self.clear()
 
+<<<<<<< HEAD
+        clsf_wrapper = MetaClassifierWrapper(self.classifier)
+        for data in dataset:
+            clsf_wrapper.set_meta(data)
+            if "target" in data:
+                res = self.attacker(self.classifier, data["x"], data["target"])
+            else:
+                res = self.attacker(self.classifier, data["x"])
+            if res is None:
+                info = self.__update(data["x"], None)
+            else:
+                info = self.__update(data["x"], res[0])
+            if not info["Succeed"]:
+                yield (data, None, None, info)
+=======
         def _iter_gen():
             for data in dataset:
                 yield data
@@ -269,6 +282,7 @@ class DefaultAttackEval(AttackEval):
                             yield (data, None, None, info)
                         else:
                             yield (data, res[0], res[1], info)
+>>>>>>> 7ebdce7cb852563d6116d62d2c07d4ba0d11d130
             else:
                 for data, res in __pool.imap(worker, _iter_gen(), chunksize=self.__config["num_process"] * 2):
                     if res is None:
@@ -447,9 +461,9 @@ class DefaultAttackEval(AttackEval):
     
     def generate_adv(self, dataset, total_len=None):
         """
-        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
-        :return: A :py:class:`.Dataset` consists of adversarial samples.
-        :rtype: Dataset
+        :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
+        :return: A :py:class:`Datasets.Dataset` consists of adversarial samples.
+        :rtype: Datasets.Dataset
         """
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
