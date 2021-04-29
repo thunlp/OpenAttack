@@ -16,7 +16,7 @@ DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")
 
 
 def LOAD(path):
-    with open(os.path.join(path, "counter-fitted-vectors.txt"), "r") as f:
+    with open(os.path.join(path, "counter-fitted-vectors.txt"), "r", encoding='utf-8') as f:
         id2vec = []
         word2id = {}
         for line in f.readlines():
