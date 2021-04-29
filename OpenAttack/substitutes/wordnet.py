@@ -49,7 +49,7 @@ class WordNetSubstitute(WordSubstitute):
         else:
             pp = None
         pos_tag = pp
-        if pos_tag is None or word is "_":
+        if pos_tag is None or word == "_":
             return [word]
         if pos_tag not in ['noun', 'verb', 'adj', 'adv']:
             raise UnknownPOSException(word, pos_tag)

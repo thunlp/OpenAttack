@@ -251,21 +251,6 @@ class DefaultAttackEval(AttackEval):
         """
         self.clear()
 
-<<<<<<< HEAD
-        clsf_wrapper = MetaClassifierWrapper(self.classifier)
-        for data in dataset:
-            clsf_wrapper.set_meta(data)
-            if "target" in data:
-                res = self.attacker(self.classifier, data["x"], data["target"])
-            else:
-                res = self.attacker(self.classifier, data["x"])
-            if res is None:
-                info = self.__update(data["x"], None)
-            else:
-                info = self.__update(data["x"], res[0])
-            if not info["Succeed"]:
-                yield (data, None, None, info)
-=======
         def _iter_gen():
             for data in dataset:
                 yield data
@@ -282,7 +267,6 @@ class DefaultAttackEval(AttackEval):
                             yield (data, None, None, info)
                         else:
                             yield (data, res[0], res[1], info)
->>>>>>> 7ebdce7cb852563d6116d62d2c07d4ba0d11d130
             else:
                 for data, res in __pool.imap(worker, _iter_gen(), chunksize=self.__config["num_process"] * 2):
                     if res is None:
