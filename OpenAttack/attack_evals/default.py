@@ -5,6 +5,9 @@ from tqdm import tqdm
 from ..utils import visualizer, result_visualizer, check_parameters
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
+import multiprocessing, logging
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
     "processor": DefaultTextProcessor(),
@@ -22,6 +25,8 @@ DEFAULT_CONFIG = {
     "word_distance": False,
     "modification_rate": False,
     "running_time": True,
+
+    "num_process": 1,
 }
 
 class MetaClassifierWrapper(Classifier):
@@ -39,6 +44,23 @@ class MetaClassifierWrapper(Classifier):
     
     def get_grad(self, input_, labels):
         return self.__clsf.get_grad(input_, labels, self.__meta)
+
+
+def worker(data):
+    attacker = globals()["$WORKER_ATTACKER"]
+    classifier = globals()["$WORKER_CLASSIFIER"]
+
+    clsf_wrapper = MetaClassifierWrapper(classifier)
+    clsf_wrapper.set_meta(data)
+    if "target" in data:
+        res = attacker(classifier, data["x"], data["target"])
+    else:
+        res = attacker(classifier, data["x"])
+    return data, res
+
+def worker_init(attacker, classifier):
+    globals()['$WORKER_ATTACKER'] = attacker
+    globals()['$WORKER_CLASSIFIER'] = classifier
 
 
 class DefaultAttackEval(AttackEval):
@@ -89,10 +111,40 @@ class DefaultAttackEval(AttackEval):
         self.clear()
         self.attacker = attacker
         self.classifier = classifier
+
+        if self.__config["levenstein"]:
+            if self.__config["levenshtein_tool"] is None:
+                from ..metric import Levenshtein
+                self.__config["levenshtein_tool"] = Levenshtein()
         
-        self.__progress_bar = progress_bar
+        if self.__config["mistake"]:
+            if self.__config["language_tool"] is None:
+                from ..metric import LanguageTool
+                self.__config["language_tool"] = LanguageTool()
+        
+        if self.__config["fluency"]:
+            if self.__config["language_model"] is None:
+                from ..metric import GPT2LM
+                self.__config["language_model"] = GPT2LM()
+
+        if self.__config["semantic"]:
+            if self.__config["sentence_encoder"] is None:
+                from ..metric import UniversalSentenceEncoder
+                self.__config["sentence_encoder"] = UniversalSentenceEncoder()
+        
+        if self.__config["modification_rate"]:
+            if self.__config["modification_tool"] is None:
+                from ..metric import Modification
+                self.__config["modification_tool"] = Modification()
+        
+        if self.__config["num_process"] > 1:
+            if multiprocessing.get_start_method() != "spawn":
+                logger.warning("Warning: multiprocessing start method '%s' may cause pytorch.cuda initialization error.", multiprocessing.get_start_method())
+        
+        
+
     
-    def eval(self, dataset, total_len=None, visualize=False):
+    def eval(self, dataset, total_len=None, visualize=False, progress_bar=False):
         """
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
         :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
@@ -110,38 +162,71 @@ class DefaultAttackEval(AttackEval):
         def tqdm_writer(x):
             return tqdm.write(x, end="")
 
-        time_start = time.time()
-        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
-            x_orig = data["x"]
-            counter += 1
-            if visualize:
-                try:
-                    if x_adv is not None:
-                        res = self.classifier.get_prob([x_orig, x_adv], data)
-                        y_orig = res[0]
-                        y_adv = res[1]
-                    else:
-                        y_orig = self.classifier.get_prob([x_orig], data)[0]
-                except ClassifierNotSupportException:
-                    if x_adv is not None:
-                        res = self.classifier.get_pred([x_orig, x_adv], data)
-                        y_orig = int(res[0])
-                        y_adv = int(res[1])
-                    else:
-                        y_orig = int(self.classifier.get_pred([x_orig], data)[0])
-
-                if self.__progress_bar:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
-                else:
-                    visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
         
-        res = self.get_result()
-        if self.__config["running_time"]:
-            res["Avg. Running Time"] = (time.time() - time_start) / counter
+        if self.__config["num_process"] > 1:
+            with self.__get_pool() as pool:
+                time_start = time.time()
+                for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset, pool), total=total_len) if progress_bar else self.eval_results(dataset)):
+                    x_orig = data["x"]
+                    counter += 1
+                    if visualize:
+                        try:
+                            if x_adv is not None:
+                                res = self.classifier.get_prob([x_orig, x_adv], data)
+                                y_orig = res[0]
+                                y_adv = res[1]
+                            else:
+                                y_orig = self.classifier.get_prob([x_orig], data)[0]
+                        except ClassifierNotSupportException:
+                            if x_adv is not None:
+                                res = self.classifier.get_pred([x_orig, x_adv], data)
+                                y_orig = int(res[0])
+                                y_adv = int(res[1])
+                            else:
+                                y_orig = int(self.classifier.get_pred([x_orig], data)[0])
+
+                        if progress_bar:
+                            visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
+                        else:
+                            visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
+                res = self.get_result()
+                if self.__config["running_time"]:
+                    res["Avg. Running Time"] = (time.time() - time_start) / counter
+        else:
+            time_start = time.time()
+            for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if progress_bar else self.eval_results(dataset)):
+                x_orig = data["x"]
+                counter += 1
+                if visualize:
+                    try:
+                        if x_adv is not None:
+                            res = self.classifier.get_prob([x_orig, x_adv], data)
+                            y_orig = res[0]
+                            y_adv = res[1]
+                        else:
+                            y_orig = self.classifier.get_prob([x_orig], data)[0]
+                    except ClassifierNotSupportException:
+                        if x_adv is not None:
+                            res = self.classifier.get_pred([x_orig, x_adv], data)
+                            y_orig = int(res[0])
+                            y_adv = int(res[1])
+                        else:
+                            y_orig = int(self.classifier.get_pred([x_orig], data)[0])
+                    if progress_bar:
+                        visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, tqdm_writer, self.__get_tokens)
+                    else:
+                        visualizer(counter, x_orig, y_orig, x_adv, y_adv, info, sys.stdout.write, self.__get_tokens)
+            res = self.get_result()
+            if self.__config["running_time"]:
+                res["Avg. Running Time"] = (time.time() - time_start) / counter
+        
 
         if visualize:
             result_visualizer(res, sys.stdout.write)
         return res
+    
+    def __get_pool(self):
+        return multiprocessing.Pool(self.__config["num_process"], initializer=worker_init, initargs=(self.attacker, self.classifier))
 
     def print(self):
         print( json.dumps( self.get_result(), indent="\t" ) )
@@ -156,7 +241,9 @@ class DefaultAttackEval(AttackEval):
         info = self.measure(sentA, sentB)
         return self.update(info)
 
-    def eval_results(self, dataset):
+
+
+    def eval_results(self, dataset, __pool=None):
         """
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
         :return: A generator which generates the result for each instance, *(data, x_adv, y_adv, info)*.
@@ -164,6 +251,7 @@ class DefaultAttackEval(AttackEval):
         """
         self.clear()
 
+<<<<<<< HEAD
         clsf_wrapper = MetaClassifierWrapper(self.classifier)
         for data in dataset:
             clsf_wrapper.set_meta(data)
@@ -177,45 +265,71 @@ class DefaultAttackEval(AttackEval):
                 info = self.__update(data["x"], res[0])
             if not info["Succeed"]:
                 yield (data, None, None, info)
+=======
+        def _iter_gen():
+            for data in dataset:
+                yield data
+
+        if self.__config["num_process"] > 1:
+            if __pool is None:
+                with self.__get_pool() as pool:
+                    for data, res in pool.imap(worker, _iter_gen(), chunksize=self.__config["num_process"] * 2):
+                        if res is None:
+                            info = self.__update(data["x"], None)
+                        else:
+                            info = self.__update(data["x"], res[0])
+                        if not info["Succeed"]:
+                            yield (data, None, None, info)
+                        else:
+                            yield (data, res[0], res[1], info)
+>>>>>>> 7ebdce7cb852563d6116d62d2c07d4ba0d11d130
             else:
-                yield (data, res[0], res[1], info)
+                for data, res in __pool.imap(worker, _iter_gen(), chunksize=self.__config["num_process"] * 2):
+                    if res is None:
+                        info = self.__update(data["x"], None)
+                    else:
+                        info = self.__update(data["x"], res[0])
+                    if not info["Succeed"]:
+                        yield (data, None, None, info)
+                    else:
+                        yield (data, res[0], res[1], info)
+        else:
+            clsf_wrapper = MetaClassifierWrapper(self.classifier)
+            for data in _iter_gen():
+                # assert isinstance(data, DataInstance)
+                clsf_wrapper.set_meta(data)
+                if "target" in data:
+                    res = self.attacker(self.classifier, data["x"], data["target"])
+                else:
+                    res = self.attacker(self.classifier, data["x"])
+                if res is None:
+                    info = self.__update(data["x"], None)
+                else:
+                    info = self.__update(data["x"], res[0])
+                if not info["Succeed"]:
+                    yield (data, None, None, info)
+                else:
+                    yield (data, res[0], res[1], info)
+        
     
     def __levenshtein(self, sentA, sentB):
-        if self.__config["levenshtein_tool"] is None:
-            from ..metric import Levenshtein
-            self.__config["levenshtein_tool"] = Levenshtein()
         return self.__config["levenshtein_tool"](sentA, sentB)
 
     def __get_tokens(self, sent):
         return list(map(lambda x: x[0], self.__config["processor"].get_tokens(sent)))
     
     def __get_mistakes(self, sent):
-        if self.__config["language_tool"] is None:
-            from ..metric import LanguageTool
-            self.__config["language_tool"] = LanguageTool()
-        
         return self.__config["language_tool"](sent)
     
     def __get_fluency(self, sent):
-        if self.__config["language_model"] is None:
-            from ..metric import GPT2LM
-            self.__config["language_model"] = GPT2LM()
-        
         if len(sent.strip()) == 0:
             return 1
         return self.__config["language_model"](sent)
     
     def __get_semantic(self, sentA, sentB):
-        if self.__config["sentence_encoder"] is None:
-            from ..metric import UniversalSentenceEncoder
-            self.__config["sentence_encoder"] = UniversalSentenceEncoder()
-        
         return self.__config["sentence_encoder"](sentA, sentB)
     
     def __get_modification(self, sentA, sentB):
-        if self.__config["modification_tool"] is None:
-            from ..metric import Modification
-            self.__config["modification_tool"] = Modification()
         tokenA = self.__get_tokens(sentA)
         tokenB = self.__get_tokens(sentB)
         return self.__config["modification_tool"](tokenA, tokenB)

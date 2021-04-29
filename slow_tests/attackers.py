@@ -8,6 +8,7 @@ import OpenAttack
 def get_attackers(dataset, clsf):
 
     # rules = OpenAttack.attackers.SEAAttacker.get_rules(clsf, dataset)
+
     print(clsf.embedding.shape)
     triggers = OpenAttack.attackers.UATAttacker.get_triggers(clsf, dataset, word2id=clsf.word2id, embedding=clsf.embedding)
     print(triggers)
@@ -29,5 +30,5 @@ def get_attackers(dataset, clsf):
         OpenAttack.attackers.BAEAttacker(),
         OpenAttack.attackers.BERTAttacker()
     ]
-
+    
     return attackers

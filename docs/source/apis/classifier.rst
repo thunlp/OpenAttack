@@ -10,6 +10,12 @@ Classifier
 
 ------------------------------------
 
+HuggingfaceClassifier
+-----------------------
+
+.. autoclass:: OpenAttack.classifiers.HuggingfaceClassifier(OpenAttack.Classifier)
+    :members: __init__
+
 PytorchClassifier
 -------------------
 

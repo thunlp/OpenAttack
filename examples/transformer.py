@@ -1,7 +1,6 @@
 import OpenAttack
-import nltk
-import numpy as np
-from tqdm import tqdm
+import transformers
+import datasets
 
 def dataset_mapping(x):
     return {
@@ -10,14 +9,13 @@ def dataset_mapping(x):
     }
     
 def main():
-    OpenAttack.DataManager.download("Dataset.SST")
-    OpenAttack.DataManager.download("Victim.ROBERTA.SST")
+    print("Load model")
+    tokenizer = transformers.AutoTokenizer.from_pretrained("./data/Victim.BERT.SST")
+    model = transformers.AutoModelForSequenceClassification.from_pretrained("./data/Victim.BERT.SST", num_labels=2, output_hidden_states=False)
+    clsf = OpenAttack.classifiers.HuggingfaceClassifier(model, tokenizer=tokenizer, max_len=100, embedding_layer=model.bert.embeddings.word_embeddings)
 
     print("New Attacker")
     attacker = OpenAttack.attackers.PWWSAttacker()
-
-    print("Build model")
-    clsf = OpenAttack.DataManager.loadVictim("ROBERTA.SST")
 
     dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
 

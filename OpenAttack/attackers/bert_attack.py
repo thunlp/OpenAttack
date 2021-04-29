@@ -67,7 +67,9 @@ class BERTAttacker(Attacker):
         :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
         :param: int max_length: the maximum length of an input sentence. **Default:** 512
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
-
+        
+        :Package Requirements:
+            * torch, transformers, numpy, random, copy
         :Classifier Capacity: Probability
 
         BERT-ATTACK: Adversarial Attack Against BERT Using BERT, Linyang Li, Ruotian Ma, Qipeng Guo, Xiangyang Xue, Xipeng Qiu, EMNLP2020

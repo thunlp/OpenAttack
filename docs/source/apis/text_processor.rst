@@ -10,6 +10,12 @@ TextProcessor
 
 ------------------------------------
 
+ChineseTextProcessor
+----------------------
+
+.. autoclass:: OpenAttack.text_processors.ChineseTextProcessor(OpenAttack.TextProcessor)
+    :members:
+
 DefaultTextProcessor
 ----------------------
 

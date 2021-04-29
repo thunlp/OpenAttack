@@ -162,13 +162,11 @@ class PSOAttacker(Attacker):
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'before mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
@@ -196,13 +194,11 @@ class PSOAttacker(Attacker):
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
-                print('\t\t', i, ' -- ', 'after mutation', pop_scores[top_attack])
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),

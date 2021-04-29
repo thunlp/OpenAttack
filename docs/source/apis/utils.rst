@@ -2,6 +2,12 @@
 utils API
 =====================
 
+HookCloser
+------------
+
+.. autoclass:: OpenAttack.utils.HookCloser
+    :members: 
+
 WordVector
 ------------
 
@@ -28,44 +34,18 @@ result_visualizer
 
 .. autofunction:: OpenAttack.utils.result_visualizer
 
-BertClassifier
-----------------
-
-.. autoclass:: OpenAttack.utils.BertClassifier
-    :members: 
-
-AlbertClassifier
-------------------
-
-.. autoclass:: OpenAttack.utils.AlbertClassifier
-    :members: 
-
-XlnetClassifier
------------------
-
-.. autoclass:: OpenAttack.utils.XlnetClassifier
-    :members: 
-
-RobertaClassifier
--------------------
-
-.. autoclass:: OpenAttack.utils.RobertaClassifier
-    :members: 
-
-Dataset
----------
-
-.. autoclass:: OpenAttack.utils.Dataset
-    :members: __init__, append, clear_label, clear_pred, copy, correct, data, eval, extend, filter_label, filter_pred, iter, merge, remove, reset_index, sample, shuffle, wrong
-
-DataInstance
---------------
-
-.. autoclass:: OpenAttack.utils.DataInstance
-    :members: __init__, copy, data
-
 NLIWrapper
 ------------
 
 .. autofunction:: OpenAttack.utils.NLIWrapper
+
+update_label
+--------------
+
+.. autofunction:: OpenAttack.utils.update_label
+
+init_tensorflow
+-----------------
+
+.. autofunction:: OpenAttack.utils.init_tensorflow
 

@@ -19,6 +19,6 @@ DOWNLOAD = make_zip_downloader(URL)
 def LOAD(path):
     from OpenAttack import HuggingfaceClassifier
     import transformers
-    tokenizer = transformers.AutoTokenizer.from_pretrained(path)
+    tokenizer = transformers.BertTokenizer.from_pretrained(path)
     model = transformers.AutoModelForSequenceClassification.from_pretrained(path, num_labels=5, output_hidden_states=False)
     return HuggingfaceClassifier(model, tokenizer=tokenizer, max_len=100, embedding_layer=model.bert.embeddings.word_embeddings)

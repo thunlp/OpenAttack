@@ -5,6 +5,7 @@ from ..data_manager import DataManager
 class ChineseFYHCharSubstitute(CharSubstitute):
     """
     :Data Requirements: :py:data:`.AttackAssist.FYH`
+    
     An implementation of :py:class:`.CharSubstitute`.
     """
 
