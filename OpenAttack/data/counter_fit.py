@@ -11,12 +11,12 @@ from OpenAttack.utils import WordVector, make_zip_downloader
 
 NAME = "AttackAssist.CounterFit"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/counter-fitted-vectors.txt.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/counter-fitted-vectors.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "counter-fitted-vectors.txt")
 
 
 def LOAD(path):
-    with open(os.path.join(path, "counter-fitted-vectors.txt"), "r") as f:
+    with open(os.path.join(path, "counter-fitted-vectors.txt"), "r", encoding='utf-8') as f:
         id2vec = []
         word2id = {}
         for line in f.readlines():

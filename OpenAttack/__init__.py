@@ -12,7 +12,7 @@ from . import attackers
 # classifier
 from .classifier import Classifier
 
-from .classifiers import PytorchClassifier, TensorflowClassifier
+from .classifiers import PytorchClassifier, TensorflowClassifier, HuggingfaceClassifier
 from . import classifiers
 
 # attack_eval
@@ -37,3 +37,5 @@ loadDataset = DataManager.loadDataset
 loadAttackAssist = DataManager.loadAttackAssist
 loadVictim = DataManager.loadVictim
 loadTProcess = DataManager.loadTProcess
+
+from .version import VERSION as __version__

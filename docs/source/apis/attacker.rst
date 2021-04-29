@@ -10,6 +10,18 @@ Attacker
 
 ------------------------------------
 
+BAEAttacker
+-------------
+
+.. autoclass:: OpenAttack.attackers.BAEAttacker(OpenAttack.Attacker)
+    :members: __init__
+
+BERTAttacker
+--------------
+
+.. autoclass:: OpenAttack.attackers.BERTAttacker(OpenAttack.Attacker)
+    :members: __init__
+
 DeepWordBugAttacker
 ---------------------
 
@@ -57,12 +69,6 @@ SCPNAttacker
 
 .. autoclass:: OpenAttack.attackers.SCPNAttacker(OpenAttack.Attacker)
     :members: __init__
-
-SEAAttacker
--------------
-
-.. autoclass:: OpenAttack.attackers.SEAAttacker(OpenAttack.Attacker)
-    :members: __init__, get_rules
 
 TextBuggerAttacker
 --------------------

@@ -85,14 +85,18 @@ class UATAttacker(Attacker):
         for epoch in range(config["epoch"]):
             for num_iter in tqdm( range( (len(dataset) + config["batch_size"] - 1) // config["batch_size"] ) ):
                 cnt = num_iter * config["batch_size"]
-                batch = dataset[ cnt: cnt + config["batch_size"] ]
+                temp = []
+                for i in range(cnt, cnt + config["batch_size"], 1):
+                    temp.append(i)
+                batch = dataset.select(temp)
+                #batch = dataset[ cnt: cnt + config["batch_size"] ]
                 cnt += config["batch_size"]
 
                 x = [
                     list(map(lambda x: x[0], config["processor"].get_tokens(sent)))
-                        for sent in list(map(lambda x: x.x, batch))
+                        for sent in batch["x"]
                 ]
-                y = list(map(lambda x: x.y, batch))
+                y = batch["y"]
 
                 nw_beams = [ ( curr_trigger,  0 ) ]
                 for i in range(config["trigger_len"]):

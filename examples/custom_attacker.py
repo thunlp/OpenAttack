@@ -3,6 +3,7 @@ This example code shows how to design a simple customized attack model which shu
 '''
 import OpenAttack
 import random
+import datasets
 
 class MyAttacker(OpenAttack.Attacker):
     def __init__(self, processor = OpenAttack.DefaultTextProcessor()):
@@ -34,9 +35,15 @@ class MyAttacker(OpenAttack.Attacker):
         # Return the potential adversarial example
         return self.processor.detokenizer(tokens)
 
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+
 def main():
     clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
-    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:10]").map(function=dataset_mapping)
 
     attacker = MyAttacker()
     attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)

@@ -3,6 +3,7 @@ This example code shows how to design a customized attack evaluation metric, nam
 '''
 import OpenAttack
 from nltk.translate.bleu_score import sentence_bleu
+import datasets
 
 class CustomAttackEval(OpenAttack.DefaultAttackEval):
     def __init__(self, attacker, clsf, processor=OpenAttack.DefaultTextProcessor(), **kwargs):
@@ -40,10 +41,16 @@ class CustomAttackEval(OpenAttack.DefaultAttackEval):
         # Calculate average bleu scores and return.
         result["Avg. Bleu"] = self.__result["bleu"] / result["Successful Instances"]
         return result
+
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
     
 def main():
     clsf = OpenAttack.load("Victim.BiLSTM.SST")
-    dataset = OpenAttack.load("Dataset.SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
 
     attacker = OpenAttack.attackers.GeneticAttacker()
     attack_eval = CustomAttackEval(attacker, clsf)

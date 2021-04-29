@@ -2,13 +2,21 @@
 This example code shows how to  how to use a genetic algorithm-based attack model to attack BiLSTM on the SST dataset.
 '''
 import OpenAttack
+import datasets
 
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+    
+    
 def main():
-    clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+    clsf = OpenAttack.loadVictim("BERT.SST")
     # Victim.BiLSTM.SST is a pytorch model which is trained on Dataset.SST. It uses Glove vectors for word representation.
     # The load operation returns a PytorchClassifier that can be further used for Attacker and AttackEval.
 
-    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
     # Dataset.SST.sample is a list of 1k sentences sampled from test dataset of Dataset.SST.
 
     attacker = OpenAttack.attackers.GeneticAttacker()

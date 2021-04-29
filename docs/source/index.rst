@@ -84,7 +84,6 @@ OpenAttack has 7 main modules:
    :caption: Data
 
    AttackAssist <data/AttackAssist>
-   Dataset <data/Dataset>
    TProcess <data/TProcess>
    Victim <data/Victim>
 

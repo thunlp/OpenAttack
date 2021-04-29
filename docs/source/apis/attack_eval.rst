@@ -10,6 +10,12 @@ AttackEval
 
 ------------------------------------
 
+ChineseAttackEval
+-------------------
+
+.. autoclass:: OpenAttack.attack_evals.ChineseAttackEval(OpenAttack.AttackEval)
+    :members: __init__, measure, update, get_result, clear, eval, eval_results
+
 DefaultAttackEval
 -------------------
 

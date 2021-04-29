@@ -72,3 +72,6 @@ class TextProcessor(metaclass=abc.ABCMeta):
 
         """
         pass
+
+    def __reduce__(self):
+        return (self.__class__, tuple())

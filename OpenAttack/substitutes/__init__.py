@@ -10,3 +10,5 @@ from .chinese_sim_char import ChineseSimCharSubstitute
 from .chinese_fyh_char import ChineseFYHCharSubstitute
 from .chinese_hownet import ChineseHowNetSubstitute
 from .chinese_wordnet import ChineseWordNetSubstitute
+from .chinese_word2vec import ChineseWord2VecSubstitute
+from .chinese_cilin import ChineseCiLinSubstitute

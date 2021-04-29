@@ -8,13 +8,16 @@
 Pretrained ALBERT model on SST-2 dataset. See :py:data:`Dataset.SST` for detail.
 """
 
-from OpenAttack.utils import make_zip_downloader, AlbertClassifier
+from OpenAttack.utils import make_zip_downloader
 
 NAME = "Victim.ALBERT.SST"
 
-URL = "https://thunlp.oss-cn-qingdao.aliyuncs.com/TAADToolbox/victim/albert_sst.zip"
+URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/albert_sst.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):
-    from OpenAttack import Classifier
-    return AlbertClassifier(path, 2)
+    from OpenAttack import HuggingfaceClassifier
+    import transformers
+    tokenizer = transformers.AutoTokenizer.from_pretrained(path)
+    model = transformers.AutoModelForSequenceClassification.from_pretrained(path, num_labels=2, output_hidden_states=False)
+    return HuggingfaceClassifier(model, tokenizer=tokenizer, max_len=100, embedding_layer=model.albert.embeddings.word_embeddings)

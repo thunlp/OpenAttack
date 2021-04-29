@@ -3,6 +3,7 @@ This example code shows how to use the genetic algorithm-based attack model to a
 '''
 import OpenAttack
 import numpy as np
+import datasets
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # configure access interface of the customized victim model by extending OpenAttack.Classifier.
@@ -26,10 +27,16 @@ class MyClassifier(OpenAttack.Classifier):
         
         # The get_prob method finally returns a np.ndarray of shape (len(input_), 2). See Classifier for detail.
         return np.array(ret)
-        
+
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+    
 def main():
     # load Dataset.SST.sample for evaluation
-    dataset = OpenAttack.load("Dataset.SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
     # choose the costomized classifier as the victim classification model
     clsf = MyClassifier()
     # choose PWWS as the attacker and initialize it with default parameters
