@@ -21,14 +21,14 @@ class ChineseHowNetSubstitute(WordSubstitute):
         self.hownet_dict = DataManager.load("AttackAssist.HowNet")
         self.zh_word_list = self.hownet_dict.get_zh_words()
 
-    def __call__(self, word, pos_tag, threshold=None):
-        if pos_tag[:2] == "JJ":
+    def __call__(self, word, pos, threshold=None):
+        if pos[:2] == "JJ":
             pp = "adj"
-        elif pos_tag[:2] == "VB":
+        elif pos[:2] == "VB":
             pp = "verb"
-        elif pos_tag[:2] == "NN":
+        elif pos[:2] == "NN":
             pp = "noun"
-        elif pos_tag[:2] == "RB":
+        elif pos[:2] == "RB":
             pp = "adv"
         else:
             pp = None
