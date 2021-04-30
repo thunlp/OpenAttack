@@ -109,7 +109,7 @@ class HotFlipAttacker(Attacker):
             sub_words = list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, pos=POS, threshold=threshold)[:num],
+                    self.config["substitute"](word, POS, threshold=threshold)[:num],
                 )
             )
             neighbours = []

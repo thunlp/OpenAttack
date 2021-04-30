@@ -195,7 +195,7 @@ class TextFoolerAttacker(Attacker):
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, pos=pos, threshold=threshold)[1 : self.config["synonym_num"] + 1],
+                    self.config["substitute"](word, pos, threshold=threshold)[1 : self.config["synonym_num"] + 1],
                 )
             )
         except WordNotInDictionaryException:
