@@ -29,7 +29,7 @@ def main():
         try:
             st = time.perf_counter()
             print(
-                OpenAttack.attack_evals.ChineseAttackEval(attacker, time_clsf, progress_bar=True).eval(dataset, visualize=True),
+                OpenAttack.attack_evals.ChineseAttackEval(attacker, time_clsf).eval(dataset),
                 time_clsf.total_time,
                 time.perf_counter() - st
             )
