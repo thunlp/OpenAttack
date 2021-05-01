@@ -25,7 +25,9 @@ class HowNetSubstitute(WordSubstitute):
 
     def __call__(self, word, pos_tag, threshold=None):
         pp = "noun"
-        if pos_tag[:2] == "JJ":
+        if pos_tag is None:
+            pp = None
+        elif pos_tag[:2] == "JJ":
             pp = "adj"
         elif pos_tag[:2] == "VB":
             pp = "verb"
