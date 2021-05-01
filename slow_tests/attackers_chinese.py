@@ -13,9 +13,9 @@ def get_attackers_on_chinese(dataset, clsf):
     attackers = [
         OpenAttack.attackers.FDAttacker(word2id=clsf.word2id, embedding=clsf.embedding, token_unk="[UNK]", processor=chinese_processor, substitute=chinese_substitute),
         OpenAttack.attackers.TextBuggerAttacker(processor=chinese_processor),
-        # OpenAttack.attackers.TextFoolerAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=10),
+        OpenAttack.attackers.TextFoolerAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=10),
         OpenAttack.attackers.GeneticAttacker(processor=chinese_processor, substitute=chinese_substitute, skip_words=["的", "了", "着"], neighbour_threshold=10),
-        OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute),
+        OpenAttack.attackers.PWWSAttacker(processor=chinese_processor, substitute=chinese_substitute, threshold=10),
         OpenAttack.attackers.PSOAttacker(processor=chinese_processor, substitute=chinese_substitute)
     ]
     return attackers
