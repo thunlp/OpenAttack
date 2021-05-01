@@ -43,6 +43,7 @@ DEFAULT_CONFIG = {
     "import_score_threshold": -1.,
     "sim_score_threshold": 0.5, 
     "sim_score_window": 15, 
+    "threshold": 0.5,
     "synonym_num": 50,
     "processor": DefaultTextProcessor(),
     "substitute": None,
@@ -190,12 +191,12 @@ class TextFoolerAttacker(Attacker):
             
 
     def get_neighbours(self, word, pos):
-        threshold = 0.5
+        threshold = self.config["threshold"]
         try:
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, pos=pos, threshold=threshold)[1 : self.config["synonym_num"] + 1],
+                    self.config["substitute"](word, pos, threshold=threshold)[1 : self.config["synonym_num"] + 1],
                 )
             )
         except WordNotInDictionaryException:

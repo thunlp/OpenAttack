@@ -70,7 +70,7 @@ class FDAttacker(Attacker):
                 if iter_cnt > 5 * len(sent):    # Failed to find a substitute word
                     return None
                 try:
-                    reps = list(map(lambda x:x[0], self.substitute(sent[idx], pos=None, threshold=self.config["threshold"])))
+                    reps = list(map(lambda x:x[0], self.substitute(sent[idx], None, threshold=self.config["threshold"])))
                 except WordNotInDictionaryException:
                     continue
                 reps = list(filter(lambda x: x in self.wordid, reps))

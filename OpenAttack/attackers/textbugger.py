@@ -157,7 +157,7 @@ class TextBuggerAttacker(Attacker):
 
     def bug_sub_W(self, word):
         try:
-            res = self.counterfit.__call__(word, pos=None, threshold=0.5)
+            res = self.counterfit(word, None, threshold=0.5)
             if len(res) == 0:
                 return word
             return res[0][0]
