@@ -17,7 +17,7 @@ def main():
     # The load operation returns a PytorchClassifier that can be further used for Attacker and AttackEval.
 
     dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
-    # Dataset.SST.sample is a list of 1k sentences sampled from test dataset of Dataset.SST.
+    # We load sst dataset using `datasets` package, and map the fields.
 
     attacker = OpenAttack.attackers.GeneticAttacker()
     # After this step, we’ve initialized a GeneticAttacker and uses the default configuration during attack process.
