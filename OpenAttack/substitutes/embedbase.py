@@ -31,6 +31,11 @@ class EmbedBasedSubstitute(WordSubstitute):
             )
 
     def __call__(self, word, pos=None, threshold=0.5):
+        """
+        :param word: the raw word; pos: part of speech of the word, return words with distances < threshold.
+        :return: The result is a list of tuples, *(substitute, distance)*.
+        :rtype: list of tuple
+        """
         if word not in self.config["word2id"]:
             raise WordNotInDictionaryException
         wdid = self.config["word2id"][word]

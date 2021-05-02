@@ -18,6 +18,11 @@ class ChineseCiLinSubstitute(WordSubstitute):
         self.cilin_dict = DataManager.load("AttackAssist.CiLin")
 
     def __call__(self, word, pos_tag, threshold=None):
+        """
+        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         if word not in self.cilin_dict:
             raise WordNotInDictionaryException()
         sym_words = self.cilin_dict[word]

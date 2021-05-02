@@ -16,8 +16,10 @@ class ChineseFYHCharSubstitute(CharSubstitute):
 
     def __call__(self, char, threshold=None):
         """
-        :param
-        :param int threshold: Returns top k results (k = threshold).
+        :param char: the raw char, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        :Data Requirements: :py:data:`.AttackAssist.FYH`
         """
         if char in self.tra_dict or char in self.var_dict or char in self.hot_dict:
             fanyihuo_result = set()

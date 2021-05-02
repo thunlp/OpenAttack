@@ -37,6 +37,11 @@ class WordNetSubstitute(WordSubstitute):
         self.wn = DataManager.load("TProcess.NLTKWordNet")
 
     def __call__(self, word, pos_tag, threshold=None):
+        """
+        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         pp = "noun"
         if pos_tag[:2] == "JJ":
             pp = "adj"

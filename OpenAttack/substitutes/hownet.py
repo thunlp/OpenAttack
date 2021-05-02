@@ -24,6 +24,11 @@ class HowNetSubstitute(WordSubstitute):
         self.en_word_list = self.hownet_dict.get_en_words()
 
     def __call__(self, word, pos_tag, threshold=None):
+        """
+        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         pp = "noun"
         if pos_tag is None:
             pp = None
