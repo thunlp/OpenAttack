@@ -46,7 +46,7 @@ Load Dataset and Evaluate
     attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
     attack_eval.eval(dataset, visualize=True)
 
-Secondly, we load :py:data:`.Dataset.SST.sample` for evaluation and initialize ``MyClassifier`` which is defined in the first step.
+Secondly, we load SST dataset for evaluation and initialize ``MyClassifier`` which is defined in the first step.
 Then :py:class:`.PWWSAttacker` is initialized, this attacker requires classifier to be able to generate probability for each label.
 It's worthy to note that all classifiers are divid into three different level of capacity -- "Blind", "Probability" and "Gradient".
 *"Blind"* means classifier can only predict labels, *"Probability"* means classifier predict probability for each label and "Gradient" means besides probability, gradient is also accessible.
@@ -77,7 +77,12 @@ Complete Code
             return np.array(ret)
             
     def main():
-        dataset = OpenAttack.load("Dataset.SST.sample")[:10]
+        def dataset_mapping(x):
+            return {
+                "x": x["sentence"],
+                "y": 1 if x["label"] > 0.5 else 0,
+            }
+        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
 
         clsf = MyClassifier()
         attacker = OpenAttack.attackers.PWWSAttacker()

@@ -15,7 +15,7 @@ Initializing Classifier
     
     clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
 
-:py:data:`.Victim.BiLSTM.SST` is a pytorch model which is trained on :py:data:`.Dataset.SST`.
+:py:data:`.Victim.BiLSTM.SST` is a pytorch model which is trained on SST dataset.
 It uses :py:data:`Glove` vectors for word representation.
 
 The load operation returns a :py:class:`.PytorchClassifier` that can be further used for *Attacker* and *AttackEval*.
@@ -26,9 +26,16 @@ Loading dataset
 
 .. code-block:: python
 
-    dataset = OpenAttack.DataManager.load("Dataset.SST.sample")
+    def dataset_mapping(x):
+        return {
+            "x": x["sentence"],
+            "y": 1 if x["label"] > 0.5 else 0,
+        }
+    dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
 
-:py:data:`.Dataset.SST.sample` is a list of 1k sentences sampled from test dataset of :py:data:`.Dataset.SST`.
+We use the datasets package to manage our data, through which we load the data and map the fields to their corresponding places.
+
+For each data instance, x means the attacked text and y means the true label of the data.
 
 
 Initializing Attacker
@@ -64,9 +71,15 @@ Complete Code
     :name: examples/workflow.py
 
     import OpenAttack
+    import datasets
     def main():
         clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
-        dataset = OpenAttack.DataManager.load("Dataset.SST.sample")[:10]
+        def dataset_mapping(x):
+            return {
+                "x": x["sentence"],
+                "y": 1 if x["label"] > 0.5 else 0,
+            }
+        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
 
         attacker = OpenAttack.attackers.GeneticAttacker()
         attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
