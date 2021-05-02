@@ -1,9 +1,8 @@
 from ..text_processor import TextProcessor
-from ..data_manager import DataManager
 
 class ChineseTextProcessor(TextProcessor):
     """
-    An implementation of :class:`OpenAttack.TextProcessor` mainly uses ``nltk`` toolkit.
+    An implementation of :class:`OpenAttack.TextProcessor` mainly uses ``thulac`` toolkit.
     """
 
     def __init__(self):
@@ -22,7 +21,9 @@ class ChineseTextProcessor(TextProcessor):
 
     def get_tokens(self, sentence):
         """
-        method: thulac
+        :param str sentence: A sentence that we want to tokenize.
+        :return: The result is a list of tuples, *(word, pos_tag)*.
+        :rtype: list of tuples
         """
         mapping = {
             'v': 'VBD',

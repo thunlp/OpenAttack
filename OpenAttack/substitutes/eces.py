@@ -25,6 +25,11 @@ class ECESSubstitute(CharSubstitute):
         self.h = H
 
     def __call__(self, char, threshold=None):
+        """
+        :param word: the raw char, threshold: return top k chars.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         if char not in self.h:
             return char
         ret = []

@@ -26,6 +26,11 @@ class ChineseWordNetSubstitute(WordSubstitute):
         super().__init__()
 
     def __call__(self, word, pos_tag, threshold=None):
+        """
+        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         from nltk.corpus import wordnet as wn
         if pos_tag is None:
             pp = None

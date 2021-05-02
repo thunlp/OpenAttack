@@ -22,6 +22,11 @@ class ChineseHowNetSubstitute(WordSubstitute):
         self.zh_word_list = self.hownet_dict.get_zh_words()
 
     def __call__(self, word, pos, threshold=None):
+        """
+        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
+        """
         if pos is  None:
             pp = None
         elif pos[:2] == "JJ":

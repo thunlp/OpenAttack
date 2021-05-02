@@ -35,7 +35,9 @@ class DCESSubstitute(CharSubstitute):
 
     def __call__(self, char, threshold):
         """
-        :param int threshold: Returns top k results (k = threshold).
+        :param word: the raw char, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
         """
         c = get_hex_string(char)
 
