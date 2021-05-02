@@ -42,10 +42,13 @@ Next we show how to use this API to generate adversarial examples in detail.
 
         # use the text processor to tokenize the generated adversarial examples
         tp = OpenAttack.text_processors.DefaultTextProcessor()
-        for inst in adversarial_samples:
-            inst.tokens = list(map(lambda x:x[0], tp.get_tokens(inst.x)))
-        
-        return adversarial_samples
+        tp = OpenAttack.text_processors.DefaultTextProcessor()
+        def adversarial_samples_mapping(x):
+            return {
+                "tokens": list(map(lambda x:x[0], tp.get_tokens(x["x"])))
+            }
+
+        return adversarial_samples.map(adversarial_samples_mapping).remove_columns(["pred", "original", "info"])
     
 
 Complete Code 
@@ -60,6 +63,7 @@ Complete Code
     '''
     import OpenAttack
     import torch
+    import datasets
 
     # Design a feedforward neural network as the the victim sentiment analysis model
     def make_model(vocab_size):
@@ -86,43 +90,46 @@ Complete Code
                 return self.softmax(self.fc(embedded))
         return TextSentiment(vocab_size)
 
+    def dataset_mapping(x):
+        return {
+            "x": x["sentence"],
+            "y": 1 if x["label"] > 0.5 else 0,
+            "tokens": x["tokens"].split("|")
+        }
+
     # Choose SST-2 as the dataset
     def prepare_data():
         vocab = {
             "<UNK>": 0,
             "<PAD>": 1
         }
-        train, valid, test = OpenAttack.loadDataset("SST")
-        tp = OpenAttack.text_processors.DefaultTextProcessor()
-        for dataset in [train, valid, test]:
-            for inst in dataset:
-                inst.tokens = list(map(lambda x:x[0], tp.get_tokens(inst.x)))
-                for token in inst.tokens:
+        dataset = datasets.load_dataset("sst").map(function=dataset_mapping).remove_columns(["label", "sentence", "tree"])
+        for dataset_name in ["train", "validation", "test"]:
+            for inst in dataset[dataset_name]:
+                for token in inst["tokens"]:
                     if token not in vocab:
                         vocab[token] = len(vocab)
-        return train, valid, test, vocab
+        return dataset["train"], dataset["validation"], dataset["test"], vocab
 
     # Batch data
     def make_batch(data, vocab):
         batch_x = [
             [ 
                 vocab[token] if token in vocab else vocab["<UNK>"]
-                    for token in inst.tokens
-            ] for inst in data
+                    for token in tokens
+            ] for tokens in data["tokens"]
         ]
-        max_len = max( [len(inst.tokens) for inst in data] )
+        max_len = max( [len(tokens) for tokens in data["tokens"]] )
         batch_x = [
             sentence + [vocab["<PAD>"]] * (max_len - len(sentence))
                 for sentence in batch_x
         ]
-        batch_y = [
-            inst.y for inst in data
-        ]
+        batch_y = data["y"]
         return torch.LongTensor(batch_x), torch.LongTensor(batch_y)
 
     # Train the victim model for one epoch 
     def train_epoch(model, dataset, vocab, batch_size=128, learning_rate=5e-3):
-        dataset = dataset.shuffle().reset_index()
+        dataset = dataset.shuffle()
         model.train()
         criterion = torch.nn.NLLLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -137,6 +144,12 @@ Complete Code
             avg_loss += loss.item()
         return avg_loss / len(dataset)
 
+    def eval_classifier_acc(dataset, clsf):
+        correct = 0
+        for inst in dataset:
+            correct += (clsf.get_pred( [inst["x"]] )[0] == inst["y"])
+        return correct / len(dataset)
+
     # Train the victim model and conduct evaluation
     def train_model(model, data_train, data_valid, vocab, num_epoch=10):
         mx_acc = None
@@ -144,7 +157,7 @@ Complete Code
         for i in range(num_epoch):
             loss = train_epoch(model, data_train, vocab)
             clsf = OpenAttack.PytorchClassifier(model, word2id=vocab)
-            accuracy = len(data_valid.eval(clsf).correct()) / len(data_valid)
+            accuracy = eval_classifier_acc(data_valid, clsf)
             print("Epoch %d: loss: %lf, accuracy %lf" % (i, loss, accuracy))
             if mx_acc is None or mx_acc < accuracy:
                 mx_model = model.state_dict()
@@ -158,7 +171,12 @@ Complete Code
             classifier = classifier,
             success_rate = True
         )
-        correct_samples = dataset.eval(classifier).correct()
+        # correct_samples = dataset.eval(classifier).correct()
+        # accuracy = len(correct_samples) / len(dataset)
+        correct_samples = [
+            inst for inst in dataset if classifier.get_pred( [inst["x"]] )[0] == inst["y"]
+        ]
+        
         accuracy = len(correct_samples) / len(dataset)
 
         adversarial_samples = attack_eval.generate_adv(correct_samples)
@@ -167,10 +185,12 @@ Complete Code
         print("Accuracy: %lf%%\nAttack success rate: %lf%%" % (accuracy * 100, attack_success_rate * 100))
 
         tp = OpenAttack.text_processors.DefaultTextProcessor()
-        for inst in adversarial_samples:
-            inst.tokens = list(map(lambda x:x[0], tp.get_tokens(inst.x)))
+        def adversarial_samples_mapping(x):
+            return {
+                "tokens": list(map(lambda x:x[0], tp.get_tokens(x["x"])))
+            }
 
-        return adversarial_samples
+        return adversarial_samples.map(adversarial_samples_mapping).remove_columns(["pred", "original", "info"])
 
     def main():
         print("Loading data")
@@ -185,7 +205,25 @@ Complete Code
         adversarial_samples = attack(clsf, train) # Conduct adversarial attacks and generate adversarial examples
 
         print("Adversarially training classifier")
-        finetune_model = train_model(trained_model, train + adversarial_samples, valid, vocab) # Retrain the classifier with additional adversarial examples
+        print(train.features)
+        print(adversarial_samples.features)
+
+        new_dataset = {
+            "x": [],
+            "y": [],
+            "tokens": []
+        }
+        for it in train:
+            new_dataset["x"].append( it["x"] )
+            new_dataset["y"].append( it["y"] )
+            new_dataset["tokens"].append( it["tokens"] )
+        
+        for it in adversarial_samples:
+            new_dataset["x"].append( it["x"] )
+            new_dataset["y"].append( it["y"] )
+            new_dataset["tokens"].append( it["tokens"] )
+            
+        finetune_model = train_model(trained_model, datasets.Dataset.from_dict(new_dataset), valid, vocab) # Retrain the classifier with additional adversarial examples
 
         print("Testing enhanced model (this step will take dozens of minutes)")
         attack(clsf, train) # Re-attack the victim model to measure the effect of adversarial training

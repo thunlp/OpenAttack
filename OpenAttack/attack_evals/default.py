@@ -80,12 +80,11 @@ class DefaultAttackEval(AttackEval):
     See :doc:`Example 4 </examples/example4>` for detail.
 
     """
-    def __init__(self, attacker, classifier, progress_bar=True, **kwargs):
+    def __init__(self, attacker, classifier, **kwargs):
         """
         :param Attacker attacker: The attacker you use.
         :param Classifier classifier: The classifier you want to attack.
         :param bool running_time: If true, returns "Avg. Running Time" in summary. **Default:** True
-        :param bool progress_bar: Dispaly a progress bar(tqdm). **Default:** True
         :param bool success_rate: If true, returns "Attack Success Rate". **Default:** True
         :param bool fluency: If true, returns "Avg. Fluency (ppl)". **Default:** False
         :param bool mistake: If true, returns "Avg. Grammatical Errors". **Default:** False
@@ -94,6 +93,7 @@ class DefaultAttackEval(AttackEval):
         :param bool word_distance: If true, applies token-level levenstein edit distance. **Default:** False
         :param bool modification_rate: If true, returns "Avg. Word Modif. Rate". **Default:** False
         :param TextProcessor processor: Text processor used in DefaultAttackEval. **Default:** :any:`DefaultTextProcessor`
+        :param int num_process: The number of parallel threads at the time of the evaluation. **Default:** 1
 
         :Package Requirements:
             * **language_tool_python** (for `mistake` option)
@@ -149,6 +149,7 @@ class DefaultAttackEval(AttackEval):
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
         :param int total_len: If `dataset` is a generator, total_len is passed the progress bar.
         :param bool visualize: Display a visualized result for each instance and the summary.
+        :param bool progress_bar: Dispaly a progress bar(tqdm). **Default:** True
         :return: Returns a dict of the summary.
         :rtype: dict
 
@@ -447,7 +448,7 @@ class DefaultAttackEval(AttackEval):
         """
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
         :return: A :py:class:`Datasets.Dataset` consists of adversarial samples.
-        :rtype: Datasets.Dataset
+        :rtype: datasets.Dataset
         """
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)

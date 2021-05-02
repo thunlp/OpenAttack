@@ -15,7 +15,7 @@ jobs:
           architecture: 'x64'
       - name: Run build script
         run: |
-          echo "VERSION = \"${GITHUB_REF##refs/tags/v}\" > OpenAttack/version.py
+          echo "VERSION = \"${GITHUB_REF##refs/tags/v}\"" > OpenAttack/version.py
           pip install twine --user
           pip install wheel
           python setup.py sdist bdist_wheel

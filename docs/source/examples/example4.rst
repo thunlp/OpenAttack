@@ -117,7 +117,12 @@ Complete Code
 
     def main():
         clsf = OpenAttack.load("Victim.BiLSTM.SST")
-        dataset = OpenAttack.load("Dataset.SST.sample")[:10]
+        def dataset_mapping(x):
+            return {
+                "x": x["sentence"],
+                "y": 1 if x["label"] > 0.5 else 0,
+            }
+        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
 
         attacker = OpenAttack.attackers.GeneticAttacker()
         attack_eval = CustomAttackEval(attacker, clsf)
