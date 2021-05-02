@@ -1,0 +1,8 @@
+nltk
+numpy
+tqdm<4.50.0
+datasets
+transformers
+torch
+sphinx
+sphinx_rtd_theme

@@ -1,13 +1,10 @@
 import copy
-#import nltk
 import random
-import torch
 import numpy as np
 from ..utils import check_parameters
 from ..data_manager import DataManager
 from ..attacker import Attacker
 from ..metric import UniversalSentenceEncoder
-from transformers import BertConfig, BertTokenizer, BertForSequenceClassification, BertForMaskedLM
 
 DEFAULT_CONFIG = {
     "token_unk": "<UNK>",
