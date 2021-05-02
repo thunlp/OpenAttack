@@ -16,7 +16,9 @@ class ChineseSimCharSubstitute(CharSubstitute):
 
     def __call__(self, char, threshold=None):
         """
-        :param int threshold: Returns top k results (k = threshold).
+        :param char: the raw char, threshold: return top k words.
+        :return: The result is a list of tuples, *(substitute, 1)*.
+        :rtype: list of tuple
         """
         print(self.sim_dict)
         if char in self.sim_dict:

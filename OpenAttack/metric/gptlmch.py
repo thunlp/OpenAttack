@@ -4,7 +4,6 @@ import math
 class GPT2LMCH:
     def __init__(self):
         """
-        :param bool use_tf: If true, uses tensorflow GPT-2-Chinese model.
         :Package Requirements:
             * **torch** (if use_tf = False)
             * **tensorflow** >= 2.0.0 (if use_tf = True)
