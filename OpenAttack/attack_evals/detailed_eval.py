@@ -6,7 +6,7 @@ from ..utils import visualizer, result_visualizer, check_parameters
 from ..exceptions import ClassifierNotSupportException
 from ..text_processors import DefaultTextProcessor
 import multiprocessing, logging
-
+import numpy as np
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
@@ -37,19 +37,21 @@ DEFAULT_CONFIG = {
     "num_process": 1,
 }
 
+
 class MetaClassifierWrapper(Classifier):
     def __init__(self, clsf):
         self.__meta = None
         self.__clsf = clsf
+
     def set_meta(self, meta):
         self.__meta = meta
 
     def get_pred(self, input_):
         return self.__clsf.get_pred(input_, self.__meta)
-    
+
     def get_prob(self, input_):
         return self.__clsf.get_prob(input_, self.__meta)
-    
+
     def get_grad(self, input_, labels):
         return self.__clsf.get_grad(input_, labels, self.__meta)
 
@@ -66,12 +68,13 @@ def worker(data):
         res = attacker(classifier, data["x"])
     return data, res
 
+
 def worker_init(attacker, classifier):
     globals()['$WORKER_ATTACKER'] = attacker
     globals()['$WORKER_CLASSIFIER'] = classifier
 
 
-class DefaultAttackEval(AttackEval):
+class DetailedAttackEval(AttackEval):
     """
     DefaultAttackEval is the default implementation of AttackEval that provides basic evaluation functions.
 
@@ -88,6 +91,7 @@ class DefaultAttackEval(AttackEval):
     See :doc:`Example 4 </examples/example4>` for detail.
 
     """
+
     def __init__(self, attacker, classifier, **kwargs):
         """
         :param Attacker attacker: The attacker you use.
@@ -124,12 +128,12 @@ class DefaultAttackEval(AttackEval):
             if self.__config["levenshtein_tool"] is None:
                 from ..metric import Levenshtein
                 self.__config["levenshtein_tool"] = Levenshtein()
-        
+
         if self.__config["mistake"]:
             if self.__config["language_tool"] is None:
                 from ..metric import LanguageTool
                 self.__config["language_tool"] = LanguageTool()
-        
+
         if self.__config["fluency"]:
             if self.__config["language_model"] is None:
                 from ..metric import GPT2LM
@@ -139,7 +143,7 @@ class DefaultAttackEval(AttackEval):
             if self.__config["sentence_encoder"] is None:
                 from ..metric import UniversalSentenceEncoder
                 self.__config["sentence_encoder"] = UniversalSentenceEncoder()
-        
+
         if self.__config["modification_rate"]:
             if self.__config["modification_tool"] is None:
                 from ..metric import Modification
@@ -164,14 +168,13 @@ class DefaultAttackEval(AttackEval):
             if self.__config["bleu_tool"] is None:
                 from ..metric import BLEU
                 self.__config["bleu_tool"] = BLEU()
-        
+
         if self.__config["num_process"] > 1:
             if multiprocessing.get_start_method() != "spawn":
-                logger.warning("Warning: multiprocessing start method '%s' may cause pytorch.cuda initialization error.", multiprocessing.get_start_method())
-        
-        
+                logger.warning(
+                    "Warning: multiprocessing start method '%s' may cause pytorch.cuda initialization error.",
+                    multiprocessing.get_start_method())
 
-    
     def eval(self, dataset, total_len=None, visualize=False, progress_bar=False):
         """
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
@@ -185,19 +188,35 @@ class DefaultAttackEval(AttackEval):
         """
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
-        
+
         counter = 0
 
         def tqdm_writer(x):
             return tqdm.write(x, end="")
 
-        
         if self.__config["num_process"] > 1:
             with self.__get_pool() as pool:
                 time_start = time.time()
-                for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset, pool), total=total_len) if progress_bar else self.eval_results(dataset)):
+                res_info = []
+                for data, x_adv, y_adv, info in (
+                tqdm(self.eval_results(dataset, pool), total=total_len) if progress_bar else self.eval_results(
+                        dataset)):
                     x_orig = data["x"]
                     counter += 1
+                    if info["Succeed"] == False:
+                        y_orig = self.classifier.get_prob([x_orig], data)[0]
+                        label_orig = np.argmax(y_orig)
+                        res_info.append(
+                            {"Succeed": False, 'Orig': x_orig, 'Orig Label': label_orig, 'Orig Confidence': y_orig})
+                    else:
+                        res = self.classifier.get_prob([x_orig, x_adv], data)
+                        y_orig = res[0]
+                        y_adv = res[1]
+                        label_orig = np.argmax(y_orig)
+                        label_adv = np.argmax(y_adv)
+                        res_info.append(
+                            {'Succeed': True, 'Orig': x_orig, 'Orig Label': label_orig, 'Orig Confidence': y_orig,
+                             'Adv': x_adv, 'Adv Label': label_adv, 'Adv Confidence': y_adv, 'info': info})
                     if visualize:
                         try:
                             if x_adv is not None:
@@ -223,12 +242,23 @@ class DefaultAttackEval(AttackEval):
                     res["Avg. Running Time"] = (time.time() - time_start) / counter
         else:
             time_start = time.time()
-
-            for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if progress_bar else self.eval_results(dataset)):
+            res_info=[]
+            for data, x_adv, y_adv, info in (
+            tqdm(self.eval_results(dataset), total=total_len) if progress_bar else self.eval_results(dataset)):
                 x_orig = data["x"]
 
                 counter += 1
-
+                if info["Succeed"]==False:
+                    y_orig = self.classifier.get_prob([x_orig], data)[0]
+                    label_orig = np.argmax(y_orig)
+                    res_info.append({"Succeed":False,'Orig':x_orig,'Orig Label':label_orig,'Orig Confidence':y_orig})
+                else:
+                    res = self.classifier.get_prob([x_orig, x_adv], data)
+                    y_orig = res[0]
+                    y_adv = res[1]
+                    label_orig=np.argmax(y_orig)
+                    label_adv=np.argmax(y_adv)
+                    res_info.append({'Succeed':True,'Orig':x_orig,'Orig Label':label_orig,'Orig Confidence':y_orig,'Adv':x_adv,'Adv Label':label_adv,'Adv Confidence':y_adv,'info':info})
                 if visualize:
                     try:
                         if x_adv is not None:
@@ -252,29 +282,27 @@ class DefaultAttackEval(AttackEval):
             res = self.get_result()
             if self.__config["running_time"]:
                 res["Avg. Running Time"] = (time.time() - time_start) / counter
-        
 
         if visualize:
             result_visualizer(res, sys.stdout.write)
-        return res
-    
+        return res,res_info
+
     def __get_pool(self):
-        return multiprocessing.Pool(self.__config["num_process"], initializer=worker_init, initargs=(self.attacker, self.classifier))
+        return multiprocessing.Pool(self.__config["num_process"], initializer=worker_init,
+                                    initargs=(self.attacker, self.classifier))
 
     def print(self):
-        print( json.dumps( self.get_result(), indent="\t" ) )
+        print(json.dumps(self.get_result(), indent="\t"))
 
     def dump(self, file_like_object):
-        json.dump( self.get_result(), file_like_object )
+        json.dump(self.get_result(), file_like_object)
 
     def dumps(self):
-        return json.dumps( self.get_result() )
-    
+        return json.dumps(self.get_result())
+
     def __update(self, sentA, sentB):
         info = self.measure(sentA, sentB)
         return self.update(info)
-
-
 
     def eval_results(self, dataset, __pool=None):
         """
@@ -327,25 +355,24 @@ class DefaultAttackEval(AttackEval):
                     yield (data, None, None, info)
                 else:
                     yield (data, res[0], res[1], info)
-        
-    
+
     def __levenshtein(self, sentA, sentB):
         return self.__config["levenshtein_tool"](sentA, sentB)
 
     def __get_tokens(self, sent):
         return list(map(lambda x: x[0], self.__config["processor"].get_tokens(sent)))
-    
+
     def __get_mistakes(self, sent):
         return self.__config["language_tool"](sent)
-    
+
     def __get_fluency(self, sent):
         if len(sent.strip()) == 0:
             return 1
         return self.__config["language_model"](sent)
-    
+
     def __get_semantic(self, sentA, sentB):
         return self.__config["sentence_encoder"](sentA, sentB)
-    
+
     def __get_modification(self, sentA, sentB):
         tokenA = self.__get_tokens(sentA)
         tokenB = self.__get_tokens(sentB)
@@ -378,9 +405,9 @@ class DefaultAttackEval(AttackEval):
         In this method, we measure all the metrics which corresponding options are setted to True.
         """
         if attack_result is None:
-            return { "Succeed": False }
+            return {"Succeed": False}
 
-        info = { "Succeed": True }
+        info = {"Succeed": True}
 
         if self.__config["levenstein"]:
             va = input_
@@ -388,14 +415,14 @@ class DefaultAttackEval(AttackEval):
             if self.__config["word_distance"]:
                 va = self.__get_tokens(va)
                 vb = self.__get_tokens(vb)
-            info["Edit Distance"] =  self.__levenshtein(va, vb)
-        
+            info["Edit Distance"] = self.__levenshtein(va, vb)
+
         if self.__config["mistake"]:
             info["Grammatical Errors"] = self.__get_mistakes(attack_result)
-        
+
         if self.__config["fluency"]:
             info["Fluency (ppl)"] = self.__get_fluency(attack_result)
-            
+
         if self.__config["semantic"]:
             info["Semantic Similarity"] = self.__get_semantic(input_, attack_result)
 
@@ -414,7 +441,7 @@ class DefaultAttackEval(AttackEval):
         if self.__config["bleu"]:
             info["BLEU"] = self.__get_bleu(input_, attack_result)
         return info
-        
+
     def update(self, info):
         """
         :param dict info: The result returned by ``measure`` method.
@@ -432,7 +459,7 @@ class DefaultAttackEval(AttackEval):
                 self.__result["succeed"] = 0
             if info["Succeed"]:
                 self.__result["succeed"] += 1
-        
+
         # early stop
         if not info["Succeed"]:
             return info
@@ -441,7 +468,7 @@ class DefaultAttackEval(AttackEval):
             if "edit" not in self.__result:
                 self.__result["edit"] = 0
             self.__result["edit"] += info["Edit Distance"]
-        
+
         if self.__config["mistake"]:
             if "mistake" not in self.__result:
                 self.__result["mistake"] = 0
@@ -456,7 +483,7 @@ class DefaultAttackEval(AttackEval):
             if "semantic" not in self.__result:
                 self.__result["semantic"] = 0
             self.__result["semantic"] += info["Semantic Similarity"]
-        
+
         if self.__config["modification_rate"]:
             if "modification" not in self.__result:
                 self.__result["modification"] = 0
@@ -482,7 +509,7 @@ class DefaultAttackEval(AttackEval):
                 self.__result["bleu"] = 0
             self.__result["bleu"] += info["BLEU"]
         return info
-        
+
     def get_result(self):
         """
         :return: The results which were accumulated previously.
@@ -543,7 +570,7 @@ class DefaultAttackEval(AttackEval):
         Clear all the accumulated results.
         """
         self.__result = {}
-    
+
     def generate_adv(self, dataset, total_len=None):
         """
         :param Datasets.Dataset dataset: A :py:class:`Datasets.Dataset`.
@@ -553,8 +580,9 @@ class DefaultAttackEval(AttackEval):
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
 
-        ret = {"x": [],  "y": [], "pred": [], "original": [], "info": []}
-        for data, x_adv, y_adv, info in (tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
+        ret = {"x": [], "y": [], "pred": [], "original": [], "info": []}
+        for data, x_adv, y_adv, info in (
+        tqdm(self.eval_results(dataset), total=total_len) if self.__progress_bar else self.eval_results(dataset)):
             if x_adv is not None:
                 ret["x"].append(x_adv)
                 ret["y"].append(data["y"])
@@ -562,5 +590,4 @@ class DefaultAttackEval(AttackEval):
                 ret["original"].append(data["x"])
                 ret["info"].append(info)
         return datasets.Dataset.from_dict(ret)
-            
-            
+

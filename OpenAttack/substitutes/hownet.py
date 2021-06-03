@@ -43,8 +43,9 @@ class HowNetSubstitute(WordSubstitute):
             pp = None
         pos_tag = pp
         if pos_tag is None:
-            return [word]
-        word_candidate_1 = []
+            return []
+        if word not in self.dict or pos_tag not in self.dict[word]:
+            return []
         if pos_tag not in pos_set:
             raise UnknownPOSException(word, pos_tag)
         word_candidate_1=self.dict[word][pos_tag]
