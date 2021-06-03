@@ -161,7 +161,7 @@ class BERTAttacker(Attacker):
             substitutes = self.get_substitues(substitutes, tokenizer, self.mlm_model, self.use_bpe, word_pred_scores, self.threshold_pred_score)
 
             if self.config['use_sim_mat']:
-                CFS = CounterFittedSubstitute()
+                CFS = CounterFittedSubstitute(cosine=True)
                 try:
                     cfs_output = CFS(tgt_word, threshold=0.4)
                     cos_sim_subtitutes = [elem[0] for elem in cfs_output]
