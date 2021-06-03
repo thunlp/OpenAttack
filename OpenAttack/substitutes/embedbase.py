@@ -47,7 +47,11 @@ class EmbedBasedSubstitute(WordSubstitute):
         rank = dis.argsort()
         ret = []
         for i in range(1, rank.shape[0]):
-            if dis[rank[i]] > threshold:
-                break
+            if self.config["cosine"]:
+                if dis[rank[i]] > (1-threshold):
+                    break
+            else:
+                if dis[rank[i]] > threshold:
+                    break
             ret.append((self.config["id2word"][rank[i]], dis[rank[i]]))
         return ret
