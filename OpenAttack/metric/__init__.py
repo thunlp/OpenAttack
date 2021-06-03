@@ -5,3 +5,7 @@ from .levenshtein import Levenshtein
 from .modification import Modification
 from .languagetool import LanguageTool
 from .languagetool import ChineseLanguageTool
+from .bleu import BLEU
+from .jaccard_char import Jaccard_Char
+from .jaccard_word import Jaccard_Word
+from .sim_cos import Sim_Cos

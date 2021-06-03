@@ -57,7 +57,7 @@ class PSOAttacker(Attacker):
         :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
         :Package Requirements: * **OpenHowNet**
         :Classifier Capacity: Probability
-        
+
         Word-level Textual Adversarial Attacking as Combinatorial Optimization. Yuan Zang, Fanchao Qi, Chenghao Yang, Zhiyuan Liu, Meng Zhang, Qun Liu and Maosong Sun. ACL 2020.
         `[pdf] <https://www.aclweb.org/anthology/2020.acl-main.540.pdf>`__
         `[code] <https://github.com/thunlp/SememePSO-Attack>`__
@@ -101,36 +101,19 @@ class PSOAttacker(Attacker):
         if np.sum(neighbours_nums) == 0:
             return None
         w_select_probs = neighbours_nums / np.sum(neighbours_nums)
-        tem = self.generate_population(
+        pop = self.generate_population(
                 clsf, x_orig, neighbours,w_select_probs,x_len, target, targeted)
-        if tem is None:
-            return None
-        if tem[0] is None:
-            if targeted:
-                return self.config["processor"].detokenizer(tem[2]), target
-            else:
-                return self.config["processor"].detokenizer(tem[2]), np.argmax(tem[1])
-        pop_preds,pop=tem
-        pop_scores=pop_preds[:,target]
-        part_elites = copy.deepcopy(pop)
-        part_elites_scores = pop_scores
+
+
+        part_elites = pop
         if targeted:
-            all_elite_score = np.max(pop_scores)
-            pop_ranks = np.argsort(pop_scores)[::-1]
-            top_attack = pop_ranks[0]
-            all_elite = pop[top_attack]
-            if np.argmax(pop_preds[top_attack, :]) == target:
-                return self.config["processor"].detokenizer(pop[top_attack]), target
+            all_elite_score = 100
+            part_elites_scores = [100 for _ in range(self.config["pop_size"])]
         else:
-            all_elite_score = np.min(pop_scores)
-            pop_ranks = np.argsort(pop_scores)
-            top_attack = pop_ranks[0]
-            all_elite = pop[top_attack]
-            if np.argmax(pop_preds[top_attack, :]) != target:
-                return (
-                    self.config["processor"].detokenizer(pop[top_attack]),
-                    np.argmax(pop_preds[top_attack, :]),
-                )
+            all_elite_score = -1
+            part_elites_scores = [-1 for _ in range(self.config["pop_size"])]
+        all_elite = pop[0]
+
         Omega_1 = 0.8
         Omega_2 = 0.2
         C1_origin = 0.8
@@ -138,6 +121,36 @@ class PSOAttacker(Attacker):
         V = [np.random.uniform(-3, 3) for rrr in range(self.config["pop_size"])]
         V_P = [[V[t] for rrr in range(x_len)] for t in range(self.config["pop_size"])]
         for i in range(self.config["max_iters"]):
+            pop_preds = self.predict_batch(clsf, pop)
+            pop_scores = pop_preds[:, target]
+
+            if targeted:
+                pop_ranks = np.argsort(pop_scores)[::-1]
+                top_attack = pop_ranks[0]
+                if np.max(pop_scores) > all_elite_score:
+                    all_elite = pop[top_attack]
+                    all_elite_score = np.max(pop_scores)
+                for k in range(self.config["pop_size"]):
+                    if pop_scores[k] > part_elites_scores[k]:
+                        part_elites[k] = pop[k]
+                        part_elites_scores[k] = pop_scores[k]
+                if np.argmax(pop_preds[top_attack, :]) == target:
+                    return self.config["processor"].detokenizer(pop[top_attack]), target
+            else:
+                pop_ranks = np.argsort(pop_scores)
+                top_attack = pop_ranks[0]
+                if np.min(pop_scores) < all_elite_score:
+                    all_elite = pop[top_attack]
+                    all_elite_score = np.min(pop_scores)
+                for k in range(self.config["pop_size"]):
+                    if pop_scores[k] < part_elites_scores[k]:
+                        part_elites[k] = pop[k]
+                        part_elites_scores[k] = pop_scores[k]
+                if np.argmax(pop_preds[top_attack, :]) != target:
+                    return (
+                        self.config["processor"].detokenizer(pop[top_attack]),
+                        np.argmax(pop_preds[top_attack, :]),
+                    )
             Omega = (Omega_1 - Omega_2) * (self.config["max_iters"] - i) / self.config["max_iters"] + Omega_2
             C1 = C1_origin - i / self.config["max_iters"] * (C1_origin - C2_origin)
             C2 = C2_origin + i / self.config["max_iters"] * (C1_origin - C2_origin)
@@ -162,66 +175,42 @@ class PSOAttacker(Attacker):
             if targeted:
                 pop_ranks = np.argsort(pop_scores)[::-1]
                 top_attack = pop_ranks[0]
+                if np.max(pop_scores) > all_elite_score:
+                    all_elite = pop[top_attack]
+                    all_elite_score = np.max(pop_scores)
+                for k in range(self.config["pop_size"]):
+                    if pop_scores[k] > part_elites_scores[k]:
+                        part_elites[k] = pop[k]
+                        part_elites_scores[k] = pop_scores[k]
                 if np.argmax(pop_preds[top_attack, :]) == target:
                     return self.config["processor"].detokenizer(pop[top_attack]), target
             else:
                 pop_ranks = np.argsort(pop_scores)
                 top_attack = pop_ranks[0]
+                if np.min(pop_scores) < all_elite_score:
+                    all_elite = pop[top_attack]
+                    all_elite_score = np.min(pop_scores)
+                for k in range(self.config["pop_size"]):
+                    if pop_scores[k] < part_elites_scores[k]:
+                        part_elites[k] = pop[k]
+                        part_elites_scores[k] = pop_scores[k]
                 if np.argmax(pop_preds[top_attack, :]) != target:
                     return (
                         self.config["processor"].detokenizer(pop[top_attack]),
                         np.argmax(pop_preds[top_attack, :]),
                     )
+
             new_pop = []
             for x in pop:
                 change_ratio = self.count_change_ratio(x, x_orig, x_len)
                 p_change = 1 - 2 * change_ratio
                 if np.random.uniform() < p_change:
-                    tem = self.perturb(clsf, x, x_orig, neighbours, w_select_probs, target,targeted)
-                    if tem is None:
-                        return None
-                    if tem[0] is None:
-                        if targeted:
-                            return self.config["processor"].detokenizer(tem[2]), target
-                        else:
-                            return self.config["processor"].detokenizer(tem[2]), np.argmax(tem[1])
-                    new_pop.append(tem[1])
+                    tem = self.mutate( x, x_orig, neighbours, w_select_probs)
+                    new_pop.append(tem)
                 else:
                     new_pop.append(x)
             pop = new_pop
-            pop_preds = self.predict_batch(clsf,pop)
-            pop_scores = pop_preds[:, target]
-            if targeted:
-                pop_ranks = np.argsort(pop_scores)[::-1]
-                top_attack = pop_ranks[0]
-                if np.argmax(pop_preds[top_attack, :]) == target:
-                    return self.config["processor"].detokenizer(pop[top_attack]), target
-            else:
-                pop_ranks = np.argsort(pop_scores)
-                top_attack = pop_ranks[0]
-                if np.argmax(pop_preds[top_attack, :]) != target:
-                    return (
-                        self.config["processor"].detokenizer(pop[top_attack]),
-                        np.argmax(pop_preds[top_attack, :]),
-                    )
-            if targeted:
-                for k in range(self.config["pop_size"]):
-                    if pop_scores[k] > part_elites_scores[k]:
-                        part_elites[k] = pop[k]
-                        part_elites_scores[k] = pop_scores[k]
-                elite = pop[top_attack]
-                if np.max(pop_scores) > all_elite_score:
-                    all_elite = elite
-                    all_elite_score = np.max(pop_scores)
-            else:
-                for k in range(self.config["pop_size"]):
-                    if pop_scores[k] < part_elites_scores[k]:
-                        part_elites[k] = pop[k]
-                        part_elites_scores[k] = pop_scores[k]
-                elite = pop[top_attack]
-                if np.min(pop_scores) < all_elite_score:
-                    all_elite = elite
-                    all_elite_score = np.min(pop_scores)
+
         return None #Failed
 
     def predict_batch(self, clsf, sentences):
@@ -243,17 +232,14 @@ class PSOAttacker(Attacker):
 
     def generate_population(self, clsf, x_orig,neighbours_list,w_select_probs,x_len, target, targeted):
         pop = []
-        pop_preds = []
+        x_len = w_select_probs.shape[0]
         for i in range(self.config["pop_size"]):
-            tem = self.perturb(clsf, x_orig, x_orig, neighbours_list, w_select_probs, target,targeted)
-            if tem is None:
-                return None
-            if tem[0] is None:
-                return [None,tem[1],tem[2]]
-            else:
-                pop_preds.append(tem[0])
-                pop.append(tem[1])
-        return np.array(pop_preds), pop
+            r = np.random.choice(x_len, 1, p=w_select_probs)[0]
+            replace_list = neighbours_list[r]
+            sub = np.random.choice(replace_list, 1)[0]
+            tem = self.do_replace(x_orig, r, sub)
+            pop.append(tem)
+        return pop
 
 
     def turn(self, x1, x2, prob, x_len):
@@ -262,43 +248,17 @@ class PSOAttacker(Attacker):
             if np.random.uniform() < prob[i]:
                 x_new[i] = x1[i]
         return x_new
-        
-    def select_best_replacement(self, clsf, pos, x_cur, x_orig, target, replace_list,targeted):
 
-        new_x_list = [self.do_replace(
-            x_cur, pos, w) if x_orig[pos] != w and w != 0 else x_cur for w in replace_list]
-        new_x_preds = self.predict_batch(clsf,new_x_list)
-
-        x_scores = new_x_preds[:, target]
-        orig_pred = self.predict(clsf,x_cur)
-        orig_score=orig_pred[target]
-        if targeted:
-            new_x_scores = x_scores - orig_score
-        else:
-            new_x_scores = orig_score - x_scores
-        # Eliminate not that clsoe words
-
-        if (np.max(new_x_scores) > 0):
-            best_id = np.argsort(new_x_scores)[-1]
-
-            if targeted==True and np.argmax(new_x_preds[best_id]) == target:
-                return [None, new_x_preds[best_id],new_x_list[best_id]]
-            if targeted==False and np.argmax(new_x_preds[best_id]) != target:
-                return [None, new_x_preds[best_id], new_x_list[best_id]]
-            return [new_x_preds[best_id], new_x_list[best_id]]
-        return [orig_pred, x_cur]
-
-    def perturb(self, clsf, x_cur, x_orig, neigbhours, w_select_probs, target, targeted):
-
+    def mutate(self,x, x_orig,neigbhours_list, w_select_probs):
         x_len = w_select_probs.shape[0]
-
-        rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
-        
-        while x_cur[rand_idx] != x_orig[rand_idx] and self.sum_diff(x_orig, x_cur) < np.sum(np.sign(w_select_probs)):
-            rand_idx = np.random.choice(x_len, 1, p=w_select_probs)[0]
-
-        replace_list = neigbhours[rand_idx]
-        return self.select_best_replacement(clsf, rand_idx, x_cur, x_orig, target, replace_list, targeted)
+        rand_idx = np.random.choice(x_len, 1,p=w_select_probs)[0]
+        while x[rand_idx] != x_orig[rand_idx] and self.sum_diff(x_orig,x) < np.sum(np.sign(w_select_probs)):
+            rand_idx = np.random.choice(x_len, 1,p=w_select_probs)[0]
+        replace_list = neigbhours_list[rand_idx]
+        sub_idx= np.random.choice(len(replace_list), 1)[0]
+        new_x=copy.deepcopy(x)
+        new_x[rand_idx]=replace_list[sub_idx]
+        return new_x
 
     def sum_diff(self, x_orig, x_cur):
         ret = 0
@@ -356,7 +316,7 @@ class PSOAttacker(Attacker):
         return 1 / (1 + np.exp(-n))
 
     def count_change_ratio(self, x, x_orig, x_len):
-        change_ratio = float(np.sum(x != x_orig)) / float(x_len)
+        change_ratio = float(np.sum(np.array(x) != np.array(x_orig))) / float(x_len)
         return change_ratio
 
 
