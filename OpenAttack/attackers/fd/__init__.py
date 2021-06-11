@@ -104,7 +104,7 @@ class FDAttacker(ClassificationAttacker):
             mnwd = None
             
             for word in reps:
-                s0 = np.sign(victim_embedding.transform(word) - victim_embedding.transform(sent[idx]))
+                s0 = np.sign(victim_embedding.transform(word, self.token_unk) - victim_embedding.transform(sent[idx], self.token_unk))
                 v = np.abs(s0 - s1).sum()
                 if goal.targeted:
                     v = -v
