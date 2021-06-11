@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.join(
 import OpenAttack
 def get_attackers(dataset, clsf):
 
-    # rules = OpenAttack.attackers.SEAAttacker.get_rules(clsf, dataset)
+    rules = OpenAttack.attackers.SEAAttacker.get_rules(clsf, dataset)
 
     triggers = ["the", "the", "the"] # OpenAttack.attackers.UATAttacker.get_triggers(clsf, dataset, clsf.tokenizer)
     print(triggers)

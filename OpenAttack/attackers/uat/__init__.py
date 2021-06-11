@@ -38,7 +38,7 @@ class UATAttacker(ClassificationAttacker):
                 raise ValueError("Unknown language `%s`" % lang)
 
         if tokenizer is None:
-            self.tokenizer = get_default_tokenizer(self.__lang_tag)
+            tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
         check_language([self.tokenizer], self.__lang_tag)
