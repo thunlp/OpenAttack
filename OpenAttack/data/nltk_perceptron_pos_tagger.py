@@ -10,7 +10,7 @@ import os
 
 NAME = "TProcess.NLTKPerceptronPosTagger"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/averaged_perceptron_tagger.pickle.zip"
+URL = "/TAADToolbox/averaged_perceptron_tagger.pickle.zip"
 DOWNLOAD = make_zip_downloader(URL, "averaged_perceptron_tagger.pickle")
 
 

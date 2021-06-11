@@ -1,8 +1,7 @@
-import pickle
 import os
-import urllib
 from .exceptions import UnknownDataException, DataNotExistException
 from .data import data_list
+import inspect
 
 
 class DataManager(object):
@@ -39,8 +38,18 @@ class DataManager(object):
 
     __auto_download = True
 
+    source = "https://data.thunlp.org/"
+
     def __init__(self):
-        raise NotImplementedError
+        raise NotImplementedError()
+    
+    @classmethod
+    def enable_cdn(cls):
+        cls.source = "https://cdn.data.thunlp.org/"
+    
+    @classmethod
+    def disable_cdn(cls):
+        cls.source = "https://data.thunlp.org/"
 
     @classmethod
     def load(cls, data_name, cached=True):
@@ -53,11 +62,9 @@ class DataManager(object):
         :raises UnknownDataException: For loading an unavailable data.
         :raises DataNotExistException:  For loading a data that has not been downloaded. This appends when AutoDownload mechanism is disabled.
 
-
-        
         """
         if data_name not in cls.AVAILABLE_DATAS:
-            raise UnknownDataException
+            raise UnknownDataException()
 
         if not os.path.exists(cls.data_path[data_name]):
             if cls.__auto_download:
@@ -76,13 +83,6 @@ class DataManager(object):
                 raise DataNotExistException(data_name, cls.data_path[data_name])
         return cls.data_reference[data_name]
     
-    @classmethod
-    def loadDataset(cls, data_name, cached=True):
-        """
-        This method is equivalent to ``DataManager.load("Dataset." + data_name)``.
-        :rtype: Dataset
-        """
-        return cls.load("Dataset." + data_name, cached=cached)
     
     @classmethod
     def loadVictim(cls, data_name, cached=True):
@@ -167,10 +167,20 @@ class DataManager(object):
         use **force** to skip this step.
         """
         if data_name not in cls.AVAILABLE_DATAS:
-            raise UnknownDataException
+            raise UnknownDataException()
         if path is None:
             path = cls.data_path[data_name]
         if os.path.exists(path) and not force:
             return True
-        cls.data_download[data_name](path)
+        download_func = cls.data_download[data_name]
+
+        parent_dir = os.path.dirname(path)
+        if not os.path.exists(parent_dir):
+            os.makedirs(parent_dir)
+
+        num_args = len(inspect.getfullargspec(download_func).args)
+        if num_args == 1:
+            download_func(path)
+        elif num_args == 2:
+            download_func(path, cls.source)
         return True

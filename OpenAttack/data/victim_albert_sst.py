@@ -12,12 +12,13 @@ from OpenAttack.utils import make_zip_downloader
 
 NAME = "Victim.ALBERT.SST"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/victim/albert_sst.zip"
+URL = "/TAADToolbox/victim/albert_sst.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 def LOAD(path):
-    from OpenAttack import HuggingfaceClassifier
     import transformers
     tokenizer = transformers.AutoTokenizer.from_pretrained(path)
     model = transformers.AutoModelForSequenceClassification.from_pretrained(path, num_labels=2, output_hidden_states=False)
-    return HuggingfaceClassifier(model, tokenizer=tokenizer, max_len=100, embedding_layer=model.albert.embeddings.word_embeddings)
+    
+    from OpenAttack.victim.classifiers import TransformersClassifier
+    return TransformersClassifier(model, tokenizer, model.albert.embeddings.word_embeddings)

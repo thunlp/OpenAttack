@@ -1,6 +1,13 @@
+from .base import AttackMetric
 import numpy as np
+from ..tags import *
 
-class UniversalSentenceEncoder:
+## TODO use a pytorch model instead
+
+class UniversalSentenceEncoder(AttackMetric):
+
+    TAGS = { TAG_English }
+
     def __init__(self):
         """
         :Data Requirements: :py:data:`.AttackAssist.UniversalSentenceEncoder`
@@ -17,7 +24,7 @@ class UniversalSentenceEncoder:
         from ..data_manager import DataManager
         self.embed = hub.load( DataManager.load("AttackAssist.UniversalSentenceEncoder") )
 
-    def __call__(self, sentA, sentB):
+    def calc_score(self, sentA, sentB):
         """
         :param str sentA: The first sentence.
         :param str sentB: The second sentence.
@@ -27,5 +34,6 @@ class UniversalSentenceEncoder:
         ret = self.embed([sentA, sentB]).numpy()
         return ret[0].dot(ret[1]) / (np.linalg.norm(ret[0]) * np.linalg.norm(ret[1]))
 
-    def __reduce__(self):
-        return UniversalSentenceEncoder, tuple()
+    def after_attack(self, input, adversarial_sample):
+        if adversarial_sample is not None:
+            return self.calc_score(input["x"], adversarial_sample)

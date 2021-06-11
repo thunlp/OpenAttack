@@ -10,7 +10,7 @@ Pretrained GAN model on SST-2 dataset used in :py:class:`.GANAttacker`. See :py:
 from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.SGAN"
-URL = "https://cdn.data.thunlp.org/TAADToolbox/SGNAE.zip"
+URL = "/TAADToolbox/SGNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

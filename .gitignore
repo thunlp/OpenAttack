@@ -144,3 +144,5 @@ dmypy.json
 
 /test/testdir
 data
+private
+testdir

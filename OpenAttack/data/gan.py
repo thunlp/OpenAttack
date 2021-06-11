@@ -9,21 +9,20 @@ Pretrained GAN model on SNLI dataset used in :py:class:`.GANAttacker`. See :py:c
 
 import os
 from OpenAttack.utils import make_zip_downloader
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import json
+from torch.autograd import Variable
 
 NAME = "AttackAssist.GAN"
-URL = "https://cdn.data.thunlp.org/TAADToolbox/GNAE.zip"
+URL = "/TAADToolbox/GNAE.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 try:
-    import torch
-    import torch.nn as nn
-    import torch.nn.functional as F
-    from torch.autograd import Variable
-    from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-    import json
-    from torch.autograd import Variable
-    from copy import deepcopy
-
+    
     def to_gpu(_, x):
         return x
     class MLP_D(nn.Module):

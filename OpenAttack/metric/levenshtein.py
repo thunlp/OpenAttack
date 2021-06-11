@@ -1,7 +1,21 @@
-import numpy as np
+from .base import AttackMetric
+import torch
+from ..text_process.tokenizer import Tokenizer
 
-class Levenshtein:
-    def __call__(self, a, b):
+class Levenshtein(AttackMetric):
+    
+    NAME = "Edit Distance"
+
+    def __init__(self, tokenizer : Tokenizer) -> None:
+        self.tokenizer = tokenizer
+
+    @property
+    def TAGS(self):
+        if hasattr(self.tokenizer, "TAGS"):
+            return self.tokenizer.TAGS
+        return set()
+        
+    def calc_score(self, a, b):
         """
             :param list a: The first list.
             :param list b: The second list.
@@ -10,7 +24,7 @@ class Levenshtein:
             """
         la = len(a)
         lb = len(b)
-        f = np.zeros((la + 1, lb + 1), dtype=np.uint64)
+        f = torch.zeros(la + 1, lb + 1, dtype=torch.long)
         for i in range(la + 1):
             for j in range(lb + 1):
                 if i == 0:
@@ -22,3 +36,7 @@ class Levenshtein:
                 else:
                     f[i][j] = min(f[i - 1][j - 1], f[i - 1][j], f[i][j - 1]) + 1
         return f[la][lb]
+
+    def after_attack(self, input, adversarial_sample):
+        if adversarial_sample is not None:
+            return self.calc_score( self.tokenizer.tokenize(input["x"], pos_tagging=False), self.tokenizer.tokenize(adversarial_sample, pos_tagging=False) )

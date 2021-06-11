@@ -14,7 +14,7 @@ from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.DCES"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/DCES.zip"
+URL = "/TAADToolbox/DCES.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

@@ -9,7 +9,7 @@ import os
 
 NAME = "TProcess.NLTKSentTokenizer"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/punkt.english.pickle.zip"
+URL = "/TAADToolbox/punkt.english.pickle.zip"
 DOWNLOAD = make_zip_downloader(URL, "english.pickle")
 
 

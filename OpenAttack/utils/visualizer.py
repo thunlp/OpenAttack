@@ -116,8 +116,8 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer):
     ret.append(("\033[32m%s\033[0m" % head_str) + " " * (max_len - sent_len(head_str)))
     ret.append(" " * max_len)
     
-    token_orig = tokenizer(x_orig)
-    token_adv = tokenizer(x_adv)
+    token_orig = tokenizer.tokenize(x_orig, pos_tagging = False)
+    token_adv = tokenizer.tokenize(x_adv, pos_tagging = False)
     pairs = levenshtein_visual(token_orig, token_adv)
     
     curr1 = ""

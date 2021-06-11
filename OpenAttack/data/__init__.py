@@ -1,6 +1,7 @@
 import pkgutil
 import pickle
 import urllib
+from tqdm import tqdm
 from ..exceptions import DataConfigErrorException
 
 
@@ -8,10 +9,26 @@ def load_data():
     def pickle_loader(path):
         return pickle.load(open(path, "rb"))
 
-    def url_downloader(url):
-        def DOWNLOAD(path):
-            with urllib.request.urlopen(url) as f:
-                open(path, "wb").write(f.read())
+    def url_downloader(url, resource_name):
+        if url[0] == "/":
+            remote_url = url[1:]
+        else:
+            remote_url = url
+
+        def DOWNLOAD(path : str, source : str):
+            CHUNK_SIZE = 1024
+            if not source.endswith("/"):
+                source = source + "/"
+            with urllib.request.urlopen(source + remote_url) as fin:
+                total_length = int(fin.headers["content-length"])
+                with open(path, "wb") as fout:
+                    with tqdm(total=total_length, unit="B", desc="Downloading %s" % resource_name, unit_scale=True) as pbar:                            
+                        while True:
+                            data = fin.read(CHUNK_SIZE)
+                            if len(data) == 0:
+                                break
+                            fout.write(data)
+                            pbar.update( len(data) )
             return True
 
         return DOWNLOAD
@@ -24,7 +41,7 @@ def load_data():
             if callable(data.DOWNLOAD):
                 tmp["download"] = data.DOWNLOAD
             elif isinstance(data.DOWNLOAD, str):
-                tmp["download"] = url_downloader(data.DOWNLOAD)
+                tmp["download"] = url_downloader(data.DOWNLOAD, data.NAME)
             else:
                 raise DataConfigErrorException(
                     "Data Module: %s\n dir: %s\n type: %s"

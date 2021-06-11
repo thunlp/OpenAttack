@@ -1,11 +1,10 @@
-from .gptlm import GPT2LM
-from .gptlmch import GPT2LMCH
-from .usencoder import UniversalSentenceEncoder
+from .base import AttackMetric
+from .bleu import BLEU
+from .gptlm import GPT2LM, GPT2LMChinese
+from .jaccard_char import JaccardChar
+from .jaccard_word import JaccardWord
+from .language_tool import LanguageTool, LanguageToolChinese
 from .levenshtein import Levenshtein
 from .modification import Modification
-from .languagetool import LanguageTool
-from .languagetool import ChineseLanguageTool
-from .bleu import BLEU
-from .jaccard_char import Jaccard_Char
-from .jaccard_word import Jaccard_Word
-from .sim_cos import Sim_Cos
+from .sentence_sim import SentenceSim
+from .usencoder import UniversalSentenceEncoder

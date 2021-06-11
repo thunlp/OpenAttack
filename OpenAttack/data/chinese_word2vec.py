@@ -4,15 +4,16 @@
 """
 import numpy as np
 import os
-from OpenAttack.utils import WordVector, make_zip_downloader
+from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.ChineseWord2Vec"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/chinese-merge-word-embedding.txt.zip"
+URL = "/TAADToolbox/chinese-merge-word-embedding.txt.zip"
 DOWNLOAD = make_zip_downloader(URL, "chinese-merge-word-embedding.txt")
 
 
 def LOAD(path):
+    from OpenAttack.attack_assist import WordEmbedding
     with open(os.path.join(path, "chinese-merge-word-embedding.txt"), "r", encoding="utf-8") as f:
         id2vec = []
         word2id = {}
@@ -26,4 +27,4 @@ def LOAD(path):
             word2id[word] = len(word2id)
             id2vec.append(embed)
         id2vec = np.stack(id2vec)
-    return WordVector(word2id, id2vec)
+    return WordEmbedding(word2id, id2vec)

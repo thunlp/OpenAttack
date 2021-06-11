@@ -5,24 +5,22 @@ import unittest, os
 class MetaClassifier(OpenAttack.Classifier):
     def __init__(self):
         self.last_meta = None
-    def get_grad(self, input_, labels, meta):
-        self.last_meta = meta
+    
+    def get_pred(self, input_):
+        return self.get_prob(input_)
+    
+    def get_prob(self, input_):
+        return self.get_grad([input_], [])[0]
+    
+    def get_grad(self, input_, labels):
+        self.last_meta = self.context.input
         return np.array([[1, 2, 3]]), None
 
 class TestMetaClassifier(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        OpenAttack.DataManager.set_path("./testdir")
-        OpenAttack.DataManager.download("TProcess.NLTKSentTokenizer")
-        OpenAttack.DataManager.download("TProcess.NLTKPerceptronPosTagger")
-    
-    @classmethod
-    def tearDownClass(cls):
-        os.system("rm -r ./testdir")
-
     def test_get_pred(self):
         clsf = MetaClassifier()
         self.assertIsNone(clsf.last_meta)
+        
         with self.assertRaises(TypeError):
             clsf.get_pred("I love apples")
         with self.assertRaises(TypeError):
@@ -30,9 +28,11 @@ class TestMetaClassifier(unittest.TestCase):
         with self.assertRaises(TypeError):
             clsf.get_pred(["I love apples"], "b", "c")
         self.assertIsNone(clsf.last_meta)
+        clsf.set_context({}, None)
         clsf.get_pred(["I love apples"])
         self.assertDictEqual(clsf.last_meta, {})
-        clsf.get_pred(["I love apples"], {"THIS": "that"})
+        clsf.set_context({"THIS": "that"}, None)
+        clsf.get_pred(["I love apples"])
         self.assertDictEqual(clsf.last_meta, {"THIS": "that"})
 
     def test_get_prob(self):
@@ -45,9 +45,11 @@ class TestMetaClassifier(unittest.TestCase):
         with self.assertRaises(TypeError):
             clsf.get_prob(["I love apples"], "b", "c")
         self.assertIsNone(clsf.last_meta)
+        clsf.set_context({}, None)
         clsf.get_prob(["I love apples"])
         self.assertDictEqual(clsf.last_meta, {})
-        clsf.get_prob(["I love apples"], {"THIS": "that"})
+        clsf.set_context({"THIS": "that"}, None)
+        clsf.get_prob(["I love apples"])
         self.assertDictEqual(clsf.last_meta, {"THIS": "that"})
 
     def test_get_grad(self):
@@ -62,7 +64,9 @@ class TestMetaClassifier(unittest.TestCase):
         with self.assertRaises(TypeError):
             clsf.get_grad(["I love apples"], "b", "c", "d")
         self.assertIsNone(clsf.last_meta)
-        clsf.get_grad(["I love apples"], [0])
+        clsf.set_context({}, None)
+        clsf.get_grad([["I", "love", "apples"]], [0])
         self.assertDictEqual(clsf.last_meta, {})
-        clsf.get_grad(["I love apples"], [0], {"THIS": "that"})
+        clsf.set_context({"THIS": "that"}, None)
+        clsf.get_grad([["I", "love", "apples"]], [0])
         self.assertDictEqual(clsf.last_meta, {"THIS": "that"})

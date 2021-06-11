@@ -10,7 +10,7 @@ from OpenAttack.utils import make_zip_downloader
 
 NAME = "AttackAssist.CiLin"
 
-URL = "https://thunlp-public.oss-cn-hongkong.aliyuncs.com/TAADToolbox/cilin_dict.zip"
+URL = "/TAADToolbox/cilin_dict.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

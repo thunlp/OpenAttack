@@ -14,7 +14,7 @@ import os
 
 NAME = "AttackAssist.TranslationModels"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/translation_models.zip"
+URL = "/TAADToolbox/translation_models.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

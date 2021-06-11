@@ -3,9 +3,6 @@ numpy
 black
 tqdm<4.50.0
 torch>=1.5.0
-tensorflow
-sphinx
-sphinx_rtd_theme
 twine
 language_tool_python
 transformers>=2.5.0

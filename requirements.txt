@@ -3,3 +3,4 @@ numpy
 tqdm<4.50.0
 datasets
 transformers
+torch

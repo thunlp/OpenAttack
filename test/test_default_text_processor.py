@@ -1,81 +1,42 @@
 import unittest
-import OpenAttack
 import os
+from OpenAttack import DataManager
 
 
 class TestDataManager(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        OpenAttack.DataManager.set_path("./testdir")
-        OpenAttack.DataManager.download("TProcess.NLTKSentTokenizer")
-        OpenAttack.DataManager.download("TProcess.NLTKPerceptronPosTagger")
-        OpenAttack.DataManager.download("TProcess.NLTKWordNet")
-        OpenAttack.DataManager.download("TProcess.NLTKWordNetDelemma")
-        OpenAttack.DataManager.download("TProcess.StanfordNER")
-        OpenAttack.DataManager.download("TProcess.StanfordParser")
-        cls.dp = OpenAttack.text_processors.DefaultTextProcessor()
-    
-    @classmethod
-    def tearDownClass(cls):
-        os.system("rm -r ./testdir")
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
     def test_tokenize(self):
-        ret = self.dp.get_tokens("This is an apple.")
+        from OpenAttack.text_process.tokenizer import PunctTokenizer
+        tokenizer = PunctTokenizer()
+        ret = tokenizer.tokenize("This is an apple.")
         self.assertIsInstance(ret, list)
         self.assertGreater(len(ret), 0)
         for i in range(len(ret)):
             self.assertEqual(len(ret[i]), 2)
             self.assertIsInstance(ret[i][0], str)
             self.assertIsInstance(ret[i][1], str)
+        self.assertIsInstance(tokenizer.detokenize(ret), str)
 
     def test_lemma(self):
-        ret = self.dp.get_lemmas([('There', 'EX'), ('were', 'VBD'), ('apples', 'NNS'), ('.', '.')])
-        self.assertIsInstance(ret, list)
-        self.assertGreater(len(ret), 0)
-        for i in range(len(ret)):
-            self.assertIsInstance(ret[i], str)
-        ret = self.dp.get_lemmas(("apples", "NNS"))
-        self.assertEqual(ret, "apple")
-    
-    def test_delemma(self):
-        ret = self.dp.get_delemmas(("apple", "NNS"))
+        from OpenAttack.text_process.lemmatizer import WordnetLemmatimer
+        
+        lemmatizer = WordnetLemmatimer()
+        test_cases = [('There', 'other'), ('were', 'verb'), ('apples', 'noun'), ('.', 'other')]
+        for case in test_cases:
+            ret = lemmatizer.lemmatize(case[0], case[1])
+
+            self.assertIsInstance(ret, str)
+
+        ret = lemmatizer.delemmatize("apples", "noun")
         self.assertEqual(ret, "apples")
     
-    def test_ner(self):
-        ret = self.dp.get_ner("New York is the biggest city in America.")
-        self.assertIsInstance(ret, list)
-        self.assertGreater(len(ret), 0)
-        for i in range(len(ret)):
-            self.assertEqual(len(ret[i]), 4)
-            self.assertIsInstance(ret[i][0], str)
-            self.assertIsInstance(ret[i][1], int)
-            self.assertIsInstance(ret[i][2], int)
-            self.assertIsInstance(ret[i][3], str)
+        ret = lemmatizer.delemmatize("apple", "noun")
+        self.assertEqual(ret, "apples")
     
+    
+    """
     def test_parser(self):
-        ret = self.dp.get_parser("The quick brown fox jumps over a lazy dog.")
+        from OpenAttack.text_process.constituency_parser import StanfordParser
+        parser = StanfordParser()
+        ret = parser("The quick brown fox jumps over a lazy dog.")
         self.assertIsInstance(ret, str)
-    
-    def test_wsd(self):
-        ret = self.dp.get_wsd([
-            ('I', 'PRP'), 
-            ('went', 'VBD'), 
-            ('to', 'TO'), 
-            ('the', 'DT'), 
-            ('bank', 'NN'), 
-            ('.', '.')
-        ])
-        self.assertIsInstance(ret, list)
-        self.assertGreater(len(ret), 0)
-        for i in range(len(ret)):
-            self.assertIsInstance(ret[i], str)
-    
-
-
-
+    """
