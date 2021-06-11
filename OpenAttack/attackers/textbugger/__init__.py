@@ -133,7 +133,7 @@ class TextBuggerAttacker(ClassificationAttacker):
             return - tempoutput[goal.target]
 
     def replaceWithBug(self, x_prime, word_idx, bug):
-        return x_prime[:word_idx] + bug + x_prime[word_idx + 1]
+        return x_prime[:word_idx] + bug + x_prime[word_idx + 1:]
 
     def generateBugs(self, word, glove_vectors, sub_w_enabled=False, typo_enabled=False):
         bugs = {"insert": word, "delete": word, "swap": word, "sub_C": word, "sub_W": word}
