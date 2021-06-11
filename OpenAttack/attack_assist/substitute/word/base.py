@@ -1,5 +1,5 @@
 from typing import List, Optional, Tuple
-from ....exceptions import UnknownPOSException
+from ....exceptions import UnknownPOSException, WordNotInDictionaryException
 
 POS_LIST = ["adv", "adj", "noun", "verb", "other"]
 
@@ -16,14 +16,19 @@ class WordSubstitute(object):
         if pos is None:
             ret = {}
             for sub_pos in POS_LIST:
-                for word, sim in self.substitute(word, sub_pos):
-                    if word not in ret:
-                        ret[word] = sim
-                    else:
-                        ret[word] = max(ret[word], sim)
+                try:
+                    for word, sim in self.substitute(word, sub_pos):
+                        if word not in ret:
+                            ret[word] = sim
+                        else:
+                            ret[word] = max(ret[word], sim)
+                except WordNotInDictionaryException:
+                    continue
             list_ret = []
             for word, sim in ret.items():
                 list_ret.append((word, sim))
+            if len(list_ret) == 0:
+                raise WordNotInDictionaryException()
             return sorted( list_ret, key=lambda x: -x[1] )
         elif pos not in POS_LIST:
             raise UnknownPOSException("Invalid `pos` %s (expect %s)" % (pos, POS_LIST) )
