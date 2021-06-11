@@ -85,7 +85,7 @@ class TextFoolerAttacker(ClassificationAttacker):
         """
         x_orig = sentence.lower()
 
-        orig_probs = victim.get_prob([x_orig])
+        orig_probs = victim.get_prob([x_orig])[0]
         orig_label = orig_probs.argmax()
         orig_prob = orig_probs.max()
 
@@ -167,8 +167,8 @@ class TextFoolerAttacker(ClassificationAttacker):
             else:
                 new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.sim_score_threshold) + (1 - pos_mask).astype(np.float64)
                 
-                new_label_prob_min = np.min(new_label_probs, axis=0)[0]
-                new_label_prob_argmin = np.argmin(new_label_probs, axis=0)[0]
+                new_label_prob_min = np.min(new_label_probs, axis=0)
+                new_label_prob_argmin = np.argmin(new_label_probs, axis=0)
                 if new_label_prob_min < orig_prob:
                     text_prime[idx] = synonyms[new_label_prob_argmin]
             text_cache = text_prime[:]
