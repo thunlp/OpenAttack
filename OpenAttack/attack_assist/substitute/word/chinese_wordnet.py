@@ -1,5 +1,5 @@
 from .base import WordSubstitute
-from ....exceptions import UnknownPOSException
+from ....exceptions import WordNotInDictionaryException
 from ....tags import *
 
 
@@ -20,7 +20,8 @@ class ChineseWordNetSubstitute(WordSubstitute):
     
     def substitute(self, word: str, pos: str):
         from nltk.corpus import wordnet as wn
-        
+        if pos == "other":
+            raise WordNotInDictionaryException()
         pos_in_wordnet = {
             "adv": "r",
             "adj": "a",

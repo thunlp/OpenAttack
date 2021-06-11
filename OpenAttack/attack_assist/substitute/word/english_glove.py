@@ -1,3 +1,4 @@
+import torch
 from .embed_based import EmbedBasedSubstitute
 from ....data_manager import DataManager
 
@@ -14,7 +15,7 @@ class GloveSubstitute(EmbedBasedSubstitute):
         
         super().__init__(
             wordvec.word2id,
-            wordvec.embedding,
+            torch.from_numpy(wordvec.embedding),
             cosine = cosine, 
             k = k,
             threshold = threshold,

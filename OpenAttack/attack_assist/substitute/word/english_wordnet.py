@@ -1,6 +1,7 @@
 from .base import WordSubstitute
 from ....tags import TAG_English
 from ....data_manager import DataManager
+from ....exceptions import WordNotInDictionaryException
 
 
 
@@ -38,6 +39,8 @@ class WordNetSubstitute(WordSubstitute):
         :return: The result is a list of tuples, *(substitute, 1)*.
         :rtype: list of tuple
         """
+        if pos == "other":
+            raise WordNotInDictionaryException()
         pos_in_wordnet = {
             "adv": "r",
             "adj": "a",
