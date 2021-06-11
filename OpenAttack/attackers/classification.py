@@ -6,11 +6,11 @@ from ..tags import *
 
 class ClassificationAttacker(Attacker):
     def __call__(self, victim: Classifier, input_: Any):
-        if Tag("get_pred", "victim") not in victim:
+        if Tag("get_pred", "victim") not in victim.TAGS:
             raise AttributeError("`%s` needs victim to support `%s` method" % (self.__class__.__name__, "get_pred"))
         self._victim_check(victim)
 
-        if TAG_Classification not in victim:
+        if TAG_Classification not in victim.TAGS:
             raise AttributeError("Victim model `%s` must be a classifier" % victim.__class__.__name__)
 
         if "target" in input_:
