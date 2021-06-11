@@ -117,7 +117,7 @@ class TextBuggerAttacker(ClassificationAttacker):
         max_score = float('-inf')
         best_bug = original_word
         for bug_type, b_k in bugs.items():
-            candidate_k = self.replaceWithBug(word_idx, b_k, x_prime)
+            candidate_k = self.replaceWithBug(x_prime, word_idx, b_k)
             score_k = self.getScore(candidate_k, clsf, goal)
             if score_k > max_score:
                 best_bug = b_k
