@@ -111,8 +111,6 @@ class TextFoolerAttacker(ClassificationAttacker):
             if score > self.import_score_threshold and x_orig[idx] not in self.filter_words:
                 words_perturb.append((idx, x_orig[idx], x_pos[idx]))
 
-
-
         synonym_words = [
             self.get_neighbours(word, pos)
             if word not in self.filter_words
@@ -152,8 +150,8 @@ class TextFoolerAttacker(ClassificationAttacker):
 
             new_probs_mask *= (semantic_sims >= self.sim_score_threshold)
 
-            synonyms_pos_ls = [self.tokenizer.tokenize(self.tokenizer.detokenize(new_text[max(idx - 4, 0):idx + 5]), pos_tagging=False)[min(4, idx)]
-                               if len(new_text) > 10 else self.tokenizer.tokenize(self.tokenizer.detokenize(new_text), pos_tagging=False)[idx] for new_text in new_texts]
+            synonyms_pos_ls = [list(map(lambda x: x[1], self.tokenizer.tokenize(self.tokenizer.detokenize(new_text[max(idx - 4, 0):idx + 5]))))[min(4, idx)]
+                               if len(new_text) > 10 else list(map(lambda x: x[1], self.tokenizer.tokenize(self.tokenizer.detokenize(new_text))))[idx] for new_text in new_texts]
 
             pos_mask = np.array(self.pos_filter(x_pos[idx], synonyms_pos_ls))
             new_probs_mask *= pos_mask
@@ -165,7 +163,7 @@ class TextFoolerAttacker(ClassificationAttacker):
                 if goal.check(x_adv, pred):
                     return x_adv
             else:
-                new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.sim_score_threshold) + (1 - pos_mask).astype(np.float64)
+                new_label_probs = new_probs[:, orig_label] + (semantic_sims < self.sim_score_threshold).astype(np.float64) + (1 - pos_mask).astype(np.float64)
                 
                 new_label_prob_min = np.min(new_label_probs, axis=0)
                 new_label_prob_argmin = np.argmin(new_label_probs, axis=0)
