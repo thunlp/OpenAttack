@@ -57,7 +57,7 @@ class HotFlipAttacker(ClassificationAttacker):
         self.substitute = substitute
 
         if tokenizer is None:
-            self.tokenizer = get_default_tokenizer(self.__lang_tag)
+            tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
         self.filter_words = set(filter_words)

@@ -65,7 +65,7 @@ class TextFoolerAttacker(ClassificationAttacker):
         self.substitute = substitute
 
         if tokenizer is None:
-            self.tokenizer = get_default_tokenizer(self.__lang_tag)
+            tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
         check_language([self.tokenizer, self.substitute], self.__lang_tag)
