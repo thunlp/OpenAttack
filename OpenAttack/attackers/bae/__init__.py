@@ -133,7 +133,7 @@ class BAEAttacker(ClassificationAttacker):
         words, sub_words, keys = self._tokenize(feature.seq, tokenizer)
         max_length = self.max_length
         # original label
-        inputs = tokenizer.encode_plus(feature.seq, None, add_special_tokens=True, max_length=max_length, )
+        inputs = tokenizer.encode_plus(feature.seq, None, add_special_tokens=True, max_length=max_length, truncation=True)
         input_ids, token_type_ids = torch.tensor(inputs["input_ids"]), torch.tensor(inputs["token_type_ids"])
         attention_mask = torch.tensor([1] * len(input_ids))
         seq_len = input_ids.size(0)
@@ -243,7 +243,7 @@ class BAEAttacker(ClassificationAttacker):
                 # = 1 - (0.2 / pi) = 0.936338023.
                 if use_score < 0.936:
                     continue
-                inputs = tokenizer.encode_plus(temp_text, None, add_special_tokens=True, max_length=max_length, )
+                inputs = tokenizer.encode_plus(temp_text, None, add_special_tokens=True, max_length=max_length, truncation=True)
                 input_ids = torch.tensor(inputs["input_ids"]).unsqueeze(0).to(self.device)
                 seq_len = input_ids.size(1)
                 
