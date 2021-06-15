@@ -35,7 +35,7 @@ class Levenshtein(AttackMetric):
                     f[i][j] = f[i - 1][j - 1]
                 else:
                     f[i][j] = min(f[i - 1][j - 1], f[i - 1][j], f[i][j - 1]) + 1
-        return f[la][lb]
+        return f[la][lb].item()
 
     def after_attack(self, input, adversarial_sample):
         if adversarial_sample is not None:
