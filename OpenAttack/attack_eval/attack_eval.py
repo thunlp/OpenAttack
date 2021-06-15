@@ -146,19 +146,19 @@ class AttackEval:
                     if Tag("get_prob", "victim") in self.victim.TAGS:
                         self.victim.set_context(res["data"], None)
                         try:
-                            res = self.victim.get_prob([x_orig, x_adv])
+                            probs = self.victim.get_prob([x_orig, x_adv])
                         finally:
                             self.victim.clear_context()
-                        y_orig = res[0]
-                        y_adv = res[1]
+                        y_orig = probs[0]
+                        y_adv = probs[1]
                     elif Tag("get_pred", "victim") in self.victim.TAGS:
                         self.victim.set_context(res["data"], None)
                         try:
-                            res = self.victim.get_pred([x_orig, x_adv])
+                            preds = self.victim.get_pred([x_orig, x_adv])
                         finally:
                             self.victim.clear_context()
-                        y_orig = int(res[0])
-                        y_adv = int(res[1])
+                        y_orig = int(preds[0])
+                        y_adv = int(preds[1])
                     else:
                         raise RuntimeError("Invalid victim model")
                 else:
@@ -166,17 +166,17 @@ class AttackEval:
                     if Tag("get_prob", "victim") in self.victim.TAGS:
                         self.victim.set_context(res["data"], None)
                         try:
-                            res = self.victim.get_prob([x_orig])
+                            probs = self.victim.get_prob([x_orig])
                         finally:
                             self.victim.clear_context()
-                        y_orig = res[0]
+                        y_orig = probs[0]
                     elif Tag("get_pred", "victim") in self.victim.TAGS:
                         self.victim.set_context(res["data"], None)
                         try:
-                            res = self.victim.get_pred([x_orig])
+                            preds = self.victim.get_pred([x_orig])
                         finally:
                             self.victim.clear_context()
-                        y_orig = int(res[0])
+                        y_orig = int(preds[0])
                     else:
                         raise RuntimeError("Invalid victim model")
                 info = res["metrics"]
