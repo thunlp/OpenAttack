@@ -35,7 +35,7 @@ class ChineseHowNetSubstitute(WordSubstitute):
 
         # get sememes
         word_sememes = self.hownet_dict.get_sememes_by_word(word, structured=False, lang="zh", merge=False)
-        word_sememe_set = set([t['sememes'] for t in word_sememes])
+        word_sememe_set = [t['sememes'] for t in word_sememes]
         if len(word_sememes) == 0:
             raise WordNotInDictionaryException()
 
@@ -55,15 +55,19 @@ class ChineseHowNetSubstitute(WordSubstitute):
 
             # sememe
             wd_sememes = self.hownet_dict.get_sememes_by_word(wd, structured=False, lang="zh", merge=False)
-            wd_sememe_set = set([t['sememes'] for t in wd_sememes])
+            wd_sememe_set = [t['sememes'] for t in wd_sememes]
             if len(wd_sememes) == 0:
                 continue
             
-            common_sememe = word_sememe_set.intersection(wd_sememe_set)
+            common_sememe = 0
+            for s1 in word_sememe_set:
+                for s2 in wd_sememe_set:
+                    if s1 == s2:
+                        common_sememe += 1
             
-            if len(common_sememe) > 0:
+            if common_sememe > 0:
                 if wd.find(" ") == -1:
-                    word_candidate.append( (wd, len(common_sememe) / len(word_sememe_set)) )
+                    word_candidate.append( (wd, common_sememe / len(word_sememe_set)) )
 
         word_candidate = sorted(word_candidate, key=lambda x: -x[1])
         if self.k is not None:
