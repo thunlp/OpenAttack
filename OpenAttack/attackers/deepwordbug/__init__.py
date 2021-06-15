@@ -73,25 +73,25 @@ class DeepWordBugAttacker(ClassificationAttacker):
             return ret
         return None
 
-    def scorefunc(self, type, victim, tokens, goal):
-        if "replaceone" in type:
+    def scorefunc(self, type_, victim, tokens, goal):
+        if type_ == "replaceone":
             return self.replaceone(victim, tokens, goal)
-        elif "temporal" in type:
+        elif type_ == "temporal":
             return self.temporal(victim, tokens, goal)
-        elif "tail" in type:
+        elif type_ == "tail":
             return self.temporaltail(victim, tokens, goal)
-        elif "combined" in type:
+        elif type_ == "combined":
             return self.combined(victim, tokens, goal)
         else:
-            print("error, No scoring func found")
+            raise ValueError("Unknown score function %s, %s expected" % (type_, ["replaceone", "temporal", "tail", "combined"]))
 
-    def transform(self, type, word):
-        if "homoglyph" in type:
+    def transform(self, type_, word):
+        if type_ == "homoglyph":
             return self.homoglyph(word)
-        elif "swap" in type:
+        elif type_ == "swap":
             return self.temporal(word)
         else:
-            print("error, No transform func found")
+            raise ValueError("Unknown transform function %s, %s expected" % (type_, ["homoglyph", "swap"]))
 
     # scoring functions
     def replaceone(self, victim, tokens, goal):

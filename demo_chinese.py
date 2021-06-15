@@ -19,16 +19,6 @@ def main():
     dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
-    options = {
-        "success_rate": True,
-        "fluency": True,
-        "mistake": True,
-        "semantic": True,
-        "levenstein": True,
-        "word_distance": True,
-        "modification_rate": True,
-        "running_time": True,
-    }
     attack_eval = OpenAttack.AttackEval(attacker, clsf, metrics=[
         OpenAttack.metric.Fluency(),
         OpenAttack.metric.GrammaticalErrors(),
