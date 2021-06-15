@@ -150,7 +150,7 @@ def left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer):
         ret.append(" " * max_len)
     return ret
 
-def left_bar_failed(x_orig, y_orig, max_len):
+def left_bar_failed(x_orig, y_orig, max_len, tokenizer):
     ret = []
 
     if isinstance(y_orig, int):
@@ -159,7 +159,7 @@ def left_bar_failed(x_orig, y_orig, max_len):
         head_str = "Label: %d (%.2lf%%) --> Failed!" % (y_orig.argmax(), y_orig.max() * 100)
     ret.append(("\033[31m%s\033[0m" % head_str) + " " * (max_len - sent_len(head_str)))
     ret.append(" " * max_len)
-    tokens = x_orig.split()
+    tokens = tokenizer.tokenize(x_orig, pos_tagging=False)
     curr = ""
     for tk in tokens:
         if sent_len(curr) + sent_len(tk) + 1 > max_len:
@@ -190,7 +190,7 @@ def visualizer(idx, x_orig, y_orig, x_adv, y_adv, info, stream_writer, tokenizer
     right = right_bar_print(info, key_len=key_len, val_len=val_len)
     if x_adv is None:
         # Failed
-        left = left_bar_failed(x_orig, y_orig, max_len)
+        left = left_bar_failed(x_orig, y_orig, max_len, tokenizer)
     else:
         left = left_bar_print(x_orig, y_orig, x_adv, y_adv, max_len, tokenizer)
     
