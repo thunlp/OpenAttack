@@ -235,7 +235,7 @@ class BAEAttacker(ClassificationAttacker):
                 temp_text = tokenizer.convert_tokens_to_string(temp_replace)
                 
                 
-                use_score = self.encoder(temp_text, x_orig)
+                use_score = self.encoder.calc_score(temp_text, x_orig)
                 
                 # From TextAttack's implementation: Finally, since the BAE code is based on the TextFooler code, we need to
                 # adjust the threshold to account for the missing / pi in the cosine
