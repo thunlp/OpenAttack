@@ -12,7 +12,10 @@ def make_model():
             except LookupError:
                 nltk.download('vader_lexicon')
                 self.model = SentimentIntensityAnalyzer()
-            
+        
+        def get_pred(self, input_):
+            return self.get_prob(input_).argmax(axis=1)
+
         def get_prob(self, input_):
             ret = []
             for sent in input_:
@@ -28,9 +31,6 @@ def dataset_mapping(x):
         "y": 1 if x["label"] > 0.5 else 0,
     }
 
-import multiprocessing
-if multiprocessing.get_start_method() != "spawn":
-    multiprocessing.set_start_method("spawn", force=True)
     
 def main():
 
@@ -43,20 +43,14 @@ def main():
     dataset = datasets.load_dataset("sst", split="train[:100]").map(function=dataset_mapping)
 
     print("Start attack")
-    options = {
-        "success_rate": True,
-        "fluency": True,
-        "mistake": True,
-        "semantic": True,
-        "levenstein": True,
-        "word_distance": True,
-        "modification_rate": True,
-        "running_time": True,
-
-        "invoke_limit": 500,
-        "average_invoke": True
-    }
-    attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options, num_process=4)
+    attack_eval = OpenAttack.AttackEval( attacker, clsf, metrics=[
+        OpenAttack.metric.Fluency(),
+        OpenAttack.metric.GrammaticalErrors(),
+        OpenAttack.metric.SemanticSimilarity(),
+        OpenAttack.metric.EditDistance(),
+        OpenAttack.metric.ModificationRate()
+    ] )
+    #attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options, num_process=4)
     attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":

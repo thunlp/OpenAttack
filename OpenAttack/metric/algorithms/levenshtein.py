@@ -1,10 +1,10 @@
 from .base import AttackMetric
 import torch
-from ..text_process.tokenizer import Tokenizer
+from ...text_process.tokenizer import Tokenizer
 
 class Levenshtein(AttackMetric):
     
-    NAME = "Edit Distance"
+    NAME = "Levenshtein Edit Distance"
 
     def __init__(self, tokenizer : Tokenizer) -> None:
         self.tokenizer = tokenizer

@@ -1,14 +1,14 @@
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 import logging
 from tqdm import tqdm
-from ..utils import visualizer, result_visualizer, get_language
+from ..utils import visualizer, result_visualizer, get_language, language_by_name
 from .utils import worker_process, worker_init, attack_process
 from ..tags import *
 from ..text_process.tokenizer import Tokenizer, get_default_tokenizer
 from ..victim.base import Victim
 from ..attackers.base import Attacker
-from ..metric import AttackMetric
+from ..metric import AttackMetric, MetricSelector
 
 import multiprocessing
 
@@ -21,7 +21,7 @@ class AttackEval:
         language : Optional[str] = None,
         tokenizer : Optional[Tokenizer] = None,
         invoke_limit : Optional[int] = None,
-        metrics : List[AttackMetric] = []
+        metrics : List[Union[AttackMetric, MetricSelector]] = []
     ):
         if language is None:
             lst = [attacker]
@@ -33,11 +33,7 @@ class AttackEval:
 
             lang_tag = get_language(lst)
         else:
-            lang_tag = None
-            for tag in TAG_ALL_LANGUAGE:
-                if tag == "lang:%s" % language:
-                    lang_tag = tag
-                    break
+            lang_tag = language_by_name(language)
             if lang_tag is None:
                 raise ValueError("Unsupported language `%s` in attack eval" % language)
 
@@ -50,7 +46,14 @@ class AttackEval:
 
         self.attacker = attacker
         self.victim = victim
-        self.metrics = metrics
+        self.metrics = []
+        for it in metrics:
+            if isinstance(it, MetricSelector):
+                self.metrics.append( it.select(lang_tag) )
+            elif isinstance(it, AttackMetric):
+                self.metrics.append( it )
+            else:
+                raise TypeError("`metrics` got %s, expect `MetricSelector` or `AttackMetric`" % it.__class__.__name__)
         self.invoke_limit = invoke_limit
         
     @property

@@ -8,6 +8,8 @@ from . import attackers
 from .victim import Victim
 from .victim.classifiers import Classifier
 
+# metrics
+from . import metric
 
 # attack_eval
 from .attack_eval import AttackEval

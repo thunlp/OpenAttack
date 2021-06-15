@@ -1,6 +1,6 @@
 import math
 import transformers
-from ..tags import *
+from ...tags import *
 from .base import AttackMetric
 
 class GPT2LM(AttackMetric):

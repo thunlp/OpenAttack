@@ -1,5 +1,5 @@
 from .base import AttackMetric
-from ..tags import *
+from ...tags import *
 
 class JaccardChar(AttackMetric):
 

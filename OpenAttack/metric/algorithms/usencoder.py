@@ -1,10 +1,13 @@
 from .base import AttackMetric
 import numpy as np
-from ..tags import *
+from ...tags import *
+from ...data_manager import DataManager
 
 ## TODO use a pytorch model instead
 
 class UniversalSentenceEncoder(AttackMetric):
+
+    NAME = "Semantic Similarity"
 
     TAGS = { TAG_English }
 
@@ -21,7 +24,7 @@ class UniversalSentenceEncoder(AttackMetric):
         """
         
         import tensorflow_hub as hub
-        from ..data_manager import DataManager
+        
         self.embed = hub.load( DataManager.load("AttackAssist.UniversalSentenceEncoder") )
 
     def calc_score(self, sentA, sentB):

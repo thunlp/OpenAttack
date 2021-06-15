@@ -1,6 +1,6 @@
 from .base import AttackMetric
-from ..tags import *
-from ..text_process.tokenizer import Tokenizer
+from ...tags import *
+from ...text_process.tokenizer import Tokenizer
 
 class JaccardWord(AttackMetric):
     

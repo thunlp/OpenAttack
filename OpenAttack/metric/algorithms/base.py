@@ -1,4 +1,4 @@
-from ..tags import *
+from ...tags import *
 class AttackMetric(object):
 
     TAGS = { * TAG_ALL_LANGUAGE }
