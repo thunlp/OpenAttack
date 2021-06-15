@@ -29,7 +29,9 @@ class AttackEval:
                 lst.append(tokenizer)
             if victim.supported_language is not None:
                 lst.append(victim)
-            lst.extend(metrics)
+            for it in metrics:
+                if isinstance(it, AttackMetric):
+                    lst.append(it)
 
             lang_tag = get_language(lst)
         else:
@@ -49,7 +51,10 @@ class AttackEval:
         self.metrics = []
         for it in metrics:
             if isinstance(it, MetricSelector):
-                self.metrics.append( it.select(lang_tag) )
+                v = it.select(lang_tag)
+                if v is None:
+                    raise RuntimeError("`%s` does not support language %s" % (it.__class__.__name__, lang_tag.name))
+                self.metrics.append( v )
             elif isinstance(it, AttackMetric):
                 self.metrics.append( it )
             else:
