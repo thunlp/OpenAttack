@@ -42,7 +42,7 @@ class GetGradient(VictimMethod):
 
         if len(input_) != len(labels):
             raise ValueError("input")
-    def invoke_count(self, input_):
+    def invoke_count(self, input_, labels):
         return len(input_)
 
 class GetEmbedding(VictimMethod):
