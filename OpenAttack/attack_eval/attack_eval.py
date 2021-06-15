@@ -163,6 +163,7 @@ class AttackEval:
                         raise RuntimeError("Invalid victim model")
                 else:
                     y_adv = None
+                    x_adv = None
                     if Tag("get_prob", "victim") in self.victim.TAGS:
                         self.victim.set_context(res["data"], None)
                         try:
