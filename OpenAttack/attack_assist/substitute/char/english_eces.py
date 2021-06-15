@@ -34,4 +34,4 @@ class ECESSubstitute(CharSubstitute):
         """
         if char not in self.h:
             return [(char, 1)]
-        return [(char, 1), (self.h[char], 1)]
+        return [(self.h[char], 1)]
