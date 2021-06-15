@@ -202,7 +202,12 @@ class AttackEval:
         summary["Successful Instances"] = success_inst
         summary["Attack Success Rate"] = success_inst / total_inst
         for kw in total_result_cnt.keys():
-            summary["Avg. " + kw] = total_result[kw] / total_result_cnt[kw]
+            if kw in ["Succeed"]:
+                continue
+            if kw in ["Query Exceeded"]:
+                summary["Total " + kw] = total_result[kw]
+            else:
+                summary["Avg. " + kw] = total_result[kw] / total_result_cnt[kw]
         
         if visualize:
             result_visualizer(summary, sys.stdout.write)
