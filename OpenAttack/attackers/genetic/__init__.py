@@ -97,9 +97,9 @@ class GeneticAttacker(ClassificationAttacker):
             self.perturb(
                 victim, x_orig, x_orig, neighbours, w_select_probs, goal
             )
-            for _ in range(self.config["pop_size"])
+            for _ in range(self.pop_size)
         ]
-        for i in range(self.config["max_iters"]):
+        for i in range(self.max_iters):
             pop_preds = victim.get_prob(self.make_batch(pop))
 
             if goal.targeted:
@@ -141,9 +141,8 @@ class GeneticAttacker(ClassificationAttacker):
         return None  # Failed
 
     def get_neighbour_num(self, word, pos):
-        cnt = 0
         try:
-            return len(self.config["substitute"](word, pos))
+            return len(self.substitute(word, pos))
         except WordNotInDictionaryException:
             return 0
 
@@ -152,7 +151,7 @@ class GeneticAttacker(ClassificationAttacker):
             return list(
                 map(
                     lambda x: x[0],
-                    self.config["substitute"](word, pos),
+                    self.substitute(word, pos),
                 )
             )
         except WordNotInDictionaryException:
