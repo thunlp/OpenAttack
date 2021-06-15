@@ -3,7 +3,7 @@ from ...data_manager import DataManager
 from ...tags import *
 
 
-__POS_MAPPING = {
+_POS_MAPPING = {
     "v": "verb",
     "n": "noun",
     "t": "noun",
@@ -24,8 +24,8 @@ class JiebaTokenizer(Tokenizer):
         for pair in self.__tokenize(x):
             if pos_tagging:
                 pos = pair.flag[0]
-                if pos in __POS_MAPPING:
-                    pos = __POS_MAPPING[pos]
+                if pos in _POS_MAPPING:
+                    pos = _POS_MAPPING[pos]
                 else:
                     pos = "other"
                 ret.append( pair.word, pos )
