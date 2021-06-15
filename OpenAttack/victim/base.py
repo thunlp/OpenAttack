@@ -1,14 +1,15 @@
+
 import functools
-from typing import Set
 from .context import AttackContext, AttackContextShadow
 from ..exceptions import InvokeLimitExceeded
-from ..tags import Tag
+from .method import VictimMethod
 import time
 
-def invoke_decorator(func):
+def invoke_decorator(func, method : VictimMethod):
     @functools.wraps(func)
     def invoke_wrapper(self : Victim, *args, **kwargs):
-        return self.record_invoke(func, *args, **kwargs)
+        cnt = method.invoke_count(*args, **kwargs)
+        return self.record_invoke(cnt, func, *args, **kwargs)
         
     return invoke_wrapper
 
@@ -18,8 +19,8 @@ class Victim:
         return self._method_tags
 
     def __init_subclass__(cls, invoke_funcs=[], tags=set()):
-        for func_name in invoke_funcs:
-            setattr( cls, func_name, invoke_decorator( getattr(cls, func_name) ) )
+        for func_name, method in invoke_funcs:
+            setattr( cls, func_name, invoke_decorator( getattr(cls, func_name), method ) )
         cls._method_tags = set(tags)
     
     @property
@@ -42,7 +43,7 @@ class Victim:
         else:
             return AttackContextShadow(self._Victim__context)
 
-    def record_invoke(self, func, *args, **kwargs):
+    def record_invoke(self, cnt, func, *args, **kwargs):
         
         if hasattr(self, "_Victim__context"):
             need_record = (self._Victim__context is not None) and (not self._Victim__context.inference)
@@ -51,10 +52,10 @@ class Victim:
         
         if need_record:
             self._Victim__context.inference = True
-            if self._Victim__context.invoke_limit is not None and self._Victim__context.invoke >= self._Victim__context.invoke_limit:
+            if self._Victim__context.invoke_limit is not None and self._Victim__context.invoke + cnt > self._Victim__context.invoke_limit:
                 raise InvokeLimitExceeded()
             else:
-                self._Victim__context.invoke += 1
+                self._Victim__context.invoke += cnt
             st = time.time()
         
         # call original function here

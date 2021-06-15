@@ -10,6 +10,9 @@ class GetPredict(VictimMethod):
         for i, it in enumerate(input_):
             if not isinstance(it, str):
                 raise  TypeError( "get_pred: `input[%d]` must be a list of sentences, but got %s" % (i, type(it)) )
+    
+    def invoke_count(self, input_):
+        return len(input_)
 
 class GetProbability(VictimMethod):
     def before_call(self, input_):
@@ -20,6 +23,9 @@ class GetProbability(VictimMethod):
         for i, it in enumerate(input_):
             if not isinstance(it, str):
                 raise  TypeError( "get_prob: `input[%d]` must be a sentence, but got %s" % (i, type(it)) )
+
+    def invoke_count(self, input_):
+        return len(input_)
 
 class GetGradient(VictimMethod):
     def before_call(self, input_, labels):
@@ -33,8 +39,11 @@ class GetGradient(VictimMethod):
             for j, token in enumerate(it):
                 if not isinstance(token, str):
                     raise  TypeError( "get_grad: `input[%d][%d]` must be a token, but got %s" % (i, j, type(it)) )
+
         if len(input_) != len(labels):
             raise ValueError("input")
+    def invoke_count(self, input_):
+        return len(input_)
 
 class GetEmbedding(VictimMethod):
     def after_call(self, ret):

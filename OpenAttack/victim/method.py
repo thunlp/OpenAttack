@@ -1,6 +1,9 @@
 import functools
 
 class VictimMethod:
+    def invoke_count(self, *args, **kwargs):
+        return 0
+
     def method_decorator(self, func):
         @functools.wraps(func)
         def wrapper(this, *args, **kwargs):

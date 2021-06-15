@@ -17,7 +17,7 @@ class Classifier(Victim):
 
         for func_name in CLASSIFIER_METHODS.keys():
             if hasattr(cls, func_name):
-                invoke_funcs.append(func_name)
+                invoke_funcs.append((func_name, CLASSIFIER_METHODS[func_name]))
                 tags.append( Tag(func_name, "victim") )
                 setattr(cls, func_name, CLASSIFIER_METHODS[func_name].method_decorator( getattr(cls, func_name) ) )
         
