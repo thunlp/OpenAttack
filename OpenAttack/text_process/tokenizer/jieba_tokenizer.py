@@ -28,7 +28,7 @@ class JiebaTokenizer(Tokenizer):
                     pos = _POS_MAPPING[pos]
                 else:
                     pos = "other"
-                ret.append( pair.word, pos )
+                ret.append( (pair.word, pos) )
             else:
                 ret.append( pair.word )
         return ret
