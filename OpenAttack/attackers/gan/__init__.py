@@ -96,11 +96,11 @@ class GANAttacker(ClassificationAttacker):
 
         hypothesis = hypothesis_indices[:self.maxlen]
         hypothesis_words = hypothesis_words[:self.maxlen]
-        c = self.autoencoder.encode(torch.tensor([hypothesis, hypothesis], dtype=torch.long),
-                                    torch.tensor([length, length], dtype=torch.long), noise=False)
+        c = self.autoencoder.encode(torch.LongTensor([hypothesis, hypothesis]),
+                                    torch.LongTensor([length, length]), noise=False)
         z = self.inverter(c).data.cpu()
 
-        hypothesis = torch.Tensor(hypothesis, dtype=torch.long)
+        hypothesis = torch.LongTensor(hypothesis)
         hypothesis = hypothesis.unsqueeze(0)
         right_curr = self.right
         counter = 0
@@ -163,8 +163,8 @@ class GANAttacker(ClassificationAttacker):
 
         ## TODO Something maybe wrong here
 
-        output = self.autoencoder(torch.Tensor([source_orig], dtype=torch.long),
-                                  torch.Tensor([length], dtype=torch.long),
+        output = self.autoencoder(torch.LongTensor([source_orig]),
+                                  torch.LongTensor([length]),
                                   noise=True)
 
         _, max_indices = torch.max(output, 2)
