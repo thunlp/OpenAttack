@@ -26,7 +26,7 @@ class VIPERAttacker(ClassificationAttacker):
             prob : float = 0.3,
             topn : int = 12,
             generations : int = 120,
-            method: str = "dces",
+            method: str = "eces",
         ):
         """
         :param float prob: The probability of changing a char in a sentence. **Default:** 0.3
