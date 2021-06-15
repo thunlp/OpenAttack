@@ -100,7 +100,7 @@ class DeepWordBugAttacker(ClassificationAttacker):
             tempinputs = tokens[:]  # ##
             tempinputs[i] = self.token_unk
             tempoutput = victim.get_prob([ self.tokenizer.detokenize(tempinputs) ])
-            if goal.targeted:
+            if not goal.targeted:
                 losses[i] = tempoutput[0][goal.target]
             else:
                 losses[i] = 1 - tempoutput[0][goal.target]
@@ -112,7 +112,7 @@ class DeepWordBugAttacker(ClassificationAttacker):
         for i in range(len(tokens)):
             tempinputs = tokens[: i + 1]
             tempoutput = victim.get_prob([self.tokenizer.detokenize(tempinputs)])
-            if goal.targeted:
+            if not goal.targeted:
                 losses1[i] = tempoutput[0][goal.target]
             else:
                 losses1[i] = 1 - tempoutput[0][goal.target]
@@ -126,7 +126,7 @@ class DeepWordBugAttacker(ClassificationAttacker):
         for i in range(len(tokens)):
             tempinputs = tokens[i:]
             tempoutput = victim.get_prob([self.tokenizer.detokenize(tempinputs)])
-            if goal.targeted:
+            if not goal.targeted:
                 losses1[i] = tempoutput[0][goal.target]
             else:
                 losses1[i] = 1 - tempoutput[0][goal.target]
