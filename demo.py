@@ -50,8 +50,7 @@ def main():
         OpenAttack.metric.EditDistance(),
         OpenAttack.metric.ModificationRate()
     ] )
-    #attack_eval = OpenAttack.attack_evals.InvokeLimitedAttackEval(attacker, clsf, **options, num_process=4)
-    attack_eval.eval(dataset, visualize=True, progress_bar=True)
+    attack_eval.eval(dataset, visualize=True, progress_bar=True, num_workers=4)
 
 if __name__ == "__main__":
     main()

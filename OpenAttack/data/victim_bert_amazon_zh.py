@@ -22,4 +22,4 @@ def LOAD(path):
     model = transformers.AutoModelForSequenceClassification.from_pretrained(path, num_labels=5, output_hidden_states=False)
 
     from OpenAttack.victim.classifiers import TransformersClassifier
-    return TransformersClassifier(model, tokenizer, model.bert.embeddings.word_embeddings)
+    return TransformersClassifier(model, tokenizer, model.bert.embeddings.word_embeddings, lang="chinese")
