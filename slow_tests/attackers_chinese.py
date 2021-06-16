@@ -13,7 +13,7 @@ def get_attackers_on_chinese(dataset, clsf):
 
     attackers = [
         OpenAttack.attackers.FDAttacker(token_unk=clsf.token_unk, lang="chinese"),
-        OpenAttack.attackers.UATAttacker(triggers=triggers),
+        OpenAttack.attackers.UATAttacker(triggers=triggers, lang="chinese"),
         OpenAttack.attackers.TextBuggerAttacker(lang="chinese"),
         OpenAttack.attackers.TextFoolerAttacker(lang="chinese"),
         OpenAttack.attackers.GeneticAttacker(lang="chinese", filter_words=["的", "了", "着"]),
