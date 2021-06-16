@@ -1,5 +1,8 @@
 from ..victim import Victim
 from ..exceptions import InvokeLimitExceeded
+import logging
+
+logger = logging.getLogger("OpenAttack.AttackEval")
 
 def attack_process(attacker, victim : Victim, data, limit):
     victim.set_context(data, limit)
@@ -10,6 +13,13 @@ def attack_process(attacker, victim : Victim, data, limit):
     except InvokeLimitExceeded:
         adversarial_sample = None
         invoke_times = victim.context.invoke + 1
+        attack_time = victim.context.attack_time
+    except KeyboardInterrupt as e:
+        raise e
+    except Exception as e:
+        logger.exception("%s", data)
+        adversarial_sample = None
+        invoke_times = victim.context.invoke
         attack_time = victim.context.attack_time
     finally:
         victim.clear_context()
