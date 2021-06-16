@@ -9,10 +9,10 @@ from attackers_chinese import get_attackers_on_chinese
 
 def dataset_mapping(x):
     return {
-        "x": x["sentence"],
-        "y": 1 if x["label"] > 0.5 else 0,
+        "x": x["review_body"],
+        "y": x["stars"],
     }
-
+    
 def main():
     import multiprocessing
     if multiprocessing.get_start_method() != "spawn":
