@@ -31,7 +31,10 @@ def dataset_mapping(x):
         "y": 1 if x["label"] > 0.5 else 0,
     }
 
-    
+import multiprocessing
+if multiprocessing.get_start_method() != "spawn":
+    multiprocessing.set_start_method("spawn")
+
 def main():
 
     print("New Attacker")
