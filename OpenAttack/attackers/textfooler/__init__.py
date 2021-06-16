@@ -68,9 +68,9 @@ class TextFoolerAttacker(ClassificationAttacker):
             tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
-        check_language([self.tokenizer, self.substitute], self.__lang_tag)
-
         self.sim_predictor = UniversalSentenceEncoder()
+
+        check_language([self.tokenizer, self.substitute, self.sim_predictor], self.__lang_tag)
 
         self.import_score_threshold = import_score_threshold
         self.sim_score_threshold = sim_score_threshold
