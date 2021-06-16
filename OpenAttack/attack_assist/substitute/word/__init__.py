@@ -17,5 +17,5 @@ def get_default_substitute(lang):
     if lang == TAG_English:
         return WordNetSubstitute()
     if lang == TAG_Chinese:
-        return ChineseHowNetSubstitute()
+        return ChineseWordNetSubstitute()
     return WordNetSubstitute()
