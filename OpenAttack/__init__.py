@@ -5,6 +5,8 @@ from .data_manager import DataManager
 from . import attackers
 
 # victim
+from . import victim
+from .victim import classifiers
 from .victim import Victim
 from .victim.classifiers import Classifier
 

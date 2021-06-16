@@ -9,6 +9,7 @@ from .embed_based import EmbedBasedSubstitute
 from .english_hownet import HowNetSubstitute
 from .english_wordnet import WordNetSubstitute
 from .english_counterfit import CounterFittedSubstitute
+from .english_word2vec import Word2VecSubstitute
 from .english_glove import GloveSubstitute
 
 
