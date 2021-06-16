@@ -1,6 +1,7 @@
 import torch
 from .embed_based import EmbedBasedSubstitute
 from ....data_manager import DataManager
+from ....tags import TAG_English
 
 
 class GloveSubstitute(EmbedBasedSubstitute):
@@ -10,6 +11,9 @@ class GloveSubstitute(EmbedBasedSubstitute):
 
     An implementation of :py:class:`.WordSubstitute`.
     """
+
+    TAGS = { TAG_English } 
+
     def __init__(self, cosine = False, k = 50, threshold = 0.5, device = None):
         wordvec = DataManager.load("AttackAssist.GloVe")
         

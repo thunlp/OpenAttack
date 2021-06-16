@@ -1,5 +1,6 @@
 from .embed_based import EmbedBasedSubstitute
 from ....data_manager import DataManager
+from ....tags import TAG_Chinese
 import torch
 
 class ChineseWord2VecSubstitute(EmbedBasedSubstitute):
@@ -9,6 +10,9 @@ class ChineseWord2VecSubstitute(EmbedBasedSubstitute):
 
     An implementation of :py:class:`.WordSubstitute`.
     """
+
+    TAGS = { TAG_Chinese }
+
     def __init__(self, cosine=False, threshold = 0.5, k = 50, device = None):
         wordvec = DataManager.load("AttackAssist.ChineseWord2Vec")
 

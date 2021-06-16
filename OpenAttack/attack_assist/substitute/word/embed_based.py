@@ -17,8 +17,6 @@ class EmbedBasedSubstitute(WordSubstitute):
     
     An implementation of :py:class:`.WordSubstitute`.
     """
-
-    TAGS = { * TAG_ALL_LANGUAGE }
     
     def __init__(self, word2id : Dict[str, int], embedding : torch.Tensor, cosine=False, k = 50, threshold = 0.5, device = None):
         if device is None:

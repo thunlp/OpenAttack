@@ -1,5 +1,6 @@
 from .embed_based import EmbedBasedSubstitute
 from ....data_manager import DataManager
+from ....tags import TAG_English
 import torch
 
 class CounterFittedSubstitute(EmbedBasedSubstitute):
@@ -12,6 +13,9 @@ class CounterFittedSubstitute(EmbedBasedSubstitute):
     Counter-fitting Word Vectors to Linguistic Constraints.
     `[pdf] <https://www.aclweb.org/anthology/N16-1018.pdf>`__
     """
+
+    TAGS = { TAG_English }
+
     def __init__(self, cosine : bool = False, k : int = 50, threshold : float = 0.5, device = None):
         wordvec = DataManager.load("AttackAssist.CounterFit")
 
