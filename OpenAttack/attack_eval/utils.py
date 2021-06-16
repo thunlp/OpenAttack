@@ -17,7 +17,7 @@ def attack_process(attacker, victim : Victim, data, limit):
     except KeyboardInterrupt as e:
         raise e
     except Exception as e:
-        logger.exception("%s", data)
+        logger.exception("Exception when evaluate data %s", data)
         adversarial_sample = None
         invoke_times = victim.context.invoke
         attack_time = victim.context.attack_time
