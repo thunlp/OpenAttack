@@ -6,7 +6,6 @@ sys.path.insert(0, os.path.join(
 
 import OpenAttack
 from attackers_chinese import get_attackers_on_chinese
-from wrapper import TimeCalcClsf
 
 def dataset_mapping(x):
     return {
@@ -25,12 +24,10 @@ def main():
 
     for attacker in attackers:
         print(attacker.__class__.__name__)
-        time_clsf = TimeCalcClsf(clsf)
         try:
             st = time.perf_counter()
             print(
-                OpenAttack.attack_evals.ChineseAttackEval(attacker, time_clsf).eval(dataset, progress_bar=True),
-                time_clsf.total_time,
+                OpenAttack.AttackEval(attacker, clsf, language="chinese").eval(dataset, progress_bar=True),
                 time.perf_counter() - st
             )
         except Exception as e:
