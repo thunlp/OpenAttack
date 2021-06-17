@@ -80,6 +80,8 @@ class PWWSAttacker(ClassificationAttacker):
         ret_sent = x_orig.copy()
         for i in range(len(H)):
             idx, wd, _ = H[i]
+            if ret_sent[idx] in self.filter_words:
+                continue
             ret_sent[idx] = wd
             
             curr_sent = self.tokenizer.detokenize(ret_sent)
@@ -111,7 +113,7 @@ class PWWSAttacker(ClassificationAttacker):
             rep_words = list(map(lambda x:x[0], self.substitute(word, pos)))
         except WordNotInDictionaryException:
             rep_words = []
-        rep_words = list(filter(lambda x: x != word and (x not in self.filter_words), rep_words))
+        rep_words = list(filter(lambda x: x != word, rep_words))
         if len(rep_words) == 0:
             return ( word, 0 )
         sents = []
