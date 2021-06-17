@@ -12,6 +12,7 @@ from .victim.classifiers import Classifier
 
 # metrics
 from . import metric
+from .metric import AttackMetric
 
 # attack_eval
 from .attack_eval import AttackEval

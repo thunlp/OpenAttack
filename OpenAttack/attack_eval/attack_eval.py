@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 import logging
 from tqdm import tqdm
 from ..utils import visualizer, result_visualizer, get_language, language_by_name
@@ -99,7 +99,7 @@ class AttackEval:
             }
             yield ret
 
-    def ieval(self, dataset, num_workers=0, chunk_size=None):
+    def ieval(self, dataset : Iterable[Dict[str, Any]], num_workers : int = 0, chunk_size : Optional[int] = None):
         if num_workers > 0:
             if multiprocessing.get_start_method() != "spawn":
                 logger.error("multiprocess attack eval needs `spawn` start method.\nTry to use `multiprocessing.set_start_method(\"spawn\")` ")
@@ -117,7 +117,7 @@ class AttackEval:
             for ret in self.__iter_metrics(zip(dataset, result_iter())):
                 yield ret
 
-    def eval(self, dataset, total_len=None, visualize=False, progress_bar=False, num_workers=0, chunk_size=None):
+    def eval(self, dataset: Iterable[Dict[str, Any]], total_len : Optional[int] = None, visualize : bool = False, progress_bar : bool = False, num_workers : int = 0, chunk_size : Optional[int] = None):
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
         

@@ -5,6 +5,28 @@ The most important part is the "attack()" function, in which adversarial example
 import OpenAttack
 import torch
 import datasets
+import tqdm
+
+from OpenAttack.text_process.tokenizer import PunctTokenizer
+
+tokenizer = PunctTokenizer()
+
+class MyClassifier(OpenAttack.Classifier):
+    def __init__(self, model, vocab) -> None:
+        self.model = model
+        self.vocab = vocab
+    
+    def get_prob(self, sentences):
+        with torch.no_grad():
+            token_ids = make_batch_tokens([
+                tokenizer.tokenize(sent, pos_tagging=False) for sent in sentences
+            ], self.vocab)
+            token_ids = torch.LongTensor(token_ids)
+            return self.model(token_ids).cpu().numpy()
+    
+    def get_pred(self, sentences):
+        return self.get_prob(sentences).argmax(axis=1)
+
 
 # Design a feedforward neural network as the the victim sentiment analysis model
 def make_model(vocab_size):
@@ -35,7 +57,7 @@ def dataset_mapping(x):
     return {
         "x": x["sentence"],
         "y": 1 if x["label"] > 0.5 else 0,
-        "tokens": x["tokens"].split("|")
+        "tokens":  tokenizer.tokenize(x["sentence"], pos_tagging=False)
     }
 
 # Choose SST-2 as the dataset
@@ -52,19 +74,23 @@ def prepare_data():
                     vocab[token] = len(vocab)
     return dataset["train"], dataset["validation"], dataset["test"], vocab
 
-# Batch data
-def make_batch(data, vocab):
+def make_batch_tokens(tokens_list, vocab):
     batch_x = [
         [ 
             vocab[token] if token in vocab else vocab["<UNK>"]
                 for token in tokens
-        ] for tokens in data["tokens"]
+        ] for tokens in tokens_list
     ]
-    max_len = max( [len(tokens) for tokens in data["tokens"]] )
+    max_len = max( [len(tokens) for tokens in tokens_list] )
     batch_x = [
         sentence + [vocab["<PAD>"]] * (max_len - len(sentence))
             for sentence in batch_x
     ]
+    return batch_x
+
+# Batch data
+def make_batch(data, vocab):
+    batch_x = make_batch_tokens(data["tokens"], vocab)
     batch_y = data["y"]
     return torch.LongTensor(batch_x), torch.LongTensor(batch_y)
 
@@ -97,7 +123,7 @@ def train_model(model, data_train, data_valid, vocab, num_epoch=10):
     mx_model = None
     for i in range(num_epoch):
         loss = train_epoch(model, data_train, vocab)
-        clsf = OpenAttack.PytorchClassifier(model, word2id=vocab)
+        clsf = MyClassifier(model, vocab)
         accuracy = eval_classifier_acc(data_valid, clsf)
         print("Epoch %d: loss: %lf, accuracy %lf" % (i, loss, accuracy))
         if mx_acc is None or mx_acc < accuracy:
@@ -107,31 +133,33 @@ def train_model(model, data_train, data_valid, vocab, num_epoch=10):
 
 # Launch adversarial attacks and generate adversarial examples 
 def attack(classifier, dataset, attacker = OpenAttack.attackers.PWWSAttacker()):
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(
-        attacker = attacker,
-        classifier = classifier,
-        success_rate = True
+    attack_eval = OpenAttack.AttackEval(
+        attacker,
+        classifier,
     )
-    # correct_samples = dataset.eval(classifier).correct()
-    # accuracy = len(correct_samples) / len(dataset)
     correct_samples = [
         inst for inst in dataset if classifier.get_pred( [inst["x"]] )[0] == inst["y"]
     ]
     
     accuracy = len(correct_samples) / len(dataset)
 
-    adversarial_samples = attack_eval.generate_adv(correct_samples)
-    attack_success_rate = attack_eval.get_result()["Attack Success Rate"]
+    adversarial_samples = {
+        "x": [],
+        "y": [],
+        "tokens": []
+    }
+    
+    for result in tqdm.tqdm(attack_eval.ieval(correct_samples), total=len(correct_samples)):
+        if result["success"]:
+            adversarial_samples["x"].append(result["result"])
+            adversarial_samples["y"].append(result["data"]["y"])
+            adversarial_samples["tokens"].append(tokenizer.tokenize(result["result"], pos_tagging=False))
+    
+    attack_success_rate = len(adversarial_samples["x"]) / len(correct_samples)
 
     print("Accuracy: %lf%%\nAttack success rate: %lf%%" % (accuracy * 100, attack_success_rate * 100))
 
-    tp = OpenAttack.text_processors.DefaultTextProcessor()
-    def adversarial_samples_mapping(x):
-        return {
-            "tokens": list(map(lambda x:x[0], tp.get_tokens(x["x"])))
-        }
-
-    return adversarial_samples.map(adversarial_samples_mapping).remove_columns(["pred", "original", "info"])
+    return datasets.Dataset.from_dict(adversarial_samples)
 
 def main():
     print("Loading data")
@@ -142,7 +170,7 @@ def main():
     trained_model = train_model(model, train, valid, vocab) # Train the victim model
     
     print("Generating adversarial samples (this step will take dozens of minutes)")
-    clsf = OpenAttack.PytorchClassifier(trained_model, word2id=vocab) # Wrap the victim model
+    clsf = MyClassifier(trained_model, vocab) # Wrap the victim model
     adversarial_samples = attack(clsf, train) # Conduct adversarial attacks and generate adversarial examples
 
     print("Adversarially training classifier")
