@@ -1,8 +1,10 @@
+from typing import List
 from ...data_manager import DataManager
 from ..classification import ClassificationAttacker, Classifier, ClassifierGoal
 from ...metric import UniversalSentenceEncoder
 from ...utils import check_language
 from ...tags import Tag, TAG_English
+from ...attack_assist.filter_words import get_default_filter_words
 
 import copy
 import random
@@ -10,33 +12,6 @@ import numpy as np
 import torch
 from transformers import BertConfig, BertTokenizer, BertForMaskedLM
 
-
-
-DEFAULT_FILTER_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
-                'alone', 'along', 'already', 'also', 'although', 'am', 'among', 'amongst', 'an', 'and', 'another',
-                'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'are', 'aren', "aren't", 'around', 'as',
-                'at', 'back', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides',
-                'between', 'beyond', 'both', 'but', 'by', 'can', 'cannot', 'could', 'couldn', "couldn't", 'd', 'didn',
-                "didn't", 'doesn', "doesn't", 'don', "don't", 'down', 'due', 'during', 'either', 'else', 'elsewhere',
-                'empty', 'enough', 'even', 'ever', 'everyone', 'everything', 'everywhere', 'except', 'first', 'for',
-                'former', 'formerly', 'from', 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'he', 'hence',
-                'her', 'here', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his',
-                'how', 'however', 'hundred', 'i', 'if', 'in', 'indeed', 'into', 'is', 'isn', "isn't", 'it', "it's",
-                'its', 'itself', 'just', 'latter', 'latterly', 'least', 'll', 'may', 'me', 'meanwhile', 'mightn',
-                "mightn't", 'mine', 'more', 'moreover', 'most', 'mostly', 'must', 'mustn', "mustn't", 'my', 'myself',
-                'namely', 'needn', "needn't", 'neither', 'never', 'nevertheless', 'next', 'no', 'nobody', 'none',
-                'noone', 'nor', 'not', 'nothing', 'now', 'nowhere', 'o', 'of', 'off', 'on', 'once', 'one', 'only',
-                'onto', 'or', 'other', 'others', 'otherwise', 'our', 'ours', 'ourselves', 'out', 'over', 'per',
-                'please', 's', 'same', 'shan', "shan't", 'she', "she's", "should've", 'shouldn', "shouldn't", 'somehow',
-                'something', 'sometime', 'somewhere', 'such', 't', 'than', 'that', "that'll", 'the', 'their', 'theirs',
-                'them', 'themselves', 'then', 'thence', 'there', 'thereafter', 'thereby', 'therefore', 'therein',
-                'thereupon', 'these', 'they', 'this', 'those', 'through', 'throughout', 'thru', 'thus', 'to', 'too',
-                'toward', 'towards', 'under', 'unless', 'until', 'up', 'upon', 'used', 've', 'was', 'wasn', "wasn't",
-                'we', 'were', 'weren', "weren't", 'what', 'whatever', 'when', 'whence', 'whenever', 'where',
-                'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while',
-                'whither', 'who', 'whoever', 'whole', 'whom', 'whose', 'why', 'with', 'within', 'without', 'won',
-                "won't", 'would', 'wouldn', "wouldn't", 'y', 'yet', 'you', "you'd", "you'll", "you're", "you've",
-                'your', 'yours', 'yourself', 'yourselves']
 
 
 class Feature(object):
@@ -56,16 +31,16 @@ class BAEAttacker(ClassificationAttacker):
         return { self.__lang_tag, Tag("get_pred", "victim"), Tag("get_prob", "victim") }
 
     def __init__(self, 
-            mlm_path = "bert-base-uncased", 
-            k = 50, 
-            threshold_pred_score = 0.3, 
-            max_length = 512, 
-            batch_size = 32, 
-            replace_rate = 1.0, 
-            insert_rate = 0.0, 
+            mlm_path : str = "bert-base-uncased", 
+            k : int = 50, 
+            threshold_pred_score : float = 0.3, 
+            max_length : int = 512, 
+            batch_size : int = 32, 
+            replace_rate : float = 1.0, 
+            insert_rate : float = 0.0, 
             device = None, 
             sentence_encoder = None, 
-            filter_words = DEFAULT_FILTER_WORDS
+            filter_words : List[str] = None
         ):
         """
         :param: str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
@@ -119,6 +94,8 @@ class BAEAttacker(ClassificationAttacker):
             raise NotImplementedError()
         
         self.__lang_tag = TAG_English
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
         self.filter_words = set(filter_words)
         check_language([self.encoder], self.__lang_tag)
 

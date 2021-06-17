@@ -5,15 +5,8 @@ from ...text_process.tokenizer import get_default_tokenizer, Tokenizer
 from ...attack_assist.substitute.word import WordSubstitute, get_default_substitute
 from ...utils import get_language, check_language, language_by_name
 from ...exceptions import WordNotInDictionaryException
+from ...attack_assist.filter_words import get_default_filter_words
 from ...tags import Tag
-
-DEFAULT_SKIP_WORDS = [
-        "the", "and", "a", "of", "to", "is",
-        "it", "in", "i", "this", "that",
-        "was", "as", "for", "with", "movie",
-        "but", "film", "on", "not", "you",
-        "he", "are", "his", "have", "be",
-]
 
 class GeneticAttacker(ClassificationAttacker):
 
@@ -27,7 +20,7 @@ class GeneticAttacker(ClassificationAttacker):
             tokenizer : Optional[Tokenizer] = None, 
             substitute : Optional[WordSubstitute] = None, 
             lang = None,
-            filter_words : List[str] = DEFAULT_SKIP_WORDS
+            filter_words : List[str] = None
         ):
         """
         :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
@@ -66,6 +59,9 @@ class GeneticAttacker(ClassificationAttacker):
         self.substitute = substitute
         self.pop_size = pop_size
         self.max_iters = max_iters
+
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
         self.filter_words = set(filter_words)
 
         check_language([self.tokenizer, self.substitute], self.__lang_tag)

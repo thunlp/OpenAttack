@@ -8,14 +8,7 @@ from ...attack_assist.substitute.word import WordSubstitute, get_default_substit
 from ...utils import get_language, check_language, language_by_name
 from ...exceptions import WordNotInDictionaryException
 from ...tags import Tag
-
-DEFAULT_SKIP_WORDS = [
-        "the", "and", "a", "of", "to", "is",
-        "it", "in", "i", "this", "that",
-        "was", "as", "for", "with", "movie",
-        "but", "film", "on", "not", "you",
-        "he", "are", "his", "have", "be",
-]
+from ...attack_assist.filter_words import get_default_filter_words
 
 
 class TextBuggerAttacker(ClassificationAttacker):
@@ -33,7 +26,7 @@ class TextBuggerAttacker(ClassificationAttacker):
             blackbox = True,
             tokenizer : Optional[Tokenizer] = None,
             substitute : Optional[WordSubstitute] = None,
-            filter_words : List[str] = DEFAULT_SKIP_WORDS,
+            filter_words : List[str] = None,
             lang = None
         ):
         """
@@ -70,6 +63,9 @@ class TextBuggerAttacker(ClassificationAttacker):
 
         self.glove_vectors = None
         self.blackbox = blackbox
+
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
         self.filter_words = set(filter_words)
 
     def attack(self, victim: Classifier, sentence, goal: ClassifierGoal):

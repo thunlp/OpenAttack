@@ -1,12 +1,12 @@
-from typing import Optional
+from typing import List, Optional
 import numpy as np
 from ...text_process.tokenizer import Tokenizer, get_default_tokenizer
 from ...utils import check_language, get_language, language_by_name
 from ...attack_assist.substitute.word import WordSubstitute, get_default_substitute
 from ..classification import ClassificationAttacker, Classifier, ClassifierGoal
-from ...tags import TAG_English, Tag, TAG_ALL_LANGUAGE
+from ...tags import TAG_English, Tag
 from ...exceptions import WordNotInDictionaryException
-
+from ...attack_assist.filter_words import get_default_filter_words
 
 class FDAttacker(ClassificationAttacker):
     @property
@@ -19,7 +19,8 @@ class FDAttacker(ClassificationAttacker):
             threshold = 0.5,
             token_unk = "<UNK>",
             max_iter = 100,
-            lang = None
+            lang = None,
+            filter_words : List[str] = None
         ):
         """
         :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
@@ -60,6 +61,10 @@ class FDAttacker(ClassificationAttacker):
             tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
+        self.filter_words = set(filter_words)
+
         check_language([self.tokenizer, self.substitute], self.__lang_tag)
 
         self.threshold = threshold
@@ -85,6 +90,8 @@ class FDAttacker(ClassificationAttacker):
                 iter_cnt += 1
                 if iter_cnt > 5 * len(sent):    # Failed to find a substitute word
                     return None
+                if sent[idx] in self.filter_words:
+                    continue
                 try:
                     reps = list(map(lambda x:x[0], self.substitute(sent[idx], None)))
                 except WordNotInDictionaryException:

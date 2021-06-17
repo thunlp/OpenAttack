@@ -1,4 +1,5 @@
 import copy
+from typing import List
 import numpy as np
 from transformers import BertConfig, BertTokenizer, BertForMaskedLM
 import torch
@@ -8,32 +9,7 @@ from ..classification import ClassificationAttacker, Classifier, ClassifierGoal
 from ...tags import TAG_English, Tag
 from ...exceptions import WordNotInDictionaryException
 from ...attack_assist.substitute.word import get_default_substitute
-
-DEFAULT_FILTER_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'ain', 'all', 'almost',
-                'alone', 'along', 'already', 'also', 'although', 'am', 'among', 'amongst', 'an', 'and', 'another',
-                'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'are', 'aren', "aren't", 'around', 'as',
-                'at', 'back', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides',
-                'between', 'beyond', 'both', 'but', 'by', 'can', 'cannot', 'could', 'couldn', "couldn't", 'd', 'didn',
-                "didn't", 'doesn', "doesn't", 'don', "don't", 'down', 'due', 'during', 'either', 'else', 'elsewhere',
-                'empty', 'enough', 'even', 'ever', 'everyone', 'everything', 'everywhere', 'except', 'first', 'for',
-                'former', 'formerly', 'from', 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'he', 'hence',
-                'her', 'here', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his',
-                'how', 'however', 'hundred', 'i', 'if', 'in', 'indeed', 'into', 'is', 'isn', "isn't", 'it', "it's",
-                'its', 'itself', 'just', 'latter', 'latterly', 'least', 'll', 'may', 'me', 'meanwhile', 'mightn',
-                "mightn't", 'mine', 'more', 'moreover', 'most', 'mostly', 'must', 'mustn', "mustn't", 'my', 'myself',
-                'namely', 'needn', "needn't", 'neither', 'never', 'nevertheless', 'next', 'no', 'nobody', 'none',
-                'noone', 'nor', 'not', 'nothing', 'now', 'nowhere', 'o', 'of', 'off', 'on', 'once', 'one', 'only',
-                'onto', 'or', 'other', 'others', 'otherwise', 'our', 'ours', 'ourselves', 'out', 'over', 'per',
-                'please', 's', 'same', 'shan', "shan't", 'she', "she's", "should've", 'shouldn', "shouldn't", 'somehow',
-                'something', 'sometime', 'somewhere', 'such', 't', 'than', 'that', "that'll", 'the', 'their', 'theirs',
-                'them', 'themselves', 'then', 'thence', 'there', 'thereafter', 'thereby', 'therefore', 'therein',
-                'thereupon', 'these', 'they', 'this', 'those', 'through', 'throughout', 'thru', 'thus', 'to', 'too',
-                'toward', 'towards', 'under', 'unless', 'until', 'up', 'upon', 'used', 've', 'was', 'wasn', "wasn't",
-                'we', 'were', 'weren', "weren't", 'what', 'whatever', 'when', 'whence', 'whenever', 'where',
-                'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while',
-                'whither', 'who', 'whoever', 'whole', 'whom', 'whose', 'why', 'with', 'within', 'without', 'won',
-                "won't", 'would', 'wouldn', "wouldn't", 'y', 'yet', 'you', "you'd", "you'll", "you're", "you've",
-                'your', 'yours', 'yourself', 'yourselves']
+from ...attack_assist.filter_words import get_default_filter_words
 
 
 class Feature(object):
@@ -60,7 +36,7 @@ class BERTAttacker(ClassificationAttacker):
             threshold_pred_score = 0.3,
             max_length = 512,
             device = None,
-            filter_words = DEFAULT_FILTER_WORDS
+            filter_words : List[str] = None
         ):
         """
         :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
@@ -93,9 +69,12 @@ class BERTAttacker(ClassificationAttacker):
         self.use_bpe = use_bpe
         self.threshold_pred_score = threshold_pred_score
         self.max_length = max_length
-        self.filter_words = set(filter_words)
+        
 
         self.__lang_tag = TAG_English
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
+        self.filter_words = set(filter_words)
 
         if sim_mat is None:
             self.use_sim_mat = False

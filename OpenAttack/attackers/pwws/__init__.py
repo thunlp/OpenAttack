@@ -7,6 +7,7 @@ from ...attack_assist.substitute.word import WordSubstitute, get_default_substit
 from ...utils import get_language, check_language, language_by_name
 from ...exceptions import WordNotInDictionaryException
 from ...tags import Tag
+from ...attack_assist.filter_words import get_default_filter_words
 
 class PWWSAttacker(ClassificationAttacker):
     @property
@@ -17,7 +18,7 @@ class PWWSAttacker(ClassificationAttacker):
             tokenizer : Optional[Tokenizer] = None,
             substitute : Optional[WordSubstitute] = None,
             token_unk : str = "<UNK>",
-            filter_words : List[str] = [],
+            filter_words : List[str] = None,
             lang = None
         ):
         """
@@ -56,6 +57,8 @@ class PWWSAttacker(ClassificationAttacker):
         check_language([self.tokenizer, self.substitute], self.__lang_tag)
 
         self.token_unk = token_unk
+        if filter_words is None:
+            filter_words = get_default_filter_words(self.__lang_tag)
         self.filter_words = set(filter_words)
         
     def attack(self, victim: Classifier, sentence : str, goal : ClassifierGoal):

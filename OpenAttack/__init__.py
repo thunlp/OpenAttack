@@ -18,7 +18,7 @@ from .metric import AttackMetric
 from .attack_eval import AttackEval
 
 # attack_assist
-from .attack_assist import goal, substitute, word_embedding
+from .attack_assist import goal, substitute, word_embedding, filter_words
 
 # exception
 from . import exceptions
