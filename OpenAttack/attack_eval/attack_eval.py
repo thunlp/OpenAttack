@@ -10,7 +10,7 @@ from ..victim.base import Victim
 from ..attackers.base import Attacker
 from ..metric import AttackMetric, MetricSelector
 
-import multiprocessing
+import multiprocessing as mp
 
 logger = logging.getLogger(__name__)
 
@@ -101,12 +101,10 @@ class AttackEval:
 
     def ieval(self, dataset : Iterable[Dict[str, Any]], num_workers : int = 0, chunk_size : Optional[int] = None):
         if num_workers > 0:
-            if multiprocessing.get_start_method() != "spawn":
-                logger.error("multiprocess attack eval needs `spawn` start method.\nTry to use `multiprocessing.set_start_method(\"spawn\")` ")
-                return
+            ctx = mp.get_context("spawn")
             if chunk_size is None:
                 chunk_size = num_workers
-            with multiprocessing.Pool(num_workers, initializer=worker_init, initargs=(self.attacker, self.victim, self.invoke_limit)) as pool:
+            with ctx.Pool(num_workers, initializer=worker_init, initargs=(self.attacker, self.victim, self.invoke_limit)) as pool:
                 for ret in self.__iter_metrics(zip(dataset, pool.imap(worker_process, self.__iter_dataset(dataset), chunksize=chunk_size))):
                     yield ret
                    

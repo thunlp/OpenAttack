@@ -31,10 +31,6 @@ def dataset_mapping(x):
         "y": 1 if x["label"] > 0.5 else 0,
     }
 
-import multiprocessing
-if multiprocessing.get_start_method() != "spawn":
-    multiprocessing.set_start_method("spawn")
-
 def main():
 
     print("New Attacker")
@@ -53,7 +49,7 @@ def main():
         OpenAttack.metric.EditDistance(),
         OpenAttack.metric.ModificationRate()
     ] )
-    attack_eval.eval(dataset, visualize=True, progress_bar=True, num_workers=4)
+    attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":
     main()
