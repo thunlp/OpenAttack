@@ -61,7 +61,7 @@ OpenAttack has 7 main modules:
    Example 1: Basic Usage <examples/example1>
    Example 2: Customized Victim Model <examples/example2>
    Example 3: Customized Attack Model <examples/example3>
-   Example 4: Customized Evaluation <examples/example4>
+   Example 4: Customized Measurement <examples/example4>
    Example 5: Adversarial Training <examples/example5>
    Example 6: Attacks on Chinese Dataset <examples/example6>
 

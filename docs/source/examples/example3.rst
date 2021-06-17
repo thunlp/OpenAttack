@@ -12,14 +12,19 @@ Initialize Attacker with Options
 .. code-block:: python
     :linenos:
     
-    class MyAttacker(OpenAttack.Attacker):
-        def __init__(self, processor = OpenAttack.text_processors.DefaultTextProcessor()):
-            self.processor = processor
-            self.max_iter = max_iter
+    from OpenAttack.tags import Tag
+    from OpenAttack.text_process.tokenizer import PunctTokenizer
+    class MyAttacker(OpenAttack.attackers.ClassificationAttacker):
+        TAGS = { Tag("english", "lang"), Tag("get_pred", "victim") }
+        def __init__(self):
+            self.tokenizer = PunctTokenizer()
 
-We add parameter ``processor`` to specify the :py:class:`.TextProcessor` which is used for tokenization and detokenization.
-By default, :py:class:`.DefaultTextProcessor` is used. Providing default value for each parameter is a good behavior in OpenAttack.
-This makes it easier for users to use, and also makes your new attacker easier to be integrated into OpenAttack.
+We create a new class called ``MyAttacker`` and create a ``PunctTokenizer`` in its initialization phase of ``MyAttacker`` for tokenization and detokenization.
+
+Besides writing the __init__ method, we also indicate the attacker's supported language and required capabilities via the ``TAGS`` attribute.
+
+The ``TAGS`` are used to help ``OpenAttack`` automatically check the parameters to avoid situations where attacker and victim are using different languages or victim model has insufficient capabilities.
+
 
 Randomly Swap Tokens
 ----------------------------------------
@@ -27,10 +32,9 @@ Randomly Swap Tokens
 .. code-block:: python
     :linenos:
 
-    def swap(self, sentence):
-        tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
+    def swap(self, tokens):
         random.shuffle(tokens)
-        return self.processor.detokenizer(tokens)
+        return tokens
 
 
 In ``swap`` method, we shuffle the ``tokens`` of input sentence to generate a candidate.
@@ -41,18 +45,18 @@ Check Candidate Sentence and Return
 .. code-block:: python
     :linenos:
 
-    def __call__(self, clsf, x_orig, target=None):
-        x_new = self.swap(x_orig)
-        y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
+    def attack(self, victim, input_, goal):
+        x_new = self.tokenizer.detokenize(
+            self.swap( self.tokenizer.tokenize(input_, pos_tagging=False) )
+        )
+        y_new = victim.get_pred([ x_new ])
+        if goal.check(x_new, y_new):
+            return x_new
+        return None
 
-        if (target is None and y_orig != y_new) or target == y_new:
-            return x_new, y_new
-        else:
-            return None
-
-``__call__`` method is the main procedure of :py:class:`.Attacker`. In this method, we generate a candidate sentence
+``attack`` method is the main procedure of :py:class:`.Attacker`. In this method, we generate a candidate sentence
 and use ``Classifier.get_pred`` to get the prediction of victim classifier. Then we check the prediction, return 
-``(adversarial_sample, adversarial_prediction)`` if succeed and return ``None`` if failed.
+``adversarial_sample`` if succeed and return ``None`` if failed.
 
 See :py:class:`.Attacker` for detail.
 
@@ -65,27 +69,32 @@ Complete Code
     
     import OpenAttack
     import random
+    import datasets
 
-    class MyAttacker(OpenAttack.Attacker):
-        def __init__(self, processor = OpenAttack.text_processors.DefaultTextProcessor()):
-            self.processor = processor
+    from OpenAttack.tags import Tag
+    from OpenAttack.text_process.tokenizer import PunctTokenizer
+
+    class MyAttacker(OpenAttack.attackers.ClassificationAttacker):
+        TAGS = { Tag("english", "lang"), Tag("get_pred", "victim") }
+        def __init__(self):
+            self.tokenizer = PunctTokenizer()
         
-        def __call__(self, clsf, x_orig, target=None):
-            x_new = self.swap(x_orig)
-            y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
-
-            if (target is None and y_orig != y_new) or target == y_new:
-                return x_new, y_new
-            else:
-                return None
+        def attack(self, victim, input_, goal):
+            x_new = self.tokenizer.detokenize(
+                self.swap( self.tokenizer.tokenize(input_, pos_tagging=False) )
+            )
+            y_new = victim.get_pred([ x_new ])
+            if goal.check(x_new, y_new):
+                return x_new
+            return None
         
         def swap(self, sentence):
-            tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
-            random.shuffle(tokens)
-            return self.processor.detokenizer(tokens)
+            random.shuffle(sentence)
+            return sentence
+
 
     def main():
-        clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+        clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
@@ -97,7 +106,5 @@ Complete Code
         attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
         attack_eval.eval(dataset, visualize=True)
 
-    if __name__ == "__main__":
-        main()
 
 Run ``python examples/custom_attacker.py`` to see visualized results.

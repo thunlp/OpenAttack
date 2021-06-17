@@ -18,7 +18,11 @@ Write a New Classifier
     from nltk.sentiment.vader import SentimentIntensityAnalyzer
     class MyClassifier(OpenAttack.Classifier):
         def __init__(self):
+            nltk.download('vader_lexicon')
             self.model = SentimentIntensityAnalyzer()
+        
+        def get_pred(self, input_):
+            return self.get_prob(input_).argmax(axis=1)
 
         def get_prob(self, input_):
             ret = []
@@ -40,10 +44,10 @@ Load Dataset and Evaluate
 .. code-block:: python
     :linenos:
     
-    dataset = OpenAttack.load("Dataset.SST.sample")[:10]
+    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
     clsf = MyClassifier()
     attacker = OpenAttack.attackers.PWWSAttacker()
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, clsf)
     attack_eval.eval(dataset, visualize=True)
 
 Secondly, we load SST dataset for evaluation and initialize ``MyClassifier`` which is defined in the first step.
@@ -51,7 +55,7 @@ Then :py:class:`.PWWSAttacker` is initialized, this attacker requires classifier
 It's worthy to note that all classifiers are divid into three different level of capacity -- "Blind", "Probability" and "Gradient".
 *"Blind"* means classifier can only predict labels, *"Probability"* means classifier predict probability for each label and "Gradient" means besides probability, gradient is also accessible.
 
-We implemented ``get_prob`` in the first step and :py:class:`.PWWSAttacker` needs a capacity of "Probability",
+We implemented ``get_prob`` and ``get_pred`` in the first step and :py:class:`.PWWSAttacker` needs a capacity of "Probability",
 so our classifier can be correctly applied to :py:class:`.PWWSAttacker`.
 
 Complete Code
@@ -63,10 +67,16 @@ Complete Code
     
     import OpenAttack
     import numpy as np
+    import datasets
+    import nltk
     from nltk.sentiment.vader import SentimentIntensityAnalyzer
     class MyClassifier(OpenAttack.Classifier):
         def __init__(self):
+            nltk.download('vader_lexicon')
             self.model = SentimentIntensityAnalyzer()
+        
+        def get_pred(self, input_):
+            return self.get_prob(input_).argmax(axis=1)
 
         def get_prob(self, input_):
             ret = []
@@ -75,18 +85,17 @@ Complete Code
                 prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 2e-6)
                 ret.append(np.array([1 - prob, prob]))
             return np.array(ret)
-            
     def main():
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
                 "y": 1 if x["label"] > 0.5 else 0,
             }
-        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
-
+        dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
         clsf = MyClassifier()
         attacker = OpenAttack.attackers.PWWSAttacker()
-        attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, clsf)
         attack_eval.eval(dataset, visualize=True)
+
 
 Run ``python examples/custom_classifier.py`` to see visualized results.

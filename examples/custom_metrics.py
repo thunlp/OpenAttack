@@ -1,8 +1,7 @@
 '''
-This example code shows how to design a customized attack evaluation metric, namely BLEU score.
+This example code shows how to design a customized attack evaluation metric.
 '''
 import OpenAttack
-from nltk.translate.bleu_score import sentence_bleu
 import datasets
 
 class SentenceLength(OpenAttack.AttackMetric):

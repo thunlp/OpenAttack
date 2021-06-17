@@ -8,14 +8,8 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
-from OpenAttack.tags import TAG_English
-
 # configure access interface of the customized victim model by extending OpenAttack.Classifier.
 class MyClassifier(OpenAttack.Classifier):
-    @property
-    def TAGS(self):
-        return super().TAGS.union({ TAG_English })
-
     def __init__(self):
         # nltk.sentiment.vader.SentimentIntensityAnalyzer is a traditional sentiment classification model.
         nltk.download('vader_lexicon')

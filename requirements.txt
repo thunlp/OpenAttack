@@ -1,6 +1,6 @@
-nltk
+nltk>=3.5
 numpy
-tqdm<4.50.0
+tqdm>=4.45.0
 datasets
 transformers>=4.0.0
-torch
+torch>=1.5.1
