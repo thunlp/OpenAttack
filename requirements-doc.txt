@@ -1,6 +1,6 @@
 nltk
 numpy
-tqdm
+tqdm<4.50.0,>=4.27
 datasets
 transformers
 torch

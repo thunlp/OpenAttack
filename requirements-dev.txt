@@ -3,7 +3,7 @@ twine
 language_tool_python
 nltk>=3.5
 numpy
-tqdm
+tqdm<4.50.0,>=4.27
 datasets
 transformers>=4.0.0
 torch>=1.5.1
