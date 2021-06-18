@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Union
 import logging
 from tqdm import tqdm
 from ..utils import visualizer, result_visualizer, get_language, language_by_name
@@ -23,6 +23,19 @@ class AttackEval:
         invoke_limit : Optional[int] = None,
         metrics : List[Union[AttackMetric, MetricSelector]] = []
     ):
+        """
+        `AttackEval` is a class used to evaluate attack metrics in OpenAttack.
+
+        Args:
+            attacker: An attacker, must be an instance of :py:class:`.Attacker` .
+            victim: A victim model, must be an instance of :py:class:`.Vicitm` .
+            language: The language used for the evaluation. If is `None` then `AttackEval` will intelligently select the language based on other parameters.
+            tokenizer: A tokenizer used for visualization.
+            invoke_limit: Limit on the number of model invokes.
+            metrics: A list of metrics. Each element must be an instance of :py:class:`.AttackMetric` or :py:class:`.MetricSelector` .
+
+        """
+
         if language is None:
             lst = [attacker]
             if tokenizer is not None:
@@ -99,7 +112,20 @@ class AttackEval:
             }
             yield ret
 
-    def ieval(self, dataset : Iterable[Dict[str, Any]], num_workers : int = 0, chunk_size : Optional[int] = None):
+    def ieval(self, dataset : Iterable[Dict[str, Any]], num_workers : int = 0, chunk_size : Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
+        """
+        Iterable evaluation function of `AttackEval` returns an Iterator of result.
+
+        Args:
+            dataset: An iterable dataset.
+            num_worers: The number of processes running the attack algorithm. Default: 0 (running on the main process).
+            chunk_size: Processing pool trunks size.
+        
+        Yields:
+            A dict contains the result of each input samples.
+
+        """
+
         if num_workers > 0:
             ctx = mp.get_context("spawn")
             if chunk_size is None:
@@ -116,6 +142,23 @@ class AttackEval:
                 yield ret
 
     def eval(self, dataset: Iterable[Dict[str, Any]], total_len : Optional[int] = None, visualize : bool = False, progress_bar : bool = False, num_workers : int = 0, chunk_size : Optional[int] = None):
+        """
+        Evaluation function of `AttackEval`.
+
+        Args:
+            dataset: An iterable dataset.
+            total_len: Total length of dataset (will be used if dataset doesn't has a `__len__` attribute).
+            visualize: Display a pretty result for each data in the dataset.
+            progress_bar: Display a progress bar if `True`.
+            num_worers: The number of processes running the attack algorithm. Default: 0 (running on the main process).
+            chunk_size: Processing pool trunks size.
+        
+        Returns:
+            A dict of attack evaluation summaries.
+
+        """
+
+
         if hasattr(dataset, "__len__"):
             total_len = len(dataset)
         
