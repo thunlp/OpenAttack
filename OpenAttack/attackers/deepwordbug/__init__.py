@@ -19,22 +19,29 @@ class DeepWordBugAttacker(ClassificationAttacker):
         return { self.__lang_tag, Tag("get_pred", "victim"), Tag("get_prob", "victim") }
 
     def __init__(self, 
-            token_unk = "unk",
+            token_unk = "<UNK>",
             scoring = "replaceone",
             transform = "homoglyph",
             power = 5,
             tokenizer : Tokenizer = None
         ):
         """
-        :param string unk: Unknown token used in Classifier. **Default:** 'unk'
-        :param string scoring: Scoring function used to compute word importance, ``["replaceone", "temporal", "tail", "combined"]``. **Default:** replaceone
-        :param string transformer: Transform function to modify a word, ``["homoglyph", "swap"]``. **Default:** homoglyph
-
-        :Classifier Capacity: Probability
-
         Black-box Generation of Adversarial Text Sequences to Evade Deep Learning Classifiers. Ji Gao, Jack Lanchantin, Mary Lou Soffa, Yanjun Qi. IEEE SPW 2018.
         `[pdf] <https://ieeexplore.ieee.org/document/8424632>`__
         `[code] <https://github.com/QData/deepWordBug>`__
+
+        Args:
+            token_unk: The token id or the token name for out-of-vocabulary words in victim model. **Default:** ``"<UNK>"``
+            scoring: Scoring function used to compute word importance, must be one of the following: ``["replaceone", "temporal", "tail", "combined"]``. **Default:** replaceone
+            transform: Transform function to modify a word, must be one of the following:  ``["homoglyph", "swap"]``. **Default:** homoglyph
+            power: Max words to replace. **Default:** 5
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
+
+        
         """
 
         self.token_unk = token_unk

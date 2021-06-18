@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from ...data_manager import DataManager
 from ..classification import ClassificationAttacker, Classifier, ClassifierGoal
 from ...metric import UniversalSentenceEncoder
@@ -38,28 +38,36 @@ class BAEAttacker(ClassificationAttacker):
             batch_size : int = 32, 
             replace_rate : float = 1.0, 
             insert_rate : float = 0.0, 
-            device = None, 
+            device : Optional[torch.device] = None, 
             sentence_encoder = None, 
             filter_words : List[str] = None
         ):
         """
-        :param str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
-        :param int k: the k most important words / sub-words to substitute for. **Default:** 50
-        :param int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 0
-        :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
-        :param int max_length: the maximum length of an input sentence. **Default:** 512
-        :param int batch_size: the size of a batch of input sentences. **Default:** 32
-        
-        :Package Requirements:
-            * torch
-        :Data Requirements: :py:data:`.TProcess.NLTKPerceptronPosTagger`
-        :Classifier Capacity: Probability
-
         BAE: BERT-based Adversarial Examples for Text Classification. Siddhant Garg, Goutham Ramakrishnan. EMNLP 2020. 
         `[pdf] <https://arxiv.org/abs/2004.01970>`__
         `[code] <https://github.com/QData/TextAttack/blob/master/textattack/attack_recipes/bae_garg_2019.py>`__
         This script is adapted from <https://github.com/LinyangLee/BERT-Attack> given the high similarity between the two attack methods.
         This attacker supports the 4 attack methods (BAE-R, BAE-I, BAE-R/I, BAE-R+I) in the paper. 
+
+        Args:
+            mlm_path: The path to the masked language model. **Default:** 'bert-base-uncased'
+            k: The k most important words / sub-words to substitute for. **Default:** 50
+            threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
+            max_length: The maximum length of an input sentence for bert. **Default:** 512
+            batch_size: The size of a batch of input sentences for bert. **Default:** 32
+            replace_rate: Replace rate.
+            insert_rate: Insert rate.
+            device: A computing device for bert.
+            sentence_encoder: A sentence encoder to calculate the semantic similarity of two sentences. Default: :py:class:`.UniversalSentenceEncoder`
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+
+        :Data Requirements: :py:data:`.TProcess.NLTKPerceptronPosTagger`
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
+        :Language: english
+
         """
 
         if sentence_encoder is None:

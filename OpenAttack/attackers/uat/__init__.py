@@ -18,13 +18,19 @@ class UATAttacker(ClassificationAttacker):
             lang = None
         ):
         """
-        :param list triggers: A list of trigger words.
-
-        :Classifier Capacity: Gradient
-
         Universal Adversarial Triggers for Attacking and Analyzing NLP. Eric Wallace, Shi Feng, Nikhil Kandpal, Matt Gardner, Sameer Singh. EMNLP-IJCNLP 2019. 
         `[pdf] <https://arxiv.org/pdf/1908.07125.pdf>`__
         `[code] <https://github.com/Eric-Wallace/universal-triggers>`__
+
+        Args:
+            triggers: A list of trigger words.
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+
+        :Classifier Capacity:
+            * get_pred
+
+        
         """
         lst = []
         if tokenizer is not None:
@@ -64,18 +70,22 @@ class UATAttacker(ClassificationAttacker):
             trigger_len : int = 3,
             beam_size : int = 5,
             lang = None
-        ):
+        ) -> List[str]:
         """
-        :param Classifier clsf: The classifier that you want to attack.
-        :param Dataset dataset: A :py:class:`.Dataset` or a list of :py:class:`.DataInstance`.
-        :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
-        :param dict word2id: A dict that maps tokens to ids.
-        :param int epoch: Maximum epochs to get the universal adversarial triggers.
-        :param int barch_size: Batch size.
-        :param int trigger_len: The number of triggers.
-        :param int beam_size: Beam search size used in UATAttacker.
-        :return: Returns a list of triggers which can be directly used in ``__init__``
-        :rtype: list
+        This method is used to get trigger words of vicim model on dataset.
+        
+        Args:
+            victim: The classifier that you want to attack.
+            dataset: A `datsets.Dataset`.
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            epoch: Maximum epochs to get the universal adversarial triggers.
+            barch_size: Batch size.
+            trigger_len: The number of triggers.
+            beam_size: Beam search size used in this attacker.
+
+        Returns:
+            A list of trigger words.
+
         """
 
         requires = [ Tag("get_grad", "victim"), Tag("get_prob", "victim"), Tag("get_embedding", "victim"), Tag("get_pred", "victim") ]

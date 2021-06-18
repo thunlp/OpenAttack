@@ -23,19 +23,21 @@ class GeneticAttacker(ClassificationAttacker):
             filter_words : List[str] = None
         ):
         """
-        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
-        :param int pop_size: Genetic algorithm popluation size. **Default:** 20
-        :param int max_iter: Maximum generations of genetic algorithm. **Default:** 20
-        :param float neighbour_threshold: Threshold used in substitute module. **Default:** 0.5
-        :param int top_n1: Maximum candidates of word substitution. **Default:** 20
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
-
-        :Classifier Capacity: Probability
-
         Generating Natural Language Adversarial Examples. Moustafa Alzantot, Yash Sharma, Ahmed Elgohary, Bo-Jhang Ho, Mani Srivastava, Kai-Wei Chang. EMNLP 2018.
         `[pdf] <https://www.aclweb.org/anthology/D18-1316.pdf>`__
         `[code] <https://github.com/nesl/nlp_adversarial_examples>`__
+        
+        Args:
+            pop_size: Genetic algorithm popluation size. **Default:** 20
+            max_iter: Maximum generations of genetic algorithm. **Default:** 20
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
         
         """
         lst = []

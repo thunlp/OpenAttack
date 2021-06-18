@@ -29,18 +29,19 @@ class VIPERAttacker(ClassificationAttacker):
             method: str = "eces",
         ):
         """
-        :param float prob: The probability of changing a char in a sentence. **Default:** 0.3
-        :param int topn: Number of substitutes while using DCES substitute. **Default:** 12
-        :param int generations: Maximum number of sentences generated per attack. **Default:** 120
-        :param bool eces: Use DCES substitute or ECES substitute. **Default:** True
-
-        :Data Requirements: :py:data:`.AttackAssist.DCES`
-        :Package Requirements: * **sklearn**
-        :Classifier Capacity: Blind
-
         Text Processing Like Humans Do: Visually Attacking and Shielding NLP Systems. Steffen Eger, Gözde Gül ¸Sahin, Andreas Rücklé, Ji-Ung Lee, Claudia Schulz, Mohsen Mesgar, Krishnkant Swarnkar, Edwin Simpson, Iryna Gurevych. NAACL-HLT 2019.
         `[pdf] <https://www.aclweb.org/anthology/N19-1165>`__
         `[code] <https://github.com/UKPLab/naacl2019-like-humans-visual-attacks>`__
+
+        Args:
+            prob: The probability of changing a char in a sentence. **Default:** 0.3
+            topn: Number of substitutes while using DCES substitute. **Default:** 12
+            generations: Maximum number of sentences generated per attack. **Default:** 120
+            method: The method of this attack. Must be one of the following: ``["eces", "dces"]``. **Default:** eces
+
+        :Classifier Capacity:
+            * get_pred
+        
         """
         
         self.prob = prob

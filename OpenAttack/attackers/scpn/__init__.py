@@ -1,4 +1,5 @@
 
+from typing import List, Optional
 from ...text_process.tokenizer import Tokenizer, get_default_tokenizer
 from ...text_process.constituency_parser import ConstituencyParser, get_default_constituency_parser
 from ...utils import check_language
@@ -44,20 +45,27 @@ class SCPNAttacker(ClassificationAttacker):
     def TAGS(self):
         return { Tag("get_pred", "victim"), self.__lang_tag }
 
-    def __init__(self, templates = DEFAULT_TEMPLATES, device = None, tokenizer : Tokenizer = None, parser : ConstituencyParser = None):
+    def __init__(self, 
+            templates : List[str] = DEFAULT_TEMPLATES, 
+            device : Optional[torch.device] = None, 
+            tokenizer : Optional[Tokenizer] = None, 
+            parser : Optional[ConstituencyParser] = None
+        ):
         """
-        :param list templates: A list of templates used in SCPNAttacker. **Default:** ten manually selected templates.
-        :param torch.device device: The device to load SCPN models (pytorch). **Default:** Use "cpu" if cuda is not available else "cuda".
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
-        
-        :Package Requirements:
-            * torch
-        :Data Requirements: :py:data:`.AttackAssist.SCPN`
-        :Classifier Capacity: Blind
-
         Adversarial Example Generation with Syntactically Controlled Paraphrase Networks. Mohit Iyyer, John Wieting, Kevin Gimpel, Luke Zettlemoyer. NAACL-HLT 2018.
         `[pdf] <https://www.aclweb.org/anthology/N18-1170.pdf>`__
         `[code] <https://github.com/miyyer/scpn>`__
+
+        Args:
+            templates: A list of templates used in SCPNAttacker. **Default:** ten manually selected templates.
+            device: The device to load SCPN models (pytorch). **Default:** Use "cpu" if cuda is not available else "cuda".
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            parser: A constituency parser.
+
+        
+        :Language: english
+        :Classifier Capacity: get_pred
+        
 
         The default templates are:
         

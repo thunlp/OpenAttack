@@ -19,17 +19,19 @@ class HotFlipAttacker(ClassificationAttacker):
             lang = None
         ):
         """
-        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
-        :param float neighbour_threshold: Threshold used in substitute module. **Default:** 0.8
-        :param int top_n: Maximum candidates of word substitution. **Default:** 20
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
-
-        :Classifier Capacity: Gradient
-
         HotFlip: White-Box Adversarial Examples for Text Classification. Javid Ebrahimi, Anyi Rao, Daniel Lowd, Dejing Dou. ACL 2018.
         `[pdf] <https://www.aclweb.org/anthology/P18-2006>`__
         `[code] <https://github.com/AnyiRao/WordAdver>`__
+
+        Args:
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            filter_words: A list of words that will be preserved in the attack procesudre.
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.            
+
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
         
         """
 

@@ -25,18 +25,22 @@ class PSOAttacker(ClassificationAttacker):
             lang = None
         ):
         """
-        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
-        :param int pop_size: Genetic algorithm popluation size. **Default:** 20
-        :param int max_iter: Maximum generations of pso algorithm. **Default:** 20
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`hownet`
-        :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
-        :Package Requirements: * **OpenHowNet**
-        :Classifier Capacity: Probability
-
         Word-level Textual Adversarial Attacking as Combinatorial Optimization. Yuan Zang, Fanchao Qi, Chenghao Yang, Zhiyuan Liu, Meng Zhang, Qun Liu and Maosong Sun. ACL 2020.
         `[pdf] <https://www.aclweb.org/anthology/2020.acl-main.540.pdf>`__
         `[code] <https://github.com/thunlp/SememePSO-Attack>`__
+
+        Args:
+            pop_size: Genetic algorithm popluation size. **Default:** 20
+            max_iter: Maximum generations of pso algorithm. **Default:** 20
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+            filter_words: A list of words that will be preserved in the attack procesudre.
+        
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
+        
         """
         
         lst = []

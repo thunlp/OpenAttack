@@ -26,19 +26,23 @@ class TextFoolerAttacker(ClassificationAttacker):
             lang = None,
         ):
         """
-        :param list skip_words: A list of words which won't be replaced during the attack. **Default:** A list of words that is most frequently used.
-        :param float import_score_threshold: Threshold used to choose important word. **Default:** -1.
-        :param float sim_score_threshold: Threshold used to choose sentences of high semantic similarity. **Default:** 0.5
-        :param int sim_score_window: length used in score module. **Default:** 15
-        :param int synonym_num: Maximum candidates of word substitution. **Default:** 50
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute()`
-
-        :Classifier Capacity: Score
-
         Is BERT Really Robust? A Strong Baseline for Natural Language Attack on Text Classification and Entailment. Di Jin, Zhijing Jin, Joey Tianyi Zhou, Peter Szolovits. AAAI 2020.
         `[pdf] <https://arxiv.org/pdf/1907.11932v4>`__
         `[code] <https://github.com/jind11/TextFooler>`__
+
+        Args:
+            import_score_threshold: Threshold used to choose important word. **Default:** -1.
+            sim_score_threshold: Threshold used to choose sentences of high semantic similarity. **Default:** 0.5
+            im_score_window: length used in score module. **Default:** 15
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+            token_unk: The token id or the token name for out-of-vocabulary words in victim model. **Default:** ``"<UNK>"``
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
         
         """
         lst = []

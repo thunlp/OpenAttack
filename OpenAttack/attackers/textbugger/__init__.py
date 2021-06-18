@@ -30,13 +30,22 @@ class TextBuggerAttacker(ClassificationAttacker):
             lang = None
         ):
         """
-        :param bool blackbox: Classifier Capacity. True-probability; False-grad. **Default:** True.
-
-        :Data Requirements: :py:data:`.TProcess.NLTKSentTokenizer`
-        :Classifier Capacity: Blind or Probability
-
         TEXTBUGGER: Generating Adversarial Text Against Real-world Applications. Jinfeng Li, Shouling Ji, Tianyu Du, Bo Li, Ting Wang. NDSS 2019.
         `[pdf] <https://arxiv.org/pdf/1812.05271.pdf>`__
+
+        Args:
+            blackbox: If is true, the attacker will perform a black-box attack.
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+        :Classifier Capacity
+            * get_pred
+            * get_prob `if blackbox = True`
+            * get_grad `if blackbox = False`
+
+        
         """
 
         lst = []

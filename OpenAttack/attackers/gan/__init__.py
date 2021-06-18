@@ -23,19 +23,19 @@ class GANAttacker(ClassificationAttacker):
     def TAGS(self):
         return { self.__lang_tag,  Tag("get_pred", "victim") }
 
-    def __init__(self, gan_dataset = "sst"):
+    def __init__(self, gan_dataset : str = "sst"):
         """
-        :param bool sst: Use model trained on sst-2 dataset or snli. True: use sst-2 **Default:** False
-        :param processor: text processor used in this attacker. **Default:** :any:`text_processors.DefaultTextProcessor`
-
-        :Package Requirements:
-            * torch
-        :Data Requirements: :py:data:`.AttackAssist.GAN` :py:data:`.AttackAssist.SGAN`
-        :Classifier Capacity: Probability
-
         Generating Natural Adversarial Examples. Zhengli Zhao, Dheeru Dua, Sameer Singh. ICLR 2018.
         `[pdf] <https://arxiv.org/pdf/1710.11342.pdf>`__
         `[code] <https://github.com/zhengliz/natural-adversary>`__
+
+        Args:
+            gan_dataset: The name of dataset which GAN model is trained on. Must be one of the following: ``["sst", "snli"]``. **Default:** sst
+        
+        :Language: english
+        :Classifier Capacity:
+            * get_pred
+
         """
         self.__lang_tag = TAG_English
         self.gan_dataset = gan_dataset

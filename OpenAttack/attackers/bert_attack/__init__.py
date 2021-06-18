@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Optional, Union
 import numpy as np
 from transformers import BertConfig, BertTokenizer, BertForMaskedLM
 import torch
@@ -8,7 +8,7 @@ import torch
 from ..classification import ClassificationAttacker, Classifier, ClassifierGoal
 from ...tags import TAG_English, Tag
 from ...exceptions import WordNotInDictionaryException
-from ...attack_assist.substitute.word import get_default_substitute
+from ...attack_assist.substitute.word import get_default_substitute, WordSubstitute
 from ...attack_assist.filter_words import get_default_filter_words
 
 
@@ -29,32 +29,35 @@ class BERTAttacker(ClassificationAttacker):
         return { self.__lang_tag, Tag("get_pred", "victim"), Tag("get_prob", "victim") }
 
     def __init__(self, 
-            mlm_path = 'bert-base-uncased',
-            k = 36,
-            use_bpe = True,
-            sim_mat = None,
-            threshold_pred_score = 0.3,
-            max_length = 512,
-            device = None,
+            mlm_path : str = 'bert-base-uncased',
+            k : int = 36,
+            use_bpe : bool = True,
+            sim_mat : Union[None, bool, WordSubstitute] = None,
+            threshold_pred_score : float = 0.3,
+            max_length : int = 512,
+            device : Optional[torch.device] = None,
             filter_words : List[str] = None
         ):
         """
-        :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
-        :param: str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
-        :param: int k: the k most important words / sub-words to substitute for. **Default:** 36
-        :param: int use_bpe:  whether use bpe. **Default:** 1
-        :param: int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 1
-        :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
-        :param: int max_length: the maximum length of an input sentence. **Default:** 512
-        :param int batch_size: the size of a batch of input sentences. **Default:** 32
-        
-        :Package Requirements:
-            * torch
-        :Classifier Capacity: Probability
-
         BERT-ATTACK: Adversarial Attack Against BERT Using BERT, Linyang Li, Ruotian Ma, Qipeng Guo, Xiangyang Xue, Xipeng Qiu, EMNLP2020
         `[pdf] <https://arxiv.org/abs/2004.09984>`__
         `[code] <https://github.com/LinyangLee/BERT-Attack>`__
+
+        Args:
+            mlm_path: The path to the masked language model. **Default:** 'bert-base-uncased'
+            k: The k most important words / sub-words to substitute for. **Default:** 36
+            use_bpe: Whether use bpe. **Default:** `True`
+            sim_mat: Whether use cosine_similarity to filter out atonyms. Keep `None` for not using a sim_mat.
+            threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
+            max_length: The maximum length of an input sentence for bert. **Default:** 512
+            device: A computing device for bert.
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+        :Classifier Capacity:
+            * get_pred
+            * get_prob
+
+        
         """
 
 
@@ -76,7 +79,7 @@ class BERTAttacker(ClassificationAttacker):
             filter_words = get_default_filter_words(self.__lang_tag)
         self.filter_words = set(filter_words)
 
-        if sim_mat is None:
+        if sim_mat is None or sim_mat is False:
             self.use_sim_mat = False
         else:
             self.use_sim_mat = True

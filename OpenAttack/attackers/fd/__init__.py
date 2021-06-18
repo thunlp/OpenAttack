@@ -16,26 +16,28 @@ class FDAttacker(ClassificationAttacker):
     def __init__(self,
             substitute : Optional[WordSubstitute] = None,
             tokenizer : Optional[Tokenizer] = None,
-            threshold = 0.5,
-            token_unk = "<UNK>",
-            max_iter = 100,
-            lang = None,
+            token_unk : str = "<UNK>",
+            max_iter : int = 100,
+            lang : Optional[str] = None,
             filter_words : List[str] = None
         ):
         """
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`CounterFittedSubstitute`
-        :param dict word2id: A dict that maps tokens to ids.
-        :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
-        :param token_unk: The word_id or the token for out-of-vocabulary words. **Default:** ``"<UNK>"``.
-        :type token_unk: int or str
-        :param float threshold: Threshold for substitute module. **Default:** 0.5.
-        :param int max_iter: Maximum number of iterations in FDAttacker.
-
-        :Classifier Capacity: Gradient
-
         Crafting Adversarial Input Sequences For Recurrent Neural Networks. Nicolas Papernot, Patrick McDaniel, Ananthram Swami, Richard Harang. MILCOM 2016.
         `[pdf] <https://arxiv.org/pdf/1604.08275.pdf>`__
+
+        Args:
+            substitute: A substitute that will be used during the attack procedure. Must be an instance of :py:class:`.WordSubstitute`
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            token_unk: The token id or the token name for out-of-vocabulary words in victim model. **Default:** ``"<UNK>"``
+            max_iter: Maximum number of iterations in attack procedure.
+            lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
+            filter_words: A list of words that will be preserved in the attack procesudre.
+
+        :Classifier Capacity:
+            * get_pred
+            * get_grad
+            * get_embedding
+        
         """
 
         if substitute is not None and tokenizer is not None:
@@ -67,7 +69,6 @@ class FDAttacker(ClassificationAttacker):
 
         check_language([self.tokenizer, self.substitute], self.__lang_tag)
 
-        self.threshold = threshold
         self.token_unk = token_unk
         self.max_iter = max_iter
     
