@@ -4,6 +4,11 @@ from ..attack_assist.goal.base import AttackGoal
 from ..tags import Tag
 
 class Attacker:
+    """
+    The base class of all attackers.
+    """
+
+
     TAGS : Set[Tag] = set()
 
     def __call__(self, victim : Victim, input_ : Any):

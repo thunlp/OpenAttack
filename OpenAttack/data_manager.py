@@ -1,4 +1,5 @@
 import os
+from typing import Any, Optional
 from .exceptions import UnknownDataException, DataNotExistException
 from .data import data_list
 import inspect
@@ -45,24 +46,37 @@ class DataManager(object):
     
     @classmethod
     def enable_cdn(cls):
+        """
+        Enable cdn for all official downloads.
+        """
+
         cls.source = "https://cdn.data.thunlp.org/"
     
     @classmethod
     def disable_cdn(cls):
+        """
+        Disable cdn for all official downloads.
+        """
         cls.source = "https://data.thunlp.org/"
 
     @classmethod
-    def load(cls, data_name, cached=True):
+    def load(cls, data_name : str, cached : bool = True) -> Any:
         """
-        :param str data_name: The name of resource that you want to load. You can find all the available resource names in ``DataManager.AVAILABLE_DATAS``. *Note: all the names are* **CASE-SENSITIVE**.
-        :param bool cached: If **cached** is *True*, DataManager will lookup the cache before load it to avoid duplicate disk IO. If **cached** is *False*, DataManager will directly load data from disk. **Default:** *True*.
-        :return: data, for details see the documentation for "Data" (size, type, description etc).
-        :rtype: Any
+        Load data from local storage, and download it automatically if not exists.
 
-        :raises UnknownDataException: For loading an unavailable data.
-        :raises DataNotExistException:  For loading a data that has not been downloaded. This appends when AutoDownload mechanism is disabled.
+        Args:
+            data_name: The name of resource that you want to load. You can find all the available resource names in ``DataManager.AVAILABLE_DATAS``. *Note: all the names are* **CASE-SENSITIVE**.
+            cached: If **cached** is *True*, DataManager will lookup the cache before load it to avoid duplicate disk IO. If **cached** is *False*, DataManager will directly load data from disk. **Default:** *True*.
+        
+        Returns:
+            The object returned by LOAD function of corresponding data.
+
+        Raises:
+            UnknownDataException: For loading an unavailable data. 
+            DataNotExistException:  For loading a data that has not been downloaded. This appends when AutoDownload mechanism is disabled.
 
         """
+
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException()
 
@@ -106,42 +120,44 @@ class DataManager(object):
         return cls.load("AttackAssist." + data_name, cached=cached)
     
     @classmethod
-    def setAutoDownload(cls, enabled=True):
+    def setAutoDownload(cls, enabled : bool = True):
         """
-        :param bool enabled: Change if DataManager automatically download the data when loading.
-        :return: None
-
         AutoDownload mechanism is enabled by default.
+
+        Args:
+            enabled: Change if DataManager automatically download the data when loading.
+        
         """
         cls.__auto_download = enabled
 
     @classmethod
-    def get(cls, data_name):
+    def get(cls, data_name : str) -> str:
         """
-        :param str data_name: The name of data.
-        :return: Relative path of data.
-        :rtype: str
+        Args:
+            data_name: The name of data.
+        Returns:
+            Relative path of data.
+
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException
         return cls.data_path[data_name]
 
     @classmethod
-    def set_path(cls, path, data_name=None):
-        """
-        :param str path: The path to data, or path to the directory where all data is stored.
-        :param data_name: The name of data. If **data_name** is *None*, all paths will be changed.
-        :type data_name: str or None
-        :return: None
-        :raises UnknownDataException: For changing an unavailable data.
-
-        Set the path for a specific data or for all data.
+    def set_path(cls, path : str, data_name : Optional[str] = None):
+        """Set the path for a specific data or for all data.
 
         If **data_name** is *None*, all paths will be changed to corresponding file under **path** directory.
 
         If **data_name** is *not None*, the specific data path will be changed to **path**.
 
         The default paths for all data are ``./data/<data_name>``, and you can manually change them using this method .
+
+        Args:
+            path: The path to data, or path to the directory where all data is stored.
+            data_name: The name of data. If **data_name** is *None*, all paths will be changed.
+
+
         """
         if data_name is None:
             nw_dict = {}
@@ -154,17 +170,19 @@ class DataManager(object):
             cls.data_path[data_name] = path
 
     @classmethod
-    def download(cls, data_name, path=None, force=False):
+    def download(cls, data_name : str, path : Optional[str] = None, force : bool = False):
         """
-        :param str data_name: Name of the data that you want to download.
-        :param str path: Specify a path when before download. Leaves None for download to default **path**.
-        :param bool force: Force download the data.
-        :return: This method always returns True
-        :rtype: bool
-        :raises UnknownDataException: For downloading an unavailable data.
+        This method will check if data exists before getting it from "Data Server".You can use **force** to skip this step.
 
-        This method will check if data exists before getting it from "Data Server".You can 
-        use **force** to skip this step.
+        Args:
+            data_name: Name of the data that you want to download.
+            path: Specify a path when before download. Leaves None for download to default **path**.
+            force: Force download the data.
+
+        Raises:
+            UnknownDataException: For downloading an unavailable data.
+
+        
         """
         if data_name not in cls.AVAILABLE_DATAS:
             raise UnknownDataException()

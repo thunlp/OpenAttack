@@ -5,6 +5,10 @@ from ..attack_assist.goal import ClassifierGoal
 from ..tags import *
 
 class ClassificationAttacker(Attacker):
+    """
+    The base class of all classification attackers.
+    """
+
     def __call__(self, victim: Classifier, input_: Any):
         if Tag("get_pred", "victim") not in victim.TAGS:
             raise AttributeError("`%s` needs victim to support `%s` method" % (self.__class__.__name__, "get_pred"))
