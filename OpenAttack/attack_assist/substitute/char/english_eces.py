@@ -15,15 +15,19 @@ H = {'a': 'â', 'b': 'ḃ', 'c': 'ĉ', 'd': 'ḑ', 'e': 'ê', 'f': 'ḟ', 'g': '
 
 
 class ECESSubstitute(CharSubstitute):
-    """
-    An implementation of :py:class:`.CharSubstitute`.
-
-    ECES substitute used in :py:class:`.VIPERAttacker`.
-    """
 
     TAGS = { TAG_English }
 
     def __init__(self):
+        """
+        Returns the chars that is visually similar to the input.
+
+        DCES substitute used in :py:class:`.VIPERAttacker`.
+
+        :Data Requirements: :py:data:`.AttackAssist.SIM`
+        :Language: english
+
+        """
         self.h = H
 
     def substitute(self, char: str):

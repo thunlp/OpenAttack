@@ -1,18 +1,25 @@
+from typing import Optional
 from .base import CharSubstitute
 from ....data_manager import DataManager
 from ....tags import *
 
 
 class ChineseFYHCharSubstitute(CharSubstitute):
-    """
-    :Data Requirements: :py:data:`.AttackAssist.FYH`
-    
-    An implementation of :py:class:`.CharSubstitute`.
-    """
 
     TAGS = { TAG_Chinese }
 
-    def __init__(self, k = None):
+    def __init__(self, k : Optional[int] = None):
+        """
+        Returns traditional, variant and Martian characters of the input character.
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned.
+        
+        :Data Requirements: :py:data:`.AttackAssist.FYH`
+        :Language: chinese
+        
+        """
+
         super().__init__()
         self.tra_dict, self.var_dict, self.hot_dict = DataManager.load("AttackAssist.FYH")
         self.k = k

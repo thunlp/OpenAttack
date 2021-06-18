@@ -4,15 +4,22 @@ from ....exceptions import UnknownPOSException, WordNotInDictionaryException
 POS_LIST = ["adv", "adj", "noun", "verb", "other"]
 
 class WordSubstitute(object):
-    def __call__(self, word : str, pos : Optional[str] = None):
+    def __call__(self, word : str, pos : Optional[str] = None) -> List[Tuple[str, float]]:
         """
-        :param word: the raw word; 
-        :param pos: part of speech of the word (`adj`, `adv`, `noun`, `verb`).
-        :return: The result is a list of tuples, *(substitute, distance)*.
-        :rtype: list of tuple
+        In WordSubstitute, we return a list of words that are semantically similar to the input word.
+        
+        Args:
+            word: A single word.
+            pos: POS tag of input word. Must be one of the following: ``["adv", "adj", "noun", "verb", "other", None]``
+        
+        Returns:
+            A list of words and their distance to original word (distance is a number between 0 and 1, with smaller indicating more similarity)
+        Raises:
+            WordNotInDictionaryException: input word not in the dictionary of substitute algorithm
+            UnknownPOSException: invalid pos tagging
 
-        In WordSubstitute, we return a list of words that are semantically similar to the original word.
         """
+        
         if pos is None:
             ret = {}
             for sub_pos in POS_LIST:

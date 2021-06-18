@@ -1,32 +1,28 @@
+from typing import Optional
 from .base import WordSubstitute
 from ....data_manager import DataManager
 from ....exceptions import WordNotInDictionaryException
 from ....tags import *
 
 class ChineseCiLinSubstitute(WordSubstitute):
-    """
-    :Data Requirements: :py:data:`.AttackAssist.CiLin`
-
-    An implementation of :py:class:`.WordSubstitute`.
-
-    Chinese Sememe-based word substitute based CiLin.
-    """
     TAGS = { TAG_Chinese }
 
-    def __init__(self, k = None):
+    def __init__(self, k : Optional[int] = None):
         """
-        :param k: Return top `k` candidate words. (return all if k = None)
+        Chinese Sememe-based word substitute based CiLin.
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned.
+        
+        :Data Requirements: :py:data:`.AttackAssist.CiLin`
+        :Language: chinese
+        
         """
+
         self.k = k
         self.cilin_dict = DataManager.load("AttackAssist.CiLin")
 
     def substitute(self, word, pos_tag):
-        """
-        :param word: the raw word; 
-        :param pos_tag: part of speech of the word
-        :return: The result is a list of tuples, *(substitute, 1)*.
-        :rtype: list of tuple
-        """
         if word not in self.cilin_dict:
             raise WordNotInDictionaryException()
         sym_words = self.cilin_dict[word]

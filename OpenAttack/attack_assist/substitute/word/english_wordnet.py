@@ -18,27 +18,25 @@ def prefilter(token, synonym):  # 预过滤（原词，一个候选词
 
 
 class WordNetSubstitute(WordSubstitute):
-    """
-    :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
-
-    An implementation of :py:class:`.WordSubstitute`.
-
-    WordNet synonym substitute.
-
-    """
 
     TAGS = { TAG_English }
 
     def __init__(self, k = None):
+        """
+        English word substitute based on wordnet.
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned. Default: 50
+        
+        :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
+        :Language: english
+        
+        """
+
         self.wn = DataManager.load("TProcess.NLTKWordNet")
         self.k = k
 
     def substitute(self, word: str, pos: str):
-        """
-        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
-        :return: The result is a list of tuples, *(substitute, 1)*.
-        :rtype: list of tuple
-        """
         if pos == "other":
             raise WordNotInDictionaryException()
         pos_in_wordnet = {

@@ -6,30 +6,28 @@ import pickle
 
 
 class HowNetSubstitute(WordSubstitute):
-    """
-    :Package Requirements: OpenHowNet
-    :Data Requirements: :py:data:`.AttackAssist.HowNet` :py:data:`.TProcess.NLTKWordNet`
-
-    An implementation of :py:class:`.WordSubstitute`.
-
-    Sememe-based word substitute based OpenHowNet.
-
-    """
 
     TAGS = { TAG_English }
 
     def __init__(self, k = None):
+        """
+        English Sememe-based word substitute based on OpenHowNet.
+        `[pdf] <https://arxiv.org/pdf/1901.09957.pdf>`__
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned.
+        
+        :Data Requirements: :py:data:`.AttackAssist.HownetSubstituteDict`
+        :Language: english
+        
+        """
+
         with open(DataManager.load("AttackAssist.HownetSubstituteDict"),'rb') as fp:
             self.dict=pickle.load(fp)
         self.k = k
 
     def substitute(self, word: str, pos: str):
-        """
-        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
-        :return: The result is a list of tuples, *(substitute, 1)*.
-        :rtype: list of tuple
-        """
-       
+
         if word not in self.dict or pos not in self.dict[word]:
             raise WordNotInDictionaryException()
 

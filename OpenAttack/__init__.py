@@ -3,6 +3,7 @@ from .data_manager import DataManager
 
 # attacker
 from . import attackers
+from .attackers import Attacker, ClassificationAttacker
 
 # victim
 from . import victim

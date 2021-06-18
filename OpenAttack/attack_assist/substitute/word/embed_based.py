@@ -8,17 +8,21 @@ DEFAULT_CONFIG = {"cosine": False}
 
 
 class EmbedBasedSubstitute(WordSubstitute):
-    """
-    :param bool cosine: If true, uses cosine distance :math:`(1 - cos(v_a, v_b))`, otherwise uses Euclidian distance :math:`norm_2(v_a - v_b)`. **Default:** False.
-    :param np.ndarray embedding: The 2d word vector matrix of shape (vocab_size, vector_dim).
-    :param dict word2id: A dict maps word to index.
-
-    A base class for all embedding-based substitute methods.
-    
-    An implementation of :py:class:`.WordSubstitute`.
-    """
     
     def __init__(self, word2id : Dict[str, int], embedding : torch.Tensor, cosine=False, k = 50, threshold = 0.5, device = None):
+        """
+        Embedding based word substitute.
+
+        Args:
+            word2id: A `dict` maps words to indexes.
+            embedding: A word embedding matrix.
+            cosine: If `true` then the cosine distance is used, otherwise the Euclidian distance is used.
+            threshold: Distance threshold. Default: 0.5
+            k: Top-k results to return. If k is `None`, all results will be returned. Default: 50
+            device: A pytocrh device for computing distances. Default: "cpu"
+        
+        """
+
         if device is None:
             device = "cpu"
             
@@ -38,14 +42,6 @@ class EmbedBasedSubstitute(WordSubstitute):
         self.embedding = self.embedding.to(device)
     
     def __call__(self, word: str, pos: Optional[str] = None):
-        """
-        :param word: the raw word; 
-        :param pos: part of speech of the word (`adj`, `adv`, `noun`, `verb`).
-        :return: The result is a list of tuples, *(substitute, distance)*.
-        :rtype: list of tuple
-
-        In WordSubstitute, we return a list of words that are semantically similar to the original word.
-        """
         return self.substitute(word, pos)
     
     def substitute(self, word, pos):

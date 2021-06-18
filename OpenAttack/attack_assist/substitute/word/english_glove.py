@@ -5,16 +5,25 @@ from ....tags import TAG_English
 
 
 class GloveSubstitute(EmbedBasedSubstitute):
-    """
-    :param bool cosine: If true, use cosine distance. **Default:** False.
-    :Data Requirements: :py:data:`.Glove`
-
-    An implementation of :py:class:`.WordSubstitute`.
-    """
 
     TAGS = { TAG_English } 
 
     def __init__(self, cosine = False, k = 50, threshold = 0.5, device = None):
+        """
+        English word substitute based on GloVe word vectors.
+        `[pdf] <https://nlp.stanford.edu/pubs/glove.pdf>`__
+
+        Args:
+            cosine: If `true` then the cosine distance is used, otherwise the Euclidian distance is used.
+            threshold: Distance threshold. Default: 0.5
+            k: Top-k results to return. If k is `None`, all results will be returned. Default: 50
+            device: A pytocrh device for computing distances. Default: "cpu"
+        
+        :Data Requirements: :py:data:`.AttackAssist.GloVe`
+        :Language: english
+        
+        """
+
         wordvec = DataManager.load("AttackAssist.GloVe")
         
         super().__init__(

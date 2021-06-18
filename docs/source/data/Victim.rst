@@ -67,20 +67,6 @@ BERT.SNLI
 
     .. automodule:: OpenAttack.data.victim_bert_snli
 
-BiLSTM.SST
-------------
-
-.. py:data:: Victim.BiLSTM.SST
-
-    .. automodule:: OpenAttack.data.victim_bilstm
-
-BiLSTM.IMDB
--------------
-
-.. py:data:: Victim.BiLSTM.IMDB
-
-    .. automodule:: OpenAttack.data.victim_bilstm_imdb
-
 ROBERTA.AG
 ------------
 

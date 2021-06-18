@@ -1,25 +1,27 @@
 from .base import WordSubstitute
 from ....exceptions import WordNotInDictionaryException
 from ....tags import *
-
+import nltk
+from nltk.corpus import wordnet as wn
 
 class ChineseWordNetSubstitute(WordSubstitute):
 
     TAGS = { TAG_Chinese }
 
-    """
-    :Data Requirements: :py:data:`.TProcess.NLTKWordNet`
-
-    An implementation of :py:class:`.WordSubstitute`.
-
-    ChineseWordNet synonym substitute.
-
-    """
     def __init__(self, k = None):
+        """
+        Chinese word substitute based on wordnet.
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned. Default: 50
+        
+        :Language: chinese
+        """
         self.k = k
+        nltk.download("wordnet")
+        nltk.download("omw")
     
     def substitute(self, word: str, pos: str):
-        from nltk.corpus import wordnet as wn
         if pos == "other":
             raise WordNotInDictionaryException()
         pos_in_wordnet = {

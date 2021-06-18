@@ -12,36 +12,34 @@ disallowed = ['TAG', 'MALAYALAM', 'BAMUM', 'HIRAGANA', 'RUNIC', 'TAI', 'SUNDANES
               'MEROITIC', 'KHAROSHTHI', 'HUNGARIAN', 'KHUDAWADI', 'ETHIOPIC', 'PERSIAN', 'OSMANYA', 'ELBASAN',
               'TIBETAN', 'BENGALI', 'TURKIC', 'THROWING', 'HANIFI', 'BRAHMI', 'KAITHI', 'LIMBU', 'LAO', 'CHAKMA',
               'DEVANAGARI', 'ITALIC', 'CJK', 'MEDEFAIDRIN', 'DIAMOND', 'SAURASHTRA', 'ADLAM', 'DUPLOYAN']
-disallowed_codes = ['1F1A4', 'A7AF']  # 不允许编码
+disallowed_codes = ['1F1A4', 'A7AF']  # filtered codes
 
 
 def get_hex_string(ch):
-    return '{:04x}'.format(ord(ch)).upper()  # 获得字符16进制编码
+    return '{:04x}'.format(ord(ch)).upper()  # Get the hex code of char
 
 
 class DCESSubstitute(CharSubstitute):
-    """
-    :Data Requirements: :py:data:`.AttackAssist.DCES`
-    :Package Requirements: * **sklearn**
-    
-    An implementation of :py:class:`.CharSubstitute`.
-
-    DCES substitute used in :py:class:`.VIPERAttacker`.
-
-    """
-
     TAGS = { TAG_English }
 
-    def __init__(self, k = 12):
+    def __init__(self, k : int = 12):
+        """
+        Returns the chars that is visually similar to the input.
+
+        DCES substitute used in :py:class:`.VIPERAttacker`.
+
+        Args:
+            k: Top-k results to return. Default: k = 12
+        
+        :Data Requirements: :py:data:`.AttackAssist.SIM`
+        :Language: english
+        :Package Requirements: * **sklearn**
+
+        """
         self.descs, self.neigh = DataManager.load("AttackAssist.DCES")
         self.k = k
 
     def substitute(self, char: str):
-        """
-        :param word: the raw char, threshold: return top k words.
-        :return: The result is a list of tuples, *(substitute, 1)*.
-        :rtype: list of tuple
-        """
         c = get_hex_string(char)
 
         if c in self.descs:

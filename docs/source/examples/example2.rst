@@ -9,7 +9,7 @@ We writes a special :py:class:`.Classifier` for it and applies PWWSAttacker on o
 See the code below.
 
 Write a New Classifier
--------------------------
+===========================
 
 .. code-block:: python
     :linenos:
@@ -40,7 +40,7 @@ Adding :math:`10^{-6}` is a trick to avoid dividing by zero.
 The ``get_prob`` method finally returns a ``np.ndarray`` of shape (len(input\_), 2). See :py:class:`.Classifier` for detail.
 
 Load Dataset and Evaluate
-------------------------------
+===========================
 .. code-block:: python
     :linenos:
     
@@ -59,7 +59,7 @@ We implemented ``get_prob`` and ``get_pred`` in the first step and :py:class:`.P
 so our classifier can be correctly applied to :py:class:`.PWWSAttacker`.
 
 Complete Code
-----------------
+===========================
 
 .. code-block:: python
     :linenos:

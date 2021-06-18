@@ -1,8 +1,9 @@
-nltk
-numpy
 black
-tqdm<4.50.0
-torch>=1.5.0
 twine
 language_tool_python
-transformers>=2.5.0
+nltk>=3.5
+numpy
+tqdm>=4.45.0
+datasets
+transformers>=4.0.0
+torch>=1.5.1

@@ -1,30 +1,18 @@
 ===================
-Classifiers API
+Victims API
 ===================
 
 Classifier
------------------
+===========================
 
-.. autoclass:: OpenAttack.Classifier
+.. autoclass:: OpenAttack.victim.classifiers.Classifier
     :members:
 
 ------------------------------------
 
-HuggingfaceClassifier
------------------------
+TransformersClassifier
+------------------------
 
-.. autoclass:: OpenAttack.classifiers.HuggingfaceClassifier(OpenAttack.Classifier)
-    :members: __init__
-
-PytorchClassifier
--------------------
-
-.. autoclass:: OpenAttack.classifiers.PytorchClassifier(OpenAttack.Classifier)
-    :members: __init__, to
-
-TensorflowClassifier
-----------------------
-
-.. autoclass:: OpenAttack.classifiers.TensorflowClassifier(OpenAttack.Classifier)
+.. autoclass:: OpenAttack.classifiers.TransformersClassifier(OpenAttack.Classifier)
     :members: __init__, to
 

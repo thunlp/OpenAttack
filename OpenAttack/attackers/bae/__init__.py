@@ -43,11 +43,11 @@ class BAEAttacker(ClassificationAttacker):
             filter_words : List[str] = None
         ):
         """
-        :param: str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
-        :param: int k: the k most important words / sub-words to substitute for. **Default:** 50
-        :param: int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 0
+        :param str mlm_path: the path to the masked language model. **Default:** 'bert-base-uncased'
+        :param int k: the k most important words / sub-words to substitute for. **Default:** 50
+        :param int use_sim_mat: whether use cosine_similarity to filter out atonyms. **Default:** 0
         :param float threshold_pred_score: Threshold used in substitute module. **Default:** 0.3
-        :param: int max_length: the maximum length of an input sentence. **Default:** 512
+        :param int max_length: the maximum length of an input sentence. **Default:** 512
         :param int batch_size: the size of a batch of input sentences. **Default:** 32
         
         :Package Requirements:

@@ -1,38 +1,33 @@
+from typing import Optional
 from ....exceptions import WordNotInDictionaryException
 from .base import WordSubstitute
 from ....data_manager import DataManager
 from ....tags import *
 
 class ChineseHowNetSubstitute(WordSubstitute):
-    """
-    :Package Requirements: OpenHowNet
-    :Data Requirements: :py:data:`.AttackAssist.HowNet`
-
-    An implementation of :py:class:`.WordSubstitute`.
-
-    Chinese Sememe-based word substitute based OpenHowNet.
-
-    """
 
     TAGS = { TAG_Chinese }
 
-    def __init__(self, k = None):
+    def __init__(self, k : Optional[int] = None):
         """
-        :param k: Return top `k` candidate words. (return all if k = None)
+        Chinese Sememe-based word substitute based on OpenHowNet.
+        `[pdf] <https://arxiv.org/pdf/1901.09957.pdf>`__
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned.
+        
+        :Package Requirements: OpenHowNet
+        :Data Requirements: :py:data:`.AttackAssist.HowNet`
+        :Language: chinese
+        
         """
+
         super().__init__()
         self.hownet_dict = DataManager.load("AttackAssist.HowNet")
         self.zh_word_list = self.hownet_dict.get_zh_words()
         self.k = k
 
     def substitute(self, word, pos):
-        """
-        :param word: the raw word; pos_tag: part of speech of the word, threshold: return top k words.
-        :return: The result is a list of tuples, *(substitute, 1)*.
-        :rtype: list of tuple
-        """
-        
-
         # get sememes
         word_sememes = self.hownet_dict.get_sememes_by_word(word, structured=False, lang="zh", merge=False)
         word_sememe_set = [t['sememes'] for t in word_sememes]
@@ -40,7 +35,7 @@ class ChineseHowNetSubstitute(WordSubstitute):
             raise WordNotInDictionaryException()
 
         # find candidates
-        word_candidate = [(word, 1)]
+        word_candidate = [(word, 0)]
         for wd in self.zh_word_list:
             if wd == word:
                 continue
@@ -67,9 +62,9 @@ class ChineseHowNetSubstitute(WordSubstitute):
             
             if common_sememe > 0:
                 if wd.find(" ") == -1:
-                    word_candidate.append( (wd, common_sememe / len(word_sememe_set)) )
+                    word_candidate.append((wd, 1 - common_sememe / len(word_sememe_set)) )
 
-        word_candidate = sorted(word_candidate, key=lambda x: -x[1])
+        word_candidate = sorted(word_candidate, key=lambda x: x[1])
         if self.k is not None:
             word_candidate = word_candidate[:self.k]
         return word_candidate

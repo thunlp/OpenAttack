@@ -22,17 +22,22 @@ def getDocMembers(clss):
 
 def make_attacker(path):
     addition_members = {
-        "SEAAttacker": ["get_rules"],
         "UATAttacker": ["get_triggers"],
     }
     opt = "===================\nAttackers API\n===================\n\n"
 
-    opt += "Attacker\n-----------\n\n.. autoclass:: OpenAttack.Attacker\n    :members: __call__\n\n"
+    opt += "Attacker\n=============\n\n.. autoclass:: OpenAttack.Attacker\n    :members:\n\n"
     opt += "-" * 36 + "\n\n"
     
-    for name in getSubClasses(OpenAttack.attackers, OpenAttack.Attacker):
+    opt += "ClassificationAttacker\n==============================\n\n.. autoclass:: OpenAttack.attackers.ClassificationAttacker\n    :members:\n\n"
+    opt += "-" * 36 + "\n\n"
+    
+    
+    for name in getSubClasses(OpenAttack.attackers, OpenAttack.ClassificationAttacker):
+        if name == "ClassificationAttacker":
+            continue
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-        opt += ".. autoclass:: OpenAttack.attackers.%s(OpenAttack.Attacker)\n" % name
+        opt += ".. autoclass:: OpenAttack.attackers.%s(OpenAttack.attackers.ClassificationAttacker)\n" % name
 
         members = ["__init__"] + (addition_members[name] if name in addition_members else [])
         opt += "    :members: " + (", ".join(members)) + "\n\n"
@@ -41,29 +46,20 @@ def make_attacker(path):
 
 def make_attack_eval(path):
     opt = "========================\nAttackEvals API\n========================\n\n"
-    opt += "AttackEval\n----------------\n\n.. autoclass:: OpenAttack.AttackEval\n    :members: __init__, eval, eval_results\n\n"
-    opt += "-" * 36 + "\n\n"
-
-    members = ["__init__", "measure", "update", "get_result", "clear", "eval", "eval_results"]
-    for name in getSubClasses(OpenAttack.attack_evals, OpenAttack.AttackEval):
-        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-        opt += ".. autoclass:: OpenAttack.attack_evals.%s(OpenAttack.AttackEval)\n" % name
-        opt += "    :members: " + (", ".join(members)) + "\n\n"
+    opt += "AttackEval\n----------------\n\n.. autoclass:: OpenAttack.AttackEval\n    :members: __init__, eval, ieval\n\n"
     open(path, "w", encoding="utf-8").write(opt)
-    return opt
 
 def make_classifier(path):
     addition_members = {
-        "PytorchClassifier": ["to"],
-        "TensorflowClassifier": ["to"],
+        "TransformersClassifier": ["to"],
     }
-    skip_list = {"ClassifierBase"}
+    skip_list = {"Classifier"}
 
-    opt = "===================\nClassifiers API\n===================\n\n"
-    opt += "Classifier\n-----------------\n\n.. autoclass:: OpenAttack.Classifier\n    :members:\n\n"
+    opt = "===================\nVictims API\n===================\n\n"
+    opt += "Classifier\n===========================\n\n.. autoclass:: OpenAttack.victim.classifiers.Classifier\n    :members:\n\n"
     opt += "-" * 36 + "\n\n"
     
-    for name in getSubClasses(OpenAttack.classifiers, OpenAttack.Classifier):
+    for name in getSubClasses(OpenAttack.victim.classifiers, OpenAttack.victim.classifiers.Classifier):
         if name in skip_list:
             continue
 
@@ -120,47 +116,112 @@ def make_data(path):
 def make_metric(path):
     opt = "==================\nMetric API\n==================\n\n"
     
-    members = ["__init__", "__call__"]
 
     for name in OpenAttack.metric.__dir__():
         if type(OpenAttack.metric.__dict__[name]) is type:
+
             opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
             opt += ".. autoclass:: OpenAttack.metric." + name + "\n"
-            opt += "    :members: " + (", ".join(members)) + "\n\n"
+            opt += "    :members: " + "\n\n"
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 
 def make_substitute(path):
     opt = "======================\nSubstitutes API\n======================\n\n"
-    bases = ["WordSubstitute", "CharSubstitute"]
-    for name in bases:
-        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-        opt += ".. autoclass:: OpenAttack.substitutes.base." + name + "\n"
-        opt += "    :members: __call__\n\n"
-    opt += "-" * 36 + "\n\n"
+    opt += """
 
-    subs = getSubClasses(OpenAttack.substitutes, OpenAttack.Substitute)
-    
+Abstract Classes
+------------------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.word.WordSubstitute
+    :members: __call__
+
+.. autoclass:: OpenAttack.attack_assist.substitute.char.CharSubstitute
+    :members: __call__
+
+-------------------------------------------------------------------------------
+
+
+"""
+    subs = getSubClasses(OpenAttack.attack_assist.substitute.word, OpenAttack.attack_assist.substitute.word.WordSubstitute)
     embed_based_idx = subs.index("EmbedBasedSubstitute")
     if embed_based_idx != -1:
         subs[0], subs[embed_based_idx] = subs[embed_based_idx], subs[0]
-
+    
     for name in subs:
-        cls = OpenAttack.substitutes.__dict__[name]
+        cls = OpenAttack.attack_assist.substitute.word.__dict__[name]
+        if cls is OpenAttack.attack_assist.substitute.word.WordSubstitute:
+            continue
+        
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-        opt += ".. autoclass:: OpenAttack.substitutes.%s(OpenAttack.substitutes.%s)\n" % (name, cls.__base__.__name__)
-        opt += "    :members:\n\n"
+        opt += ".. autoclass:: OpenAttack.attack_assist.substitute.word.%s(OpenAttack.attack_assist.substitute.word.WordSubstitute)\n" % name
+        opt += "    :members: __init__\n\n"
+
+    subs = getSubClasses(OpenAttack.attack_assist.substitute.char, OpenAttack.attack_assist.substitute.char.CharSubstitute)
+    
+    for name in subs:
+        cls = OpenAttack.attack_assist.substitute.char.__dict__[name]
+        if cls is OpenAttack.attack_assist.substitute.char.CharSubstitute:
+            continue
+        
+        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
+        opt += ".. autoclass:: OpenAttack.attack_assist.substitute.char.%s(OpenAttack.attack_assist.substitute.char.CharSubstitute)\n" % name
+        opt += "    :members: __init__\n\n"
+
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 
 def make_text_processor(path):
     opt = "========================\nTextProcessors API\n========================\n\n"
-    opt += "TextProcessor\n--------------------\n\n.. autoclass:: OpenAttack.TextProcessor\n    :members:\n\n"
-    opt += "-" * 36 + "\n\n"
-    for name in getSubClasses(OpenAttack.text_processors, OpenAttack.TextProcessor):
+    opt += "Tokenizers\n------------------------\n\n"
+    opt += """
+.. autoclass:: OpenAttack.text_process.tokenizer.Tokenizer
+    :members: tokenize, detokenize
+
+"""
+
+    import OpenAttack.text_process.tokenizer
+    
+    for name in getSubClasses(OpenAttack.text_process.tokenizer, OpenAttack.text_process.tokenizer.Tokenizer):
+        if name == "Tokenizer":
+            continue
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-        opt += ".. autoclass:: OpenAttack.text_processors.%s(OpenAttack.TextProcessor)\n" % name
+        opt += ".. autoclass:: OpenAttack.text_process.tokenizer.%s(OpenAttack.text_process.tokenizer.Tokenizer)\n" % name
         opt += "    :members:\n\n"
+    
+    
+    import OpenAttack.text_process.lemmatizer
+    
+    opt += "Lemmatizer\n------------------------\n\n"
+    opt += """
+.. autoclass:: OpenAttack.text_process.lemmatizer.Lemmatizer
+    :members: lemmatize, delemmatize
+
+"""
+    for name in getSubClasses(OpenAttack.text_process.lemmatizer, OpenAttack.text_process.lemmatizer.Lemmatizer):
+        if name == "Lemmatizer":
+            continue
+        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
+        opt += ".. autoclass:: OpenAttack.text_process.lemmatizer.%s(OpenAttack.text_process.lemmatizer.Lemmatizer)\n" % name
+        opt += "    :members:\n\n"
+
+    
+    import OpenAttack.text_process.constituency_parser
+    
+    opt += "ConstituencyParser\n------------------------\n\n"
+    opt += """
+.. autoclass:: OpenAttack.text_process.constituency_parser.ConstituencyParser
+    :members: parse
+
+"""
+    for name in getSubClasses(OpenAttack.text_process.constituency_parser, OpenAttack.text_process.constituency_parser.ConstituencyParser):
+        if name == "ConstituencyParser":
+            continue
+        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
+        opt += ".. autoclass:: OpenAttack.text_process.constituency_parser.%s(OpenAttack.text_process.constituency_parser.ConstituencyParser)\n" % name
+        opt += "    :members:\n\n"
+    
+
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 

@@ -2,23 +2,54 @@
 TextProcessors API
 ========================
 
-TextProcessor
---------------------
+Tokenizers
+------------------------
 
-.. autoclass:: OpenAttack.TextProcessor
+
+.. autoclass:: OpenAttack.text_process.tokenizer.Tokenizer
+    :members: tokenize, detokenize
+
+JiebaTokenizer
+----------------
+
+.. autoclass:: OpenAttack.text_process.tokenizer.JiebaTokenizer(OpenAttack.text_process.tokenizer.Tokenizer)
     :members:
 
-------------------------------------
+PunctTokenizer
+----------------
 
-ChineseTextProcessor
-----------------------
-
-.. autoclass:: OpenAttack.text_processors.ChineseTextProcessor(OpenAttack.TextProcessor)
+.. autoclass:: OpenAttack.text_process.tokenizer.PunctTokenizer(OpenAttack.text_process.tokenizer.Tokenizer)
     :members:
 
-DefaultTextProcessor
-----------------------
+TransformersTokenizer
+-----------------------
 
-.. autoclass:: OpenAttack.text_processors.DefaultTextProcessor(OpenAttack.TextProcessor)
+.. autoclass:: OpenAttack.text_process.tokenizer.TransformersTokenizer(OpenAttack.text_process.tokenizer.Tokenizer)
+    :members:
+
+Lemmatizer
+------------------------
+
+
+.. autoclass:: OpenAttack.text_process.lemmatizer.Lemmatizer
+    :members: lemmatize, delemmatize
+
+WordnetLemmatimer
+-------------------
+
+.. autoclass:: OpenAttack.text_process.lemmatizer.WordnetLemmatimer(OpenAttack.text_process.lemmatizer.Lemmatizer)
+    :members:
+
+ConstituencyParser
+------------------------
+
+
+.. autoclass:: OpenAttack.text_process.constituency_parser.ConstituencyParser
+    :members: parse
+
+StanfordParser
+----------------
+
+.. autoclass:: OpenAttack.text_process.constituency_parser.StanfordParser(OpenAttack.text_process.constituency_parser.ConstituencyParser)
     :members:
 

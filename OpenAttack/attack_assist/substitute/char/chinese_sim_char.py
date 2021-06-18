@@ -1,18 +1,24 @@
+from typing import Optional
 from .base import CharSubstitute
 from ....data_manager import DataManager
 from ....tags import *
 
 
 class ChineseSimCharSubstitute(CharSubstitute):
-    """
-    :Data Requirements: :py:data:`.AttackAssist.SIM`
-    
-    An implementation of :py:class:`.CharSubstitute`.
-    """
 
     TAGS = { TAG_Chinese }
 
-    def __init__(self, k = None):
+    def __init__(self, k : Optional[int] = None):
+        """
+        Returns the chars that is visually similar to the input.
+
+        Args:
+            k: Top-k results to return. If k is `None`, all results will be returned.
+        
+        :Data Requirements: :py:data:`.AttackAssist.SIM`
+        :Language: chinese
+        
+        """
         super().__init__()
         self.sim_dict = DataManager.load("AttackAssist.SIM")
         self.k = k

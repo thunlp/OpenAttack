@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
-autodoc_mock_imports = ["onmt", "onmt_model", "editdistance", "torchtext"]
+autodoc_mock_imports = ["onmt", "onmt_model", "editdistance", "transformers", "torch", "datasets"]
 
 # -- Project information -----------------------------------------------------
 
@@ -31,6 +31,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
+    'sphinx-mathjax-offline'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,16 +54,11 @@ exclude_patterns = []
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 
-import sphinx_rtd_theme
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "sphinx_thunlp_theme"
+html_codeblock_linenos_style = "table"
 
 add_module_names = False
 autodoc_member_order = "groupwise"
-
-
-napoleon_google_docstring = False
-napoleon_use_param = False
-napoleon_use_ivar = True
+autodoc_typehints = "description"
 
 master_doc = 'index'
