@@ -6,12 +6,15 @@ class JaccardChar(AttackMetric):
     NAME = "Jaccard Char Similarity"
     TAGS = { * TAG_ALL_LANGUAGE }
 
-    def calc_score(self, senA, senB):
+    def calc_score(self, senA : str, senB : str) -> float:
         """
-            :param list tokenA: The first list of tokens.
-            :param list tokenB: The second list of tokens.
+        Args:
+            senA: First sentence.
+            senB: Second sentence.
 
-            Make sure two list have the same length.
+        Returns:
+            Jaccard char similarity of two sentences.
+        
         """
         AS=set()
         BS=set()

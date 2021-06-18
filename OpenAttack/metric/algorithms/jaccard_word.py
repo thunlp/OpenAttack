@@ -7,6 +7,11 @@ class JaccardWord(AttackMetric):
     NAME = "Jaccard Word Similarity"
 
     def __init__(self, tokenizer : Tokenizer):
+        """
+        Args:
+            tokenizer: A tokenizer that will be used in this metric. Must be an instance of :py:class:`.Tokenizer`
+
+        """
         self.tokenizer = tokenizer
     
     @property
@@ -15,7 +20,16 @@ class JaccardWord(AttackMetric):
             return self.tokenizer.TAGS
         return set()
 
-    def calc_score(self, sentA, sentB):
+    def calc_score(self, sentA : str, sentB : str) -> float:
+        """
+        Args:
+            sentA: First sentence.
+            sentB: Second sentence.
+
+        Returns:
+            Jaccard word similarity of two sentences.
+        
+        """
         tokenA = self.tokenizer.tokenize(sentA, pos_tagging=False)
         tokenB = self.tokenizer.tokenize(sentB, pos_tagging=False)
 

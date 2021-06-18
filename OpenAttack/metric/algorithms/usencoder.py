@@ -13,26 +13,31 @@ class UniversalSentenceEncoder(AttackMetric):
 
     def __init__(self):
         """
+        Universal Sentence Encoder in tensorflow_hub.
+        `[pdf] <https://arxiv.org/pdf/1803.11175>`__
+        `[page] <https://tfhub.dev/google/universal-sentence-encoder/4>`__
+
         :Data Requirements: :py:data:`.AttackAssist.UniversalSentenceEncoder`
         :Package Requirements:
             * **tensorflow** >= 2.0.0
             * **tensorflow_hub**
+        :Language: english
         
-        Universal Sentence Encoder in tensorflow_hub.
-        `[pdf] <https://arxiv.org/pdf/1803.11175>`__
-        `[page] <https://tfhub.dev/google/universal-sentence-encoder/4>`__
         """
         
         import tensorflow_hub as hub
         
         self.embed = hub.load( DataManager.load("AttackAssist.UniversalSentenceEncoder") )
 
-    def calc_score(self, sentA, sentB):
+    def calc_score(self, sentA : str, sentB : str) -> float:
         """
-        :param str sentA: The first sentence.
-        :param str sentB: The second sentence.
-        :return: Cosine distance between two sentences.
-        :rtype: float
+        Args:
+            sentA: The first sentence.
+            sentB: The second sentence.
+
+        Returns:
+            Cosine distance between two sentences.
+        
         """
         ret = self.embed([sentA, sentB]).numpy()
         return ret[0].dot(ret[1]) / (np.linalg.norm(ret[0]) * np.linalg.norm(ret[1]))

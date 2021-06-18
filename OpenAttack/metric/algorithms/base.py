@@ -1,5 +1,8 @@
 from ...tags import *
 class AttackMetric(object):
+    """
+    Base class of all metrics.
+    """
 
     TAGS = { * TAG_ALL_LANGUAGE }
 

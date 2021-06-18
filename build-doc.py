@@ -117,12 +117,53 @@ def make_metric(path):
     opt = "==================\nMetric API\n==================\n\n"
     
 
-    for name in OpenAttack.metric.__dir__():
-        if type(OpenAttack.metric.__dict__[name]) is type:
+    metrics = []
+    selector = []
+    for name in dir(OpenAttack.metric):
+        if isinstance(OpenAttack.metric.__dict__[name], type):
+            if issubclass(OpenAttack.metric.__dict__[name], OpenAttack.metric.AttackMetric):
+                if name == "AttackMetric":
+                    continue
+                metrics.append(name)
+            elif issubclass(OpenAttack.metric.__dict__[name], OpenAttack.metric.MetricSelector):
+                if name == "MetricSelector":
+                    continue
+                selector.append(name)
+    
+    opt += """Attacker Metrics
+==================
 
-            opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
-            opt += ".. autoclass:: OpenAttack.metric." + name + "\n"
-            opt += "    :members: " + "\n\n"
+.. autoclass:: OpenAttack.metric.AttackMetric
+    :members:
+
+-------------------------------------------------------
+
+
+"""
+
+    for name in metrics:
+        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
+        opt += ".. autoclass:: OpenAttack.metric." + name + "\n"
+        opt += "    :members: " + "\n"
+        opt += "    :exclude-members: TAGS" + "\n\n"
+    
+    opt += """Metrics Selector
+=======================
+
+.. autoclass:: OpenAttack.metric.MetricSelector
+    :members:
+
+-------------------------------------------------------
+
+
+"""
+    
+    for name in selector:
+        opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
+        opt += ".. autoclass:: OpenAttack.metric." + name + "\n"
+        opt += "    :members: " + "\n"
+        opt += "    :exclude-members: TAGS" + "\n\n"
+    
     open(path, "w", encoding="utf-8").write(opt)
     return opt
 

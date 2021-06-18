@@ -1,9 +1,17 @@
+from typing import List
 from .base import AttackMetric
 from ...text_process.tokenizer import Tokenizer
 class BLEU(AttackMetric):
     NAME = "BLEU"
 
     def __init__(self, tokenizer : Tokenizer) -> None:
+        """
+        Args:
+            tokenizer: A tokenizer that will be used in this metric. Must be an instance of :py:class:`.Tokenizer`
+        :Language: english
+        
+        """
+        
         from nltk.translate.bleu_score import sentence_bleu
         from nltk.translate.bleu_score import SmoothingFunction
         self.smooth = SmoothingFunction()
@@ -17,12 +25,15 @@ class BLEU(AttackMetric):
         else:
             return set()
 
-    def calc_score(self, tokenA, tokenB):
+    def calc_score(self, tokenA : List[str], tokenB : List[str]) -> float:
         """
-            :param list tokenA: The first list of tokens.
-            :param list tokenB: The second list of tokens.
+        Args:
+            tokenA: The first list of tokens.
+            tokenB: The second list of tokens.
+        Retruns:
+            The BLEU score.
 
-            Make sure two list have the same length.
+        Make sure two list have the same length.
         """
         ref = [ tokenA ]
         cand = tokenB

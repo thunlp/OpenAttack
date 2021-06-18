@@ -1,3 +1,4 @@
+from typing import List
 from .base import AttackMetric
 import torch
 from ...text_process.tokenizer import Tokenizer
@@ -7,6 +8,11 @@ class Levenshtein(AttackMetric):
     NAME = "Levenshtein Edit Distance"
 
     def __init__(self, tokenizer : Tokenizer) -> None:
+        """
+        Args:
+            tokenizer: A tokenizer that will be used in this metric. Must be an instance of :py:class:`.Tokenizer`
+
+        """
         self.tokenizer = tokenizer
 
     @property
@@ -15,13 +21,15 @@ class Levenshtein(AttackMetric):
             return self.tokenizer.TAGS
         return set()
         
-    def calc_score(self, a, b):
+    def calc_score(self, a : List[str], b : List[str]) -> int:
         """
-            :param list a: The first list.
-            :param list b: The second list.
+        Args:
+            a: The first list.
+            b: The second list.
+        Returns:
 
-            Both parameters can be str or list, str for char-level edit distance while list for token-level edit distance.
-            """
+        Both parameters can be str or list, str for char-level edit distance while list for token-level edit distance.
+        """
         la = len(a)
         lb = len(b)
         f = torch.zeros(la + 1, lb + 1, dtype=torch.long)

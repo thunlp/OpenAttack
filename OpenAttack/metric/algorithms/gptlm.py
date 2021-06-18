@@ -10,13 +10,12 @@ class GPT2LM(AttackMetric):
 
     def __init__(self):
         """
-        :param bool use_tf: If true, uses tensorflow GPT-2 model.
-        :Package Requirements:
-            * **torch** (if use_tf = False)
-        
         Language Models are Unsupervised Multitask Learners.
         `[pdf] <https://d4mucfpksywv.cloudfront.net/better-language-models/language-models.pdf>`__
         `[code] <https://github.com/openai/gpt-2>`__
+
+        :Language: english
+        
         """
 
         self.tokenizer = transformers.GPT2TokenizerFast.from_pretrained("gpt2")
@@ -35,6 +34,16 @@ class GPT2LMChinese(AttackMetric):
     TAGS = { TAG_Chinese }
 
     def __init__(self):
+        """
+        Language Models are Unsupervised Multitask Learners.
+        `[pdf] <https://d4mucfpksywv.cloudfront.net/better-language-models/language-models.pdf>`__
+        `[code] <https://github.com/openai/gpt-2>`__
+
+        :Package Requirements:
+            * tensorflow>=2
+        :Language: chinese
+
+        """
         ## TODO train a pytorch chinese gpt-2 model
         self.tokenizer = transformers.BertTokenizer.from_pretrained("mymusise/EasternFantasyNoval")
         self.lm = transformers.TFGPT2LMHeadModel.from_pretrained("mymusise/EasternFantasyNoval")

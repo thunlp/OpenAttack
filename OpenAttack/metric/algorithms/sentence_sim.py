@@ -7,11 +7,26 @@ class SentenceSim(AttackMetric):
     TAGS = { TAG_English } 
 
     def __init__(self):
+        """
+        :Pakcage Requirements:
+            * sentence_transformers
+        :Language: english
+
+        """
         from sentence_transformers import SentenceTransformer
         from ..data_manager import DataManager
         self.model = SentenceTransformer(DataManager.load("AttackAssist.SentenceTransformer"), device='cuda')
 
-    def calc_score(self, sen1, sen2):
+    def calc_score(self, sen1 : str, sen2 : str) -> float:
+        """
+        Args:
+            sen1: The first sentence.
+            sen2: The second sentence.
+        Returns:
+            Sentence similarity.
+            
+        """
+
         from sentence_transformers import util
         emb1,emb2 = self.model.encode([sen1,sen2],show_progress_bar=False)
         cos_sim = util.pytorch_cos_sim(emb1, emb2)
