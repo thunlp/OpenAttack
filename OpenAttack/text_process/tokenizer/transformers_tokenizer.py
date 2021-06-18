@@ -1,6 +1,13 @@
 from .base import Tokenizer
 import transformers
 class TransformersTokenizer(Tokenizer):
+    """
+    Pretrained Tokenizer from transformers.
+
+    Usually returned by :py:class:`.TransformersClassifier` .
+    
+    """
+
     @property
     def TAGS(self):
         return { self.__lang_tag }

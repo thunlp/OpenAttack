@@ -11,6 +11,9 @@ CLASSIFIER_METHODS : Dict[str, VictimMethod] = {
 }
 
 class Classifier(Victim):
+    """
+    Classifier is the base class of all classifiers.
+    """
     def __init_subclass__(cls):
         invoke_funcs = []
         tags = [ TAG_Classification ]

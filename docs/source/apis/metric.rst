@@ -8,84 +8,82 @@ Attacker Metrics
 .. autoclass:: OpenAttack.metric.AttackMetric
     :members:
 
--------------------------------------------------------
-
 
 BLEU
 ------
 
 .. autoclass:: OpenAttack.metric.BLEU
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 GPT2LM
 --------
 
 .. autoclass:: OpenAttack.metric.GPT2LM
-    :members: 
+    :members: __init__
     :exclude-members: TAGS
 
 GPT2LMChinese
 ---------------
 
 .. autoclass:: OpenAttack.metric.GPT2LMChinese
-    :members: 
+    :members: __init__
     :exclude-members: TAGS
 
 JaccardChar
 -------------
 
 .. autoclass:: OpenAttack.metric.JaccardChar
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 JaccardWord
 -------------
 
 .. autoclass:: OpenAttack.metric.JaccardWord
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 LanguageTool
 --------------
 
 .. autoclass:: OpenAttack.metric.LanguageTool
-    :members: 
+    :members: __init__
     :exclude-members: TAGS
 
 LanguageToolChinese
 ---------------------
 
 .. autoclass:: OpenAttack.metric.LanguageToolChinese
-    :members: 
+    :members: __init__
     :exclude-members: TAGS
 
 Levenshtein
 -------------
 
 .. autoclass:: OpenAttack.metric.Levenshtein
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 Modification
 --------------
 
 .. autoclass:: OpenAttack.metric.Modification
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 SentenceSim
 -------------
 
 .. autoclass:: OpenAttack.metric.SentenceSim
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 UniversalSentenceEncoder
 --------------------------
 
 .. autoclass:: OpenAttack.metric.UniversalSentenceEncoder
-    :members: 
+    :members: __init__, calc_score
     :exclude-members: TAGS
 
 Metrics Selector
@@ -93,8 +91,6 @@ Metrics Selector
 
 .. autoclass:: OpenAttack.metric.MetricSelector
     :members:
-
--------------------------------------------------------
 
 
 EditDistance

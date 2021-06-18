@@ -11,6 +11,14 @@ _POS_MAPPING = {
     "d": "adv"
 }
 class JiebaTokenizer(Tokenizer):
+    """
+    Tokenizer based on jieba.posseg
+
+    :Package Requirements:
+        * jieba
+    :Language: chinese
+    """
+
     TAGS = { TAG_Chinese }
 
     def __init__(self) -> None:

@@ -17,6 +17,12 @@ _DELEMMA_POS_MAPPING = {
 }
 
 class WordnetLemmatimer(Lemmatizer):
+    """
+    Lemmatizer based on nltk.wordnet
+    
+    :Language: english
+    """
+
     TAGS = { TAG_English }
 
     def __init__(self) -> None:

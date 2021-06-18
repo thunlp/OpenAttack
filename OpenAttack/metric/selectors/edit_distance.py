@@ -3,8 +3,8 @@ from ...text_process.tokenizer import get_default_tokenizer
 
 class EditDistance(MetricSelector):
     """
-    :English: `Levenshtein`( :py:class:`.PunctTokenizer` )
-    :Chinese: `Levenshtein`( :py:class:`.JiebaTokenizer` )
+    :English: `Levenshtein` ( :py:class:`.PunctTokenizer` )
+    :Chinese: `Levenshtein` ( :py:class:`.JiebaTokenizer` )
     """
 
     def _select(self, lang):

@@ -1,9 +1,9 @@
 ========================
-TextProcessors API
+Text Processors API
 ========================
 
 Tokenizers
-------------------------
+============================
 
 
 .. autoclass:: OpenAttack.text_process.tokenizer.Tokenizer
@@ -28,7 +28,7 @@ TransformersTokenizer
     :members:
 
 Lemmatizer
-------------------------
+============================
 
 
 .. autoclass:: OpenAttack.text_process.lemmatizer.Lemmatizer
@@ -41,11 +41,11 @@ WordnetLemmatimer
     :members:
 
 ConstituencyParser
-------------------------
+============================
 
 
 .. autoclass:: OpenAttack.text_process.constituency_parser.ConstituencyParser
-    :members: parse
+    :members: __call__
 
 StanfordParser
 ----------------

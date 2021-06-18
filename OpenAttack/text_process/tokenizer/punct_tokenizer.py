@@ -12,6 +12,12 @@ _POS_MAPPING = {
 
 
 class PunctTokenizer(Tokenizer):
+    """
+    Tokenizer based on nltk.word_tokenizer.
+
+    :Language: english
+    """
+
 
     TAGS = { TAG_English }
 

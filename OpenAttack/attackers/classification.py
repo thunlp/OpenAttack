@@ -10,6 +10,8 @@ class ClassificationAttacker(Attacker):
     """
 
     def __call__(self, victim: Classifier, input_: Any):
+        if not isinstance(victim, Classifier):
+            raise TypeError("`victim` is an instance of `%s`, but `%s` expected" % (victim.__class__.__name__, "Classifier"))
         if Tag("get_pred", "victim") not in victim.TAGS:
             raise AttributeError("`%s` needs victim to support `%s` method" % (self.__class__.__name__, "get_pred"))
         self._victim_check(victim)

@@ -18,20 +18,21 @@ class TransformersClassifier(Classifier):
             model : transformers.PreTrainedModel,
             tokenizer : transformers.PreTrainedTokenizer,
             embedding_layer,
-            device = None, 
-            max_length = 128,
-            batch_size = 8,
+            device : torch.device = None, 
+            max_length : int = 128,
+            batch_size : int = 8,
             lang = None
         ):
         """
-        :param transformers.Module model: Huggingface model for classification.
-        :param str device: Device of pytorch model. **Default:** "cpu" if cuda is not available else "cuda"
-        :param transformers.model.embeddings.word_embeddings embedding_layer: The module of embedding_layer used in transformers models. For example, ``BertModel.bert.embeddings.word_embeddings``. ``word2id`` and ``embedding`` options are both required to support get_grad. **Default:** None
-        :param transformers.Tokenizer tokenizer: Huggingface tokenizer for classification. **Default:** None
-        :param str token_unk: Token for padding. **Default:** ``"<PAD>"``
-        :param int max_len: Max length of input tokens. If input token list is too long, it will be truncated. Uses None for no truncation. **Default:** None
+        Args:
+            model: Huggingface model for classification.
+            tokenizer: Huggingface tokenizer for classification. **Default:** None
+            embedding_layer: The module of embedding_layer used in transformers models. For example, ``BertModel.bert.embeddings.word_embeddings``. **Default:** None
+            device: Device of pytorch model. **Default:** "cpu" if cuda is not available else "cuda"
+            max_len: Max length of input tokens. If input token list is too long, it will be truncated. Uses None for no truncation. **Default:** None
+            batch_size: Max batch size of this classifier.
+            lang: Language of this classifier. If is `None` then `TransformersClassifier` will intelligently select the language based on other parameters.
 
-        :Package Requirements: * **pytorch**
         """
 
         self.model = model
@@ -67,9 +68,10 @@ class TransformersClassifier(Classifier):
     def tokenizer(self):
         return TransformersTokenizer(self.__tokenizer, self.__lang_tag)
 
-    def to(self, device):
+    def to(self, device : torch.device):
         """
-        :param str device: Device that moves model to.
+        Args:
+            device: Device that moves model to.
         """
         self.device = device
         self.model = self.model.to(device)

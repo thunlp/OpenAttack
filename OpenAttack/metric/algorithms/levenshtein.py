@@ -27,7 +27,8 @@ class Levenshtein(AttackMetric):
             a: The first list.
             b: The second list.
         Returns:
-
+            Levenshtein edit distance between two sentences.
+            
         Both parameters can be str or list, str for char-level edit distance while list for token-level edit distance.
         """
         la = len(a)

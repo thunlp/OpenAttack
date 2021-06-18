@@ -49,7 +49,7 @@ def make_attack_eval(path):
     opt += "AttackEval\n----------------\n\n.. autoclass:: OpenAttack.AttackEval\n    :members: __init__, eval, ieval\n\n"
     open(path, "w", encoding="utf-8").write(opt)
 
-def make_classifier(path):
+def make_victim(path):
     addition_members = {
         "TransformersClassifier": ["to"],
     }
@@ -136,15 +136,17 @@ def make_metric(path):
 .. autoclass:: OpenAttack.metric.AttackMetric
     :members:
 
--------------------------------------------------------
-
 
 """
 
     for name in metrics:
+        cls = OpenAttack.metric.__dict__[name]
         opt += name + "\n" + ("-" * (2 + len(name))) + "\n\n"
         opt += ".. autoclass:: OpenAttack.metric." + name + "\n"
-        opt += "    :members: " + "\n"
+        if hasattr(cls, "calc_score"):
+            opt += "    :members: __init__, calc_score" + "\n"
+        else:
+            opt += "    :members: __init__" + "\n"
         opt += "    :exclude-members: TAGS" + "\n\n"
     
     opt += """Metrics Selector
@@ -152,8 +154,6 @@ def make_metric(path):
 
 .. autoclass:: OpenAttack.metric.MetricSelector
     :members:
-
--------------------------------------------------------
 
 
 """
@@ -213,8 +213,8 @@ Abstract Classes
     return opt
 
 def make_text_processor(path):
-    opt = "========================\nTextProcessors API\n========================\n\n"
-    opt += "Tokenizers\n------------------------\n\n"
+    opt = "========================\nText Processors API\n========================\n\n"
+    opt += "Tokenizers\n============================\n\n"
     opt += """
 .. autoclass:: OpenAttack.text_process.tokenizer.Tokenizer
     :members: tokenize, detokenize
@@ -233,7 +233,7 @@ def make_text_processor(path):
     
     import OpenAttack.text_process.lemmatizer
     
-    opt += "Lemmatizer\n------------------------\n\n"
+    opt += "Lemmatizer\n============================\n\n"
     opt += """
 .. autoclass:: OpenAttack.text_process.lemmatizer.Lemmatizer
     :members: lemmatize, delemmatize
@@ -249,10 +249,10 @@ def make_text_processor(path):
     
     import OpenAttack.text_process.constituency_parser
     
-    opt += "ConstituencyParser\n------------------------\n\n"
+    opt += "ConstituencyParser\n============================\n\n"
     opt += """
 .. autoclass:: OpenAttack.text_process.constituency_parser.ConstituencyParser
-    :members: parse
+    :members: __call__
 
 """
     for name in getSubClasses(OpenAttack.text_process.constituency_parser, OpenAttack.text_process.constituency_parser.ConstituencyParser):
@@ -286,7 +286,7 @@ def make_utils(path):
 def main(path):
     make_attacker(os.path.join(path, "attacker.rst"))
     make_attack_eval(os.path.join(path, "attack_eval.rst"))
-    make_classifier(os.path.join(path, "classifier.rst"))
+    make_victim(os.path.join(path, "victim.rst"))
     make_data_manager(os.path.join(path, "data_manager.rst"))
     make_data(os.path.join(path, "..", "data"))
     make_metric(os.path.join(path, "metric.rst"))

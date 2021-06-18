@@ -4,5 +4,5 @@ tqdm<4.50.0
 datasets
 transformers
 torch
-sphinx-thunlp-theme>=0.0.8
+sphinx-thunlp-theme>=0.0.9
 sphinx-mathjax-offline

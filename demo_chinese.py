@@ -13,7 +13,7 @@ def main():
     attacker = OpenAttack.attackers.PWWSAttacker(lang="chinese")
 
     print("Building model")
-    clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
+    clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH")
 
     print("Loading dataset")
     dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
