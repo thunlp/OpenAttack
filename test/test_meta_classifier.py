@@ -10,7 +10,7 @@ class MetaClassifier(OpenAttack.Classifier):
         return self.get_prob(input_)
     
     def get_prob(self, input_):
-        return self.get_grad([input_], [])[0]
+        return self.get_grad([input_], [0])[0]
     
     def get_grad(self, input_, labels):
         self.last_meta = self.context.input

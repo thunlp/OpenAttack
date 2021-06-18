@@ -41,7 +41,8 @@ class GetGradient(VictimMethod):
                     raise  TypeError( "get_grad: `input[%d][%d]` must be a token, but got %s" % (i, j, type(it)) )
 
         if len(input_) != len(labels):
-            raise ValueError("input")
+            raise ValueError("`input_` and `labels` must be the same length. (%d != %d)" % (len(input_), len(labels)))
+
     def invoke_count(self, input_, labels):
         return len(input_)
 
