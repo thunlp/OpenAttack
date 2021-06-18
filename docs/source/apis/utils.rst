@@ -8,17 +8,6 @@ HookCloser
 .. autoclass:: OpenAttack.utils.HookCloser
     :members: 
 
-WordVector
-------------
-
-.. autoclass:: OpenAttack.utils.WordVector
-    :members: 
-
-check_parameters
-------------------
-
-.. autofunction:: OpenAttack.utils.check_parameters
-
 make_zip_downloader
 ---------------------
 
@@ -34,18 +23,23 @@ result_visualizer
 
 .. autofunction:: OpenAttack.utils.result_visualizer
 
-NLIWrapper
-------------
-
-.. autofunction:: OpenAttack.utils.NLIWrapper
-
 update_label
 --------------
 
 .. autofunction:: OpenAttack.utils.update_label
 
-init_tensorflow
------------------
+get_language
+--------------
 
-.. autofunction:: OpenAttack.utils.init_tensorflow
+.. autofunction:: OpenAttack.utils.get_language
+
+check_language
+----------------
+
+.. autofunction:: OpenAttack.utils.check_language
+
+language_by_name
+------------------
+
+.. autofunction:: OpenAttack.utils.language_by_name
 

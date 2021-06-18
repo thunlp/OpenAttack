@@ -37,6 +37,8 @@ during running `python setup.py install`.
 * **tqdm** >= 4.45.0
 * **nltk** >= 3.5
 * **numpy** >= 1.18.1
+* **transformers** >= 4.0.0
+* **torch** >= 1.5.1
 
 Optional Requirements
 -----------------------------
@@ -47,15 +49,13 @@ You can install them manually when needed.
 
 **Python Packages:**
 
-* **pytorch** >= 1.5.0
 * **tensorflow** >= 2.0.0
 * **tensorflow_hub**
-* **transformers**
 * **OpenHowNet**
 * **editdistance**
 * **language_tool_python**
 * **sklearn**
-* **torchtext** == 0.1.1 *(The latest version of torchtext is not supported now. This will be improved in the futrue.)*
+* **sentence_transformers**
 
 **Others:**
 

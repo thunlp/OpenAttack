@@ -22,7 +22,7 @@ def main():
     attacker = OpenAttack.attackers.GeneticAttacker()
     # After this step, we’ve initialized a GeneticAttacker and uses the default configuration during attack process.
 
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, clsf)
     # DefaultAttackEval is the default implementation for AttackEval which supports seven basic metrics.
 
     attack_eval.eval(dataset, visualize=True)

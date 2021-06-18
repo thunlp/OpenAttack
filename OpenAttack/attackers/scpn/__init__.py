@@ -1,10 +1,16 @@
-import os
-import pickle
-import numpy as np
-from ...utils import check_parameters
-from ...text_processors import DefaultTextProcessor
-from ...attacker import Attacker
+
+from typing import List, Optional
+from ...text_process.tokenizer import Tokenizer, get_default_tokenizer
+from ...text_process.constituency_parser import ConstituencyParser, get_default_constituency_parser
+from ...utils import check_language
+from ...tags import TAG_English, Tag
+
 from ...data_manager import DataManager
+from ..classification import ClassificationAttacker, ClassifierGoal, Classifier
+
+import numpy as np
+import pickle
+import torch
 
 DEFAULT_TEMPLATES = [
     '( ROOT ( S ( NP ) ( VP ) ( . ) ) ) EOP',
@@ -18,13 +24,6 @@ DEFAULT_TEMPLATES = [
     '( ROOT ( S ( ADVP ) ( NP ) ( VP ) ( . ) ) ) EOP',
     '( ROOT ( S ( SBAR ) ( , ) ( NP ) ( VP ) ( . ) ) ) EOP'
 ]
-
-DEFAULT_CONFIG = {
-    "templates": DEFAULT_TEMPLATES,
-    "device": None,
-    "processor": DefaultTextProcessor()
-}
-
 
 def reverse_bpe(sent):
     x = []
@@ -40,21 +39,33 @@ def reverse_bpe(sent):
     return ' '.join(x)
 
 
-class SCPNAttacker(Attacker):
-    def __init__(self, **kwargs):
-        """
-        :param list templates: A list of templates used in SCPNAttacker. **Default:** ten manually selected templates.
-        :param torch.device device: The device to load SCPN models (pytorch). **Default:** Use "cpu" if cuda is not available else "cuda".
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`.
-        
-        :Package Requirements:
-            * torch
-        :Data Requirements: :py:data:`.AttackAssist.SCPN`
-        :Classifier Capacity: Blind
+class SCPNAttacker(ClassificationAttacker):
 
+    @property
+    def TAGS(self):
+        return { Tag("get_pred", "victim"), self.__lang_tag }
+
+    def __init__(self, 
+            templates : List[str] = DEFAULT_TEMPLATES, 
+            device : Optional[torch.device] = None, 
+            tokenizer : Optional[Tokenizer] = None, 
+            parser : Optional[ConstituencyParser] = None
+        ):
+        """
         Adversarial Example Generation with Syntactically Controlled Paraphrase Networks. Mohit Iyyer, John Wieting, Kevin Gimpel, Luke Zettlemoyer. NAACL-HLT 2018.
         `[pdf] <https://www.aclweb.org/anthology/N18-1170.pdf>`__
         `[code] <https://github.com/miyyer/scpn>`__
+
+        Args:
+            templates: A list of templates used in SCPNAttacker. **Default:** ten manually selected templates.
+            device: The device to load SCPN models (pytorch). **Default:** Use "cpu" if cuda is not available else "cuda".
+            tokenizer: A tokenizer that will be used during the attack procedure. Must be an instance of :py:class:`.Tokenizer`
+            parser: A constituency parser.
+
+        
+        :Language: english
+        :Classifier Capacity: get_pred
+        
 
         The default templates are:
         
@@ -76,21 +87,32 @@ class SCPNAttacker(Attacker):
         """
         from . import models
         from . import subword
-        import torch
-
-        self.config = DEFAULT_CONFIG.copy()
-        self.config.update(kwargs)
-        check_parameters(DEFAULT_CONFIG, self.config)
         
-        if self.config["device"] is None:
+        
+        if device is None:
             if torch.cuda.is_available():
                 self.device = torch.device("cuda")
             else:
                 self.device = torch.device("cpu")
         else:
-            self.device = torch.device( self.config["device"] )
+            self.device = torch.device( device )
         
-        self.processor = self.config["processor"]
+        self.__lang_tag = TAG_English
+        
+        if tokenizer is None:
+            self.tokenizer = get_default_tokenizer(self.__lang_tag)
+        else:
+            self.tokenizer = tokenizer
+        
+        if parser is None:
+            self.parser = get_default_constituency_parser(self.__lang_tag)
+        else:
+            self.parser = parser
+        
+        check_language([self.parser, self.tokenizer], self.__lang_tag)
+
+        self.templates = templates
+        
 
         # Use DataManager Here
         model_path = DataManager.load("AttackAssist.SCPN")
@@ -124,8 +146,6 @@ class SCPNAttacker(Attacker):
         self.bpe = subword.BPE(bpe_codes, '@@', bpe_vocab, None)
 
     def gen_paraphrase(self, sent, templates):
-        import torch
-        
         template_lens = [len(x.split()) for x in templates]
         np_templates = np.zeros((len(templates), max(template_lens)), dtype='int32')
         for z, template in enumerate(templates):
@@ -133,7 +153,7 @@ class SCPNAttacker(Attacker):
         tp_templates = torch.from_numpy(np_templates).long().to(self.device)
         tp_template_lens = torch.LongTensor(template_lens).to(self.device)
 
-        ssent = ' '.join(list(map(lambda x:x[0], self.processor.get_tokens(sent))))
+        ssent =  ' '.join( self.tokenizer.tokenize(sent, pos_tagging=False) )
         seg_sent = self.bpe.segment(ssent.lower()).split()
         
         # encode sentence using pp_vocab, leave one word for EOS
@@ -146,7 +166,7 @@ class SCPNAttacker(Attacker):
 
         # encode parse using parse vocab
         # Stanford Parser
-        parse_tree = self.processor.get_parser(sent)
+        parse_tree = self.parser(sent)
         parse_tree = " ".join(parse_tree.replace("\n", " ").split()).replace("(", "( ").replace(")", " )")
         parse_tree = parse_tree.split()
 
@@ -182,26 +202,16 @@ class SCPNAttacker(Attacker):
             gen_sent = ' '.join([self.rev_pp_vocab[w] for w in seq[:-1]])
             ret.append(reverse_bpe(gen_sent.split()))
         return ret
-    def __call__(self, clsf, sent, target=None):
-        if target is None:
-            targeted = False
-            target = clsf.get_pred([sent])[0]  # calc x_orig's prediction
-        else:
-            targeted = True
-
+    
+    def attack(self, victim: Classifier, sent, goal: ClassifierGoal):
         try:
-            pps = self.gen_paraphrase(sent, self.config["templates"])
+            pps = self.gen_paraphrase(sent, self.templates)
         except KeyError as e:
             return None
-        preds = clsf.get_pred(pps)
+        preds = victim.get_pred(pps)
 
-        if targeted:
-            idx = (preds == target).argmax()
-            if preds[idx] == target:
-                return pps[idx], target
-        else:
-            idx = (preds == target).argmin()
-            if preds[idx] != target:
-                return pps[idx], preds[idx]
+        for idx, pred in enumerate(preds):
+            if goal.check(pps[idx], pred):
+                return pps[idx]
         return None
         

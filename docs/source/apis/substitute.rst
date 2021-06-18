@@ -2,101 +2,101 @@
 Substitutes API
 ======================
 
-WordSubstitute
-----------------
 
-.. autoclass:: OpenAttack.substitutes.base.WordSubstitute
+
+Abstract Classes
+------------------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.word.WordSubstitute
     :members: __call__
 
-CharSubstitute
-----------------
-
-.. autoclass:: OpenAttack.substitutes.base.CharSubstitute
+.. autoclass:: OpenAttack.attack_assist.substitute.char.CharSubstitute
     :members: __call__
 
-------------------------------------
+-------------------------------------------------------------------------------
+
 
 EmbedBasedSubstitute
 ----------------------
 
-.. autoclass:: OpenAttack.substitutes.EmbedBasedSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
-
-ChineseFYHCharSubstitute
---------------------------
-
-.. autoclass:: OpenAttack.substitutes.ChineseFYHCharSubstitute(OpenAttack.substitutes.CharSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.EmbedBasedSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 ChineseHowNetSubstitute
 -------------------------
 
-.. autoclass:: OpenAttack.substitutes.ChineseHowNetSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
-
-ChineseSimCharSubstitute
---------------------------
-
-.. autoclass:: OpenAttack.substitutes.ChineseSimCharSubstitute(OpenAttack.substitutes.CharSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.ChineseHowNetSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 ChineseWord2VecSubstitute
 ---------------------------
 
-.. autoclass:: OpenAttack.substitutes.ChineseWord2VecSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.ChineseWord2VecSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 ChineseWordNetSubstitute
 --------------------------
 
-.. autoclass:: OpenAttack.substitutes.ChineseWordNetSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.ChineseWordNetSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 CounterFittedSubstitute
 -------------------------
 
-.. autoclass:: OpenAttack.substitutes.CounterFittedSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
-    :members:
-
-DCESSubstitute
-----------------
-
-.. autoclass:: OpenAttack.substitutes.DCESSubstitute(OpenAttack.substitutes.CharSubstitute)
-    :members:
-
-ECESSubstitute
-----------------
-
-.. autoclass:: OpenAttack.substitutes.ECESSubstitute(OpenAttack.substitutes.CharSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.CounterFittedSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 ChineseCiLinSubstitute
 ------------------------
 
-.. autoclass:: OpenAttack.substitutes.ChineseCiLinSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.ChineseCiLinSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 GloveSubstitute
 -----------------
 
-.. autoclass:: OpenAttack.substitutes.GloveSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.GloveSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 HowNetSubstitute
 ------------------
 
-.. autoclass:: OpenAttack.substitutes.HowNetSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.HowNetSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 Word2VecSubstitute
 --------------------
 
-.. autoclass:: OpenAttack.substitutes.Word2VecSubstitute(OpenAttack.substitutes.EmbedBasedSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.Word2VecSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
 
 WordNetSubstitute
 -------------------
 
-.. autoclass:: OpenAttack.substitutes.WordNetSubstitute(OpenAttack.substitutes.WordSubstitute)
-    :members:
+.. autoclass:: OpenAttack.attack_assist.substitute.word.WordNetSubstitute(OpenAttack.attack_assist.substitute.word.WordSubstitute)
+    :members: __init__
+
+ChineseFYHCharSubstitute
+--------------------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.char.ChineseFYHCharSubstitute(OpenAttack.attack_assist.substitute.char.CharSubstitute)
+    :members: __init__
+
+ChineseSimCharSubstitute
+--------------------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.char.ChineseSimCharSubstitute(OpenAttack.attack_assist.substitute.char.CharSubstitute)
+    :members: __init__
+
+DCESSubstitute
+----------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.char.DCESSubstitute(OpenAttack.attack_assist.substitute.char.CharSubstitute)
+    :members: __init__
+
+ECESSubstitute
+----------------
+
+.. autoclass:: OpenAttack.attack_assist.substitute.char.ECESSubstitute(OpenAttack.attack_assist.substitute.char.CharSubstitute)
+    :members: __init__
 

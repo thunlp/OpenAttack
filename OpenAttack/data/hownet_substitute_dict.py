@@ -4,7 +4,7 @@ import os
 
 NAME = "AttackAssist.HownetSubstituteDict"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/hownet_candidate.zip"
+URL = "/TAADToolbox/hownet_candidate.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

@@ -60,12 +60,26 @@ HowNet
 
     .. automodule:: OpenAttack.data.hownet
 
+HownetSubstituteDict
+----------------------
+
+.. py:data:: AttackAssist.HownetSubstituteDict
+
+    .. automodule:: OpenAttack.data.hownet_substitute_dict
+
 SCPN
 ------
 
 .. py:data:: AttackAssist.SCPN
 
     .. automodule:: OpenAttack.data.scpn
+
+SentenceTransformer
+---------------------
+
+.. py:data:: AttackAssist.SentenceTransformer
+
+    .. automodule:: OpenAttack.data.sentence_transformer
 
 SGAN
 ------

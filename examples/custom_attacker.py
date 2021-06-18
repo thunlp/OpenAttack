@@ -5,35 +5,44 @@ import OpenAttack
 import random
 import datasets
 
-class MyAttacker(OpenAttack.Attacker):
-    def __init__(self, processor = OpenAttack.DefaultTextProcessor()):
-        self.processor = processor
+from OpenAttack.tags import Tag
+from OpenAttack.text_process.tokenizer import PunctTokenizer
+
+class MyAttacker(OpenAttack.attackers.ClassificationAttacker):
+    @property
+    def TAGS(self):
+        # returns tags can help OpenAttack to check your parameters automatically
+        return { self.lang_tag, Tag("get_pred", "victim") }
+
+    def __init__(self, tokenizer = None):
+        if tokenizer is None:
+            tokenizer = PunctTokenizer()
+        self.tokenizer = tokenizer
+        self.lang_tag = OpenAttack.utils.get_language([self.tokenizer])
         # We add parameter ``processor`` to specify the :py:class:`.TextProcessor` which is used for tokenization and detokenization.
         # By default, :py:class:`.DefaultTextProcessor` is used. 
     
-    def __call__(self, clsf, x_orig, target=None):
+    def attack(self, victim, input_, goal):
         # Generate a potential adversarial example
-        x_new = self.swap(x_orig)
+        x_new = self.tokenizer.detokenize(
+            self.swap( self.tokenizer.tokenize(input_, pos_tagging=False) )
+        )
         
         # Get the preidictions of victim classifier
-        y_orig, y_new = clsf.get_pred([ x_orig, x_new ])
+        y_new = victim.get_pred([ x_new ])
 
-        # Check for untargeted or targeted attack
-        if (target is None and y_orig != y_new) or target == y_new:
-            return x_new, y_new
-        else:
-            # Failed
-            return None
+        # Check for attack goal
+        if goal.check(x_new, y_new):
+            return x_new
+        # Failed
+        return None
     
-    def swap(self, sentence):
-        # Get tokens of sentence
-        tokens = [ token for token, pos in self.processor.get_tokens(sentence) ]
-        
+    def swap(self, sentence):        
         # Shuffle tokens to generate a potential adversarial example
-        random.shuffle(tokens)
-        
+        random.shuffle(sentence)
+
         # Return the potential adversarial example
-        return self.processor.detokenizer(tokens)
+        return sentence
 
 def dataset_mapping(x):
     return {
@@ -42,11 +51,11 @@ def dataset_mapping(x):
     }
 
 def main():
-    clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+    clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
     dataset = datasets.load_dataset("sst", split="train[:10]").map(function=dataset_mapping)
 
     attacker = MyAttacker()
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, clsf)
     attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":

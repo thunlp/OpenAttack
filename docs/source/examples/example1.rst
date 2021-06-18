@@ -3,6 +3,7 @@ Basic Usage
 ========================
 
 This example shows a basic workflow of OpenAttack which consists of four main steps:
+
 * Initializing classifier
 * Loading dataset
 * Initializing attacker
@@ -13,12 +14,11 @@ Initializing Classifier
 
 .. code-block:: python
     
-    clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+    clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
 
-:py:data:`.Victim.BiLSTM.SST` is a pytorch model which is trained on SST dataset.
-It uses :py:data:`Glove` vectors for word representation.
+:py:data:`.Victim.BERT.SST` is a pytorch model which is trained on SST dataset.
 
-The load operation returns a :py:class:`.PytorchClassifier` that can be further used for *Attacker* and *AttackEval*.
+The load operation returns a :py:class:`.Classifier` that can be further used for *Attacker* and *AttackEval*.
 
 
 Loading dataset
@@ -35,7 +35,7 @@ Loading dataset
 
 We use the datasets package to manage our data, through which we load the data and map the fields to their corresponding places.
 
-For each data instance, x means the attacked text and y means the true label of the data.
+For each data instance, `x` means the attacked text and `y` means the true label of the data.
 
 
 Initializing Attacker
@@ -55,10 +55,10 @@ Evaluation
 .. code-block:: python
     :linenos:
 
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, clsf)
     attack_eval.eval(dataset, visualize=True)
 
-:py:class:`.DefaultAttackEval` is the default implementation for AttackEval which supports seven basic metrics.
+:py:class:`.AttackEval` is the class used for evaluation. It has many options however we will not go into details here.
 
 Using ``visualize=True`` in `attack_eval.eval` can make it displays a visualized result.
 This function is really useful for analyzing small datasets.
@@ -73,16 +73,16 @@ Complete Code
     import OpenAttack
     import datasets
     def main():
-        clsf = OpenAttack.DataManager.load("Victim.BiLSTM.SST")
+        clsf = OpenAttack.loadVictim("BERT.SST")
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
                 "y": 1 if x["label"] > 0.5 else 0,
             }
-        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
-
+        dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
         attacker = OpenAttack.attackers.GeneticAttacker()
-        attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, clsf)
         attack_eval.eval(dataset, visualize=True)
+
 
 Run ``python examples/workflow.py`` to see visualized results.

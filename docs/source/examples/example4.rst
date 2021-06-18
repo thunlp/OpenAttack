@@ -2,76 +2,47 @@
 Customized Measurement
 ============================================
 
-In this example, we write a new AttackEval to evaluate attackers and report average bleu score.
-This example is a bit harder than the other tree examples because a deeper understanding of OpenAttack is needed.
+In this example, we write a new AttackMetric to evaluate attackers and report average input length.
 
-Initialize AttackEval
------------------------
-
-.. code-block:: python
-    :linenos:
-
-    class CustomAttackEval(OpenAttack.DefaultAttackEval):
-        def __init__(self, attacker, clsf, processor=OpenAttack.DefaultTextProcessor(), **kwargs):
-            super().__init__(attacker, clsf, processor=processor, **kwargs)
-            self.__processor = processor
-            self.__result = {}
-
-We extend :py:class:`.DefaultAttackEval` and use ``processor`` option to specify the :py:class:`.TextProcessor`
-used in our ``CustomAttackEval``.
-
-
-Override Measure Method
------------------------------
+Write a New AttackMetric
+---------------------------
 
 .. code-block:: python
     :linenos:
 
-    def measure(self, x_orig, x_adv):
-        info = super().measure(x_orig, x_adv)
+    class SentenceLength(OpenAttack.AttackMetric):
+        NAME = "Input Length"
 
-        if info["Succeed"]:
-            token_orig = [token for token, pos in self.__processor.get_tokens(x_orig)]
-            token_adv = [token for token, pos in self.__processor.get_tokens(x_adv)]
-            info["Bleu"] = sentence_bleu([x_orig], x_adv)
-
-        return info
-
-In this step, ``measure`` method is overriden.
-It invokes the original ``measure`` method to get measurements and add ``Blue`` score which is calculated by **NLTK toolkit** if attack succeed.
+        def after_attack(self, input, adversarial_sample):
+            return len(input["x"].split(" "))
 
 
-Accumulate Measurements
-------------------------------
+We extend :py:class:`.AttackMetric` and override `after_attack` method to report the length of attacked sentence (assume that words are separated by white spaces).
+
+``NAME`` attribute  indicates the name of the ``AttackMetric`` that will show out in the final result.
+
+
+Apply AttackMetrics in AttackEval
+----------------------------------
 
 .. code-block:: python
     :linenos:
 
-    def update(self, info):
-        info = super().update(info)
-        if info["Succeed"]:
-            self.__result["bleu"] += info["Bleu"]
-        return info
+    attack_eval = OpenAttack.AttackEval(attacker, clsf, metrics=[
+        SentenceLength()
+    ])
 
-``update`` method is used to accumulate results. 
-We add bleu score that we just calculated to the total result.
-Don't forget to call ``super().update(info)``.
+``AttackEval`` supports the ``metrics`` option to specify evaluation metrics.
 
-Generate Summary
--------------------------
+There are some built-in metrics in ``OpenAttack``:
 
-.. code-block:: python
-    :linenos:
+* OpenAttack.metric.Fluency()
+* OpenAttack.metric.GrammaticalErrors()
+* OpenAttack.metric.SemanticSimilarity()
+* OpenAttack.metric.EditDistance()
+* OpenAttack.metric.ModificationRate()
 
-    def get_result(self):
-        result = super().get_result()
-        result["Avg. Bleu"] = self.__result["bleu"] / result["Successful Instances"]
-        return result
-
-The ``get_result`` method is called to generate a summary after all data is evaluated.
-In this method, we calculate average bleu scores and return.
-
-You can see :py:class:`.DefaultAttackEval` for more information.
+These metrics are common in most attack evaluations.
 
 Complete Code
 --------------------------
@@ -81,54 +52,25 @@ Complete Code
     :name: examples/custom_measurement.py
 
     import OpenAttack
-    from nltk.translate.bleu_score import sentence_bleu
-
-    class CustomAttackEval(OpenAttack.DefaultAttackEval):
-        def __init__(self, attacker, clsf, processor=OpenAttack.DefaultTextProcessor(), **kwargs):
-            super().__init__(attacker, clsf, processor=processor, **kwargs)
-            self.__processor = processor
-        
-        
-        def measure(self, x_orig, x_adv):
-            info = super().measure(x_orig, x_adv)
-
-            if info["Succeed"]:
-                token_orig = [token for token, pos in self.__processor.get_tokens(x_orig)]
-                token_adv = [token for token, pos in self.__processor.get_tokens(x_adv)]
-                info["Bleu"] = sentence_bleu([x_orig], x_adv)
-
-            return info
-        
-        def update(self, info):
-            info = super().update(info)
-            if info["Succeed"]:
-                self.__result["bleu"] += info["Bleu"]
-            return info
-        
-        def clear(self):
-            super().clear()
-            self.__result = { "bleu": 0 }
-        
-        def get_result(self):
-            result = super().get_result()
-            result["Avg. Bleu"] = self.__result["bleu"] / result["Successful Instances"]
-            return result
-        
-
+    import datasets
+    class SentenceLength(OpenAttack.AttackMetric):
+        NAME = "Input Length"
+        def after_attack(self, input, adversarial_sample):
+            return len(input["x"].split(" "))
     def main():
-        clsf = OpenAttack.load("Victim.BiLSTM.SST")
+        clsf = OpenAttack.load("Victim.BERT.SST")
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
                 "y": 1 if x["label"] > 0.5 else 0,
             }
-        dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
-
+        dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
         attacker = OpenAttack.attackers.GeneticAttacker()
-        attack_eval = CustomAttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, clsf, metrics=[
+            SentenceLength()
+        ])
         attack_eval.eval(dataset, visualize=True)
 
-    if __name__ == "__main__":
-        main()
 
-Run ``python examples/custom_eval.py`` to see visualized results.
+
+Run ``python examples/custom_metrics.py`` to see visualized results.

@@ -11,7 +11,7 @@ import os
 
 NAME = "TProcess.StanfordNER"
 
-URL = "https://cdn.data.thunlp.org/TAADToolbox/stanford_ner_small.zip"
+URL = "/TAADToolbox/stanford_ner_small.zip"
 DOWNLOAD = make_zip_downloader(URL)
 
 

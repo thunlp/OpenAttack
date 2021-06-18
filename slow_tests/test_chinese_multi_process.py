@@ -6,14 +6,13 @@ sys.path.insert(0, os.path.join(
 
 import OpenAttack
 from attackers_chinese import get_attackers_on_chinese
-from wrapper import TimeCalcClsf
 
 def dataset_mapping(x):
     return {
-        "x": x["sentence"],
-        "y": 1 if x["label"] > 0.5 else 0,
+        "x": x["review_body"],
+        "y": x["stars"],
     }
-
+    
 def main():
     import multiprocessing
     if multiprocessing.get_start_method() != "spawn":
@@ -24,12 +23,10 @@ def main():
 
     for attacker in attackers:
         print(attacker.__class__.__name__)
-        time_clsf = TimeCalcClsf(clsf)
         try:
             st = time.perf_counter()
             print(
-                OpenAttack.attack_evals.MultiProcessAttackEval(attacker, time_clsf, num_process=2, progress_bar=False).eval(dataset),
-                time_clsf.total_time,
+                OpenAttack.AttackEval(attacker, clsf, language="chinese").eval(dataset, num_workers=2, progress_bar=False),
                 time.perf_counter() - st
             )
         except Exception as e:

@@ -1,39 +1,35 @@
 # data manager
 from .data_manager import DataManager
 
-# text processor
-from .text_processor import TextProcessor
-from .text_processors import DefaultTextProcessor
-
 # attacker
-from .attacker import Attacker
 from . import attackers
+from .attackers import Attacker, ClassificationAttacker
 
-# classifier
-from .classifier import Classifier
+# victim
+from . import victim
+from .victim import classifiers
+from .victim import Victim
+from .victim.classifiers import Classifier
 
-from .classifiers import PytorchClassifier, TensorflowClassifier, HuggingfaceClassifier
-from . import classifiers
+# metrics
+from . import metric
+from .metric import AttackMetric
 
 # attack_eval
 from .attack_eval import AttackEval
-from .attack_evals import DefaultAttackEval
-from . import attack_evals
+
+# attack_assist
+from .attack_assist import goal, substitute, word_embedding, filter_words
 
 # exception
 from . import exceptions
 from .exception import AttackException
-
-# substitute
-from .substitute import Substitute
-from . import substitutes
 
 # utils
 from . import utils
 
 download = DataManager.download
 load = DataManager.load
-loadDataset = DataManager.loadDataset
 loadAttackAssist = DataManager.loadAttackAssist
 loadVictim = DataManager.loadVictim
 loadTProcess = DataManager.loadTProcess

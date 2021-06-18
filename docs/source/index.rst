@@ -1,49 +1,12 @@
+=======================================
 OpenAttack
 =======================================
 
-OpenAttack is an open-source Python-based textual adversarial attack toolkit, 
-which handles the whole process of textual adversarial attacking, including 
-preprocessing text, accessing the victim model, generating adversarial examples 
-and evaluation.
+topic-trees
+========================
 
-------------------
-Uses
-------------------
-
-OpenAttack has following features:
-
-1. **High usability.** OpenAttack provides easy-to-use APIs that can support the whole process of textual adversarial attacks;
-2. **Full coverage of attack model types.** OpenAttack supports sentence-/word-/character-level perturbations and gradient-/score-/decision-based/blind attack models;
-3. **Great flexibility and extensibility.** You can easily attack a customized victim model or develop and evaluate a customized attack model;
-4. **Comprehensive Evaluation.** OpenAttack can thoroughly evaluate an attack model from attack effectiveness, adversarial example quality and attack efficiency.
-
-
-OpenAttack has a wide range of uses, including:
-
-1. Providing various handy baselines for attack models;
-2. Comprehensively evaluating attack models using its thorough evaluation metrics;
-3. Assisting in quick development of new attack models with the help of its common attack components;
-4. Evaluating the robustness of a machine learning model against various adversarial attacks;
-5. Conducting adversarial training to improve robustness of a machine learning model by enriching the training data with generated adversarial examples.
-
-
----------------
-Toolkit Design
----------------
-
-Considering the significant distinctions among different attack models, we leave considerable freedom for the skeleton design of attack models, and focus more on streamlining the general processing of adversarial attacking and the common components used in attack models.
-
-OpenAttack has 7 main modules:
-
-.. image:: /images/toolkit_framework.png
-
-* **TextProcessor**: processing the original text sequence so as to assist attack models in generating adversarial examples.
-* **Classifier**: wrapping victim classification models
-* **Attacker**: involving various attack models
-* **Substitute**: packing different word/character substitution methods which are widely used in word- and character-level attack models.
-* **Metric**: providing several adversarial example quality metrics which can serve as either the constraints on the adversarial examples during attacking or evaluation metrics for evaluating adversarial attacks.
-* **AttackEval**: evaluating textual adversarial attacks from attack effectiveness, adversarial example quality and attack efficiency.
-* **DataManager**: managing all the data as well as saved models that are used in other modules
+.. toctree::
+   Home <self>
 
 .. toctree::
    :maxdepth: 1
@@ -61,7 +24,7 @@ OpenAttack has 7 main modules:
    Example 1: Basic Usage <examples/example1>
    Example 2: Customized Victim Model <examples/example2>
    Example 3: Customized Attack Model <examples/example3>
-   Example 4: Customized Evaluation <examples/example4>
+   Example 4: Customized Measurement <examples/example4>
    Example 5: Adversarial Training <examples/example5>
    Example 6: Attacks on Chinese Dataset <examples/example6>
 
@@ -76,7 +39,7 @@ OpenAttack has 7 main modules:
    Metric <apis/metric>
    TextProcessor <apis/text_processor>
    AttackEval <apis/attack_eval>
-   Classifier <apis/classifier>
+   Victim <apis/victim>
    utils <apis/utils>
 
 .. toctree::
@@ -88,7 +51,98 @@ OpenAttack has 7 main modules:
    TProcess <data/TProcess>
    Victim <data/Victim>
 
-Indices and tables
-==================
+project-slogans
+========================
 
-* :ref:`search`
+.. topic:: project slogan short
+    :class: project-slogan-short
+
+    An Open-Source Package for Textual Adversarial Attack. 
+
+.. topic:: project slogan long
+    :class: project-slogan-long
+
+    OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation.
+
+.. image:: images/project-image.png
+    :class: project-image
+
+.. topic:: install link
+    :class: link-button
+
+    :doc:`Install</quickstart/installation>`
+
+.. topic:: quickstart link
+    :class: link-button
+
+    :doc:`Quick Start</quickstart/introduction>`
+
+project-features
+========================
+
+.. topic:: project-feature-1
+    :class: project-feature
+
+    .. image:: images/project-feature-1.svg
+
+    feature 1
+
+        feature 1 description
+
+.. topic:: project-feature-2
+    :class: project-feature
+
+    .. image:: images/project-feature-2.png
+
+    feature 2
+
+        feature 2 description
+
+
+.. topic:: project-feature-3
+    :class: project-feature
+
+    .. image:: images/project-feature-3.svg
+
+    feature 3
+
+        feature 3 description
+
+data-results
+========================
+
+Data Results
+--------------
+
+.. topic:: data results
+    :class: align-center
+
+    Nunc porta erat ut lectus posuere molestie. Vestibulum risus ligula, rhoncus eleifend rhoncus sed, malesuada id metus. Aenean lorem nibh, varius fermentum viverra vel, efficitur nec elit. Nunc porta erat ut lectus posuere molestie. Vestibulum risus ligula, rhoncus eleifend rhoncus sed, malesuada id metus. Aenean lorem nibh, varius fermentum v
+
+.. topic:: data result list
+    :class: data-result
+
+    .. container::
+
+        .. image:: images/project-results-1.png
+
+        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+
+    .. container::
+
+        .. image:: images/project-results-2.png
+
+        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+
+    .. container::
+
+        .. image:: images/project-results-3.png
+
+        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+
+    .. container::
+
+        .. image:: images/project-results-4.png
+
+        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+

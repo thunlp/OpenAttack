@@ -4,14 +4,20 @@ This example code shows how to use the genetic algorithm-based attack model to a
 import OpenAttack
 import numpy as np
 import datasets
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 # configure access interface of the customized victim model by extending OpenAttack.Classifier.
 class MyClassifier(OpenAttack.Classifier):
     def __init__(self):
         # nltk.sentiment.vader.SentimentIntensityAnalyzer is a traditional sentiment classification model.
+        nltk.download('vader_lexicon')
         self.model = SentimentIntensityAnalyzer()
     
+    def get_pred(self, input_):
+        return self.get_prob(input_).argmax(axis=1)
+
     # access to the classification probability scores with respect input sentences
     def get_prob(self, input_):
         ret = []
@@ -42,7 +48,7 @@ def main():
     # choose PWWS as the attacker and initialize it with default parameters
     attacker = OpenAttack.attackers.PWWSAttacker()
     # prepare for attacking
-    attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, clsf)
     # launch attacks and print attack results 
     attack_eval.eval(dataset, visualize=True)
 
