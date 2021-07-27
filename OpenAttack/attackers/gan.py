@@ -191,7 +191,7 @@ class GANAttacker(Attacker):
             if "." in words:
                 words = words[:words.index(".")]
             for i in range(len(words)):
-                if words[i] is "<oov>":
+                if words[i] == "<oov>":
                     words[i] = ""
             sent = self.config["processor"].detokenizer(words)
             pred = clsf.get_pred([sent])[0]
