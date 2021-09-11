@@ -48,6 +48,12 @@ GANAttacker
 .. autoclass:: OpenAttack.attackers.GANAttacker(OpenAttack.attackers.ClassificationAttacker)
     :members: __init__
 
+GEOAttacker
+-------------
+
+.. autoclass:: OpenAttack.attackers.GEOAttacker(OpenAttack.attackers.ClassificationAttacker)
+    :members: __init__
+
 GeneticAttacker
 -----------------
 

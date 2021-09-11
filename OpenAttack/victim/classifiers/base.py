@@ -1,4 +1,5 @@
-from typing import Dict
+from typing import Callable, Dict, List, Tuple
+import numpy as np
 from ..base import Victim
 from .methods import *
 from ...tags import Tag, TAG_Classification
@@ -14,6 +15,9 @@ class Classifier(Victim):
     """
     Classifier is the base class of all classifiers.
     """
+    get_pred : Callable[[List[str]], np.ndarray]
+    get_prob : Callable[[List[str]], np.ndarray]
+    get_grad : Callable[[List[str]], Tuple[np.ndarray, np.ndarray]]
     def __init_subclass__(cls):
         invoke_funcs = []
         tags = [ TAG_Classification ]

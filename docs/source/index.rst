@@ -64,9 +64,6 @@ project-slogans
 
     OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation.
 
-.. image:: images/project-image.png
-    :class: project-image
-
 .. topic:: install link
     :class: link-button
 
@@ -83,66 +80,86 @@ project-features
 .. topic:: project-feature-1
     :class: project-feature
 
-    .. image:: images/project-feature-1.svg
+    .. image:: images/全部.png
 
-    feature 1
+    All-type Support 
 
-        feature 1 description
+        OpenAttack supports all types of attacks including sentence-/word-/character-level perturbations and gradient-/score-/decision-based/blind attack models;
 
 .. topic:: project-feature-2
     :class: project-feature
 
-    .. image:: images/project-feature-2.png
+    .. image:: images/多语言.png
 
-    feature 2
+    Multilinguality
 
-        feature 2 description
+        OpenAttack supports English and Chinese now. Its extensible design enables quick support for more languages
 
 
 .. topic:: project-feature-3
     :class: project-feature
 
-    .. image:: images/project-feature-3.svg
+    .. image:: images/并行数据挖掘.png
 
-    feature 3
+    Parallel processing 
 
-        feature 3 description
+        OpenAttack provides support for multi-process running of attack models to improve attack efficiency
+
+.. topic:: project-feature-4
+    :class: project-feature
+
+    .. image:: images/huggingface.png
+
+    Compatibility with 🤗
+
+        OpenAttack is fully integrated with 🤗 Transformers and Datasets libraries;
+
+.. topic:: project-feature-5
+    :class: project-feature
+
+    .. image:: images/可扩展性强.png
+
+    Extensibility
+
+        You can easily attack a customized victim model on any customized dataset or develop and evaluate a customized attack model.
+
 
 data-results
 ========================
 
-Data Results
+Uses
 --------------
-
-.. topic:: data results
-    :class: align-center
-
-    Nunc porta erat ut lectus posuere molestie. Vestibulum risus ligula, rhoncus eleifend rhoncus sed, malesuada id metus. Aenean lorem nibh, varius fermentum viverra vel, efficitur nec elit. Nunc porta erat ut lectus posuere molestie. Vestibulum risus ligula, rhoncus eleifend rhoncus sed, malesuada id metus. Aenean lorem nibh, varius fermentum v
 
 .. topic:: data result list
     :class: data-result
 
     .. container::
 
-        .. image:: images/project-results-1.png
+        .. image:: images/Align_baseline+row.png
 
-        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
-
-    .. container::
-
-        .. image:: images/project-results-2.png
-
-        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+        Attack Baseline
 
     .. container::
 
-        .. image:: images/project-results-3.png
+        .. image:: images/攻击.png
 
-        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+        Attack Evaluation 
 
     .. container::
 
-        .. image:: images/project-results-4.png
+        .. image:: images/开发套件.png
 
-        Nunc porta erat ut lectus posuere molestie. Nunc porta erat ut
+        Develop New Attack Models
+
+    .. container::
+
+        .. image:: images/盾牌.png
+
+        Evaluate Robustness
+
+    .. container::
+
+        .. image:: images/训练.png
+
+        Adversarial Training
 

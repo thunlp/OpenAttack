@@ -60,5 +60,6 @@ html_codeblock_linenos_style = "table"
 add_module_names = False
 autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
-
+html_static_path = ['_static']
+html_css_files = ["css/custom.css"]
 master_doc = 'index'

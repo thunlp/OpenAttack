@@ -1,5 +1,6 @@
 
 import functools
+from typing import Union
 from .context import AttackContext, AttackContextShadow
 from ..exceptions import InvokeLimitExceeded
 from .method import VictimMethod
@@ -37,7 +38,7 @@ class Victim:
         self._Victim__context = None
     
     @property
-    def context(self):
+    def context(self) -> Union[None, AttackContextShadow]:
         if not hasattr(self, "_Victim__context"):
             return None
         else:

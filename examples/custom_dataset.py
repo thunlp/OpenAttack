@@ -1,12 +1,6 @@
 import OpenAttack
 import transformers
 import datasets
-
-def dataset_mapping(x):
-    return {
-        "x": x["sentence"],
-        "y": 1 if x["label"] > 0.5 else 0,
-    }
     
 def main():
     print("Load model")
@@ -17,7 +11,17 @@ def main():
     print("New Attacker")
     attacker = OpenAttack.attackers.PWWSAttacker()
 
-    dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
+    # create your dataset here
+    dataset = datasets.Dataset.from_dict({
+        "x": [
+            "I hate this movie.",
+            "I like this apple."
+        ],
+        "y": [
+            0, # 0 for negative
+            1, # 1 for positive
+        ]
+    })
 
     print("Start attack")
     attack_eval = OpenAttack.AttackEval(attacker, clsf, metrics = [

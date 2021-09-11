@@ -18,20 +18,6 @@ ALBERT.IMDB
 
     .. automodule:: OpenAttack.data.victim_albert_imdb
 
-ALBERT.MNLI
--------------
-
-.. py:data:: Victim.ALBERT.MNLI
-
-    .. automodule:: OpenAttack.data.victim_albert_mnli
-
-ALBERT.SNLI
--------------
-
-.. py:data:: Victim.ALBERT.SNLI
-
-    .. automodule:: OpenAttack.data.victim_albert_snli
-
 ALBERT.SST
 ------------
 
@@ -53,20 +39,6 @@ BERT.AMAZON_ZH
 
     .. automodule:: OpenAttack.data.victim_bert_amazon_zh
 
-BERT.MNLI
------------
-
-.. py:data:: Victim.BERT.MNLI
-
-    .. automodule:: OpenAttack.data.victim_bert_mnli
-
-BERT.SNLI
------------
-
-.. py:data:: Victim.BERT.SNLI
-
-    .. automodule:: OpenAttack.data.victim_bert_snli
-
 ROBERTA.AG
 ------------
 
@@ -80,20 +52,6 @@ ROBERTA.IMDB
 .. py:data:: Victim.ROBERTA.IMDB
 
     .. automodule:: OpenAttack.data.victim_roberta_imdb
-
-ROBERTA.MNLI
---------------
-
-.. py:data:: Victim.ROBERTA.MNLI
-
-    .. automodule:: OpenAttack.data.victim_roberta_mnli
-
-ROBERTA.SNLI
---------------
-
-.. py:data:: Victim.ROBERTA.SNLI
-
-    .. automodule:: OpenAttack.data.victim_roberta_snli
 
 ROBERTA.SST
 -------------
@@ -115,20 +73,6 @@ XLNET.IMDB
 .. py:data:: Victim.XLNET.IMDB
 
     .. automodule:: OpenAttack.data.victim_xlnet_imdb
-
-XLNET.MNLI
-------------
-
-.. py:data:: Victim.XLNET.MNLI
-
-    .. automodule:: OpenAttack.data.victim_xlnet_mnli
-
-XLNET.SNLI
-------------
-
-.. py:data:: Victim.XLNET.SNLI
-
-    .. automodule:: OpenAttack.data.victim_xlnet_snli
 
 XLNET.SST
 -----------

@@ -997,8 +997,8 @@ class GEOAttacker(ClassificationAttacker):
             **kwargs):
         """
         :param float threshold: Threshold used in substitute module. **Default:** 0.5
-        :param WordSubstitute substitute: Substitute method used in this attacker. **Default:** :any:`WordNetSubstitute`
-        :param TextProcessor processor: Text processor used in this attacker. **Default:** :any:`DefaultTextProcessor`
+        :param WordSubstitute substitute: Substitute method used in this attacker.
+        :param TextProcessor processor: Text processor used in this attacker.
         :param str token_unk: A token which means "unknown token" in Classifier's vocabulary.
 
         :Classifier Capacity: Probability

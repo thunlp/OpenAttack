@@ -23,6 +23,13 @@ class AttackContext:
             super().__setattr__(name, value)
 
 class AttackContextShadow:
+    invoke : int
+    invoke_limit : int
+    attacker_start : float
+    attacker_time_del : int
+    attacker_time : int
+    input : dict
+
     def __init__(self, ctx) -> None:
         self.__ctx = ctx
     
