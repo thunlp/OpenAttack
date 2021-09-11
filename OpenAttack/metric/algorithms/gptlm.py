@@ -46,6 +46,6 @@ class GPT2LMChinese(AttackMetric):
         """
         ## TODO train a pytorch chinese gpt-2 model
         self.tokenizer = transformers.BertTokenizer.from_pretrained("mymusise/EasternFantasyNoval")
-        self.lm = transformers.TFGPT2LMHeadModel.from_pretrained("mymusise/EasternFantasyNoval")
+        self.lm = transformers.GPT2LMHeadModel.from_pretrained("mymusise/EasternFantasyNoval", from_tf=True)
 
     ## FIXME after_attack

@@ -46,7 +46,9 @@ class BAEAttacker(ClassificationAttacker):
         BAE: BERT-based Adversarial Examples for Text Classification. Siddhant Garg, Goutham Ramakrishnan. EMNLP 2020. 
         `[pdf] <https://arxiv.org/abs/2004.01970>`__
         `[code] <https://github.com/QData/TextAttack/blob/master/textattack/attack_recipes/bae_garg_2019.py>`__
+
         This script is adapted from <https://github.com/LinyangLee/BERT-Attack> given the high similarity between the two attack methods.
+        
         This attacker supports the 4 attack methods (BAE-R, BAE-I, BAE-R/I, BAE-R+I) in the paper. 
 
         Args:

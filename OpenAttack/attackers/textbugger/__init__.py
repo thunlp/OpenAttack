@@ -40,7 +40,7 @@ class TextBuggerAttacker(ClassificationAttacker):
             lang: The language used in attacker. If is `None` then `attacker` will intelligently select the language based on other parameters.
             filter_words: A list of words that will be preserved in the attack procesudre.
 
-        :Classifier Capacity
+        :Classifier Capacity:
             * get_pred
             * get_prob `if blackbox = True`
             * get_grad `if blackbox = False`
