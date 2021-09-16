@@ -1,3 +1,6 @@
+'''
+This example code shows how to conduct adversarial attacks against a Chinese review classification model using PWWS
+'''
 import OpenAttack
 import datasets
 
@@ -12,13 +15,13 @@ def main():
     attacker = OpenAttack.attackers.PWWSAttacker(lang="chinese")
 
     print("Building model")
-    clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
+    victim = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
 
     print("Loading dataset")
     dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
 if __name__ == "__main__":

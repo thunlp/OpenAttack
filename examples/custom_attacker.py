@@ -1,5 +1,5 @@
 '''
-This example code shows how to design a simple customized attack model which shuffles the tokens in the original sentence.
+This example code shows how to design a customized attack model (that shuffles the tokens in the original sentence).
 '''
 import OpenAttack
 import random
@@ -51,11 +51,11 @@ def dataset_mapping(x):
     }
 
 def main():
-    clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
+    victim = OpenAttack.loadVictim("BERT.SST")
     dataset = datasets.load_dataset("sst", split="train[:10]").map(function=dataset_mapping)
 
     attacker = MyAttacker()
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     attack_eval.eval(dataset, visualize=True)
 
 if __name__ == "__main__":

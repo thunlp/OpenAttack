@@ -1,3 +1,6 @@
+'''
+This example code shows how to conduct adversarial attacks against a sentence pair classification (NLI) model
+'''
 import OpenAttack
 import transformers
 import datasets
@@ -29,8 +32,8 @@ def main():
     print("Load model")
     tokenizer = transformers.AutoTokenizer.from_pretrained("roberta-large-mnli")
     model = transformers.AutoModelForSequenceClassification.from_pretrained("roberta-large-mnli", output_hidden_states=False)
-    clsf = OpenAttack.classifiers.TransformersClassifier (model, tokenizer, model.roberta.embeddings.word_embeddings)
-    clsf = NLIWrapper(clsf)
+    victim = OpenAttack.classifiers.TransformersClassifier(model, tokenizer, model.roberta.embeddings.word_embeddings)
+    victim = NLIWrapper(victim)
 
     print("New Attacker")
     attacker = OpenAttack.attackers.PWWSAttacker()
@@ -38,7 +41,7 @@ def main():
     dataset = datasets.load_dataset("glue", "mnli", split="train[:20]").map(function=dataset_mapping)
 
     print("Start attack")
-    attack_eval = OpenAttack.AttackEval(attacker, clsf, metrics = [
+    attack_eval = OpenAttack.AttackEval(attacker, victim, metrics = [
         OpenAttack.metric.EditDistance(),
         OpenAttack.metric.ModificationRate()
     ])

@@ -1,5 +1,5 @@
 '''
-This example code shows how to  how to use a genetic algorithm-based attack model to attack BiLSTM on the SST dataset.
+This example code shows how to using multiprocessing to accelerate adversarial attacks
 '''
 import OpenAttack
 import datasets
@@ -12,7 +12,7 @@ def dataset_mapping(x):
     
     
 def main():
-    clsf = OpenAttack.loadVictim("BERT.SST")
+    victim = OpenAttack.loadVictim("BERT.SST")
     # Victim.BiLSTM.SST is a pytorch model which is trained on Dataset.SST. It uses Glove vectors for word representation.
     # The load operation returns a PytorchClassifier that can be further used for Attacker and AttackEval.
 
@@ -22,11 +22,11 @@ def main():
     attacker = OpenAttack.attackers.GeneticAttacker()
     # After this step, we’ve initialized a GeneticAttacker and uses the default configuration during attack process.
 
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     # DefaultAttackEval is the default implementation for AttackEval which supports seven basic metrics.
 
     attack_eval.eval(dataset, visualize=True, num_workers=4)
-    # Using visualize=True in attack_eval.eval can make it displays a visualized result. This function is really useful for analyzing small datasets.
+    # Using multiprocessing by specify num_workers
 
 if __name__ == "__main__":
     main()

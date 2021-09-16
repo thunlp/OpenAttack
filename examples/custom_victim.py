@@ -1,5 +1,5 @@
 '''
-This example code shows how to use the genetic algorithm-based attack model to attack a customized sentiment analysis model.
+This example code shows how to use the PWWS attack model to attack a customized sentiment analysis model.
 '''
 import OpenAttack
 import numpy as np
@@ -41,14 +41,14 @@ def dataset_mapping(x):
     }
     
 def main():
-    # load Dataset.SST.sample for evaluation
+    # load some examples of SST-2 for evaluation
     dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
-    # choose the costomized classifier as the victim classification model
-    clsf = MyClassifier()
+    # choose the costomized classifier as the victim model
+    victim = MyClassifier()
     # choose PWWS as the attacker and initialize it with default parameters
     attacker = OpenAttack.attackers.PWWSAttacker()
     # prepare for attacking
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     # launch attacks and print attack results 
     attack_eval.eval(dataset, visualize=True)
 

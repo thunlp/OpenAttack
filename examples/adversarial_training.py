@@ -111,10 +111,10 @@ def train_epoch(model, dataset, vocab, batch_size=128, learning_rate=5e-3):
         avg_loss += loss.item()
     return avg_loss / len(dataset)
 
-def eval_classifier_acc(dataset, clsf):
+def eval_classifier_acc(dataset, victim):
     correct = 0
     for inst in dataset:
-        correct += (clsf.get_pred( [inst["x"]] )[0] == inst["y"])
+        correct += (victim.get_pred( [inst["x"]] )[0] == inst["y"])
     return correct / len(dataset)
 
 # Train the victim model and conduct evaluation
@@ -123,8 +123,8 @@ def train_model(model, data_train, data_valid, vocab, num_epoch=10):
     mx_model = None
     for i in range(num_epoch):
         loss = train_epoch(model, data_train, vocab)
-        clsf = MyClassifier(model, vocab)
-        accuracy = eval_classifier_acc(data_valid, clsf)
+        victim = MyClassifier(model, vocab)
+        accuracy = eval_classifier_acc(data_valid, victim)
         print("Epoch %d: loss: %lf, accuracy %lf" % (i, loss, accuracy))
         if mx_acc is None or mx_acc < accuracy:
             mx_model = model.state_dict()
@@ -170,8 +170,8 @@ def main():
     trained_model = train_model(model, train, valid, vocab) # Train the victim model
     
     print("Generating adversarial samples (this step will take dozens of minutes)")
-    clsf = MyClassifier(trained_model, vocab) # Wrap the victim model
-    adversarial_samples = attack(clsf, train) # Conduct adversarial attacks and generate adversarial examples
+    victim = MyClassifier(trained_model, vocab) # Wrap the victim model
+    adversarial_samples = attack(victim, train) # Conduct adversarial attacks and generate adversarial examples
 
     print("Adversarially training classifier")
     print(train.features)
@@ -195,7 +195,7 @@ def main():
     finetune_model = train_model(trained_model, datasets.Dataset.from_dict(new_dataset), valid, vocab) # Retrain the classifier with additional adversarial examples
 
     print("Testing enhanced model (this step will take dozens of minutes)")
-    attack(clsf, train) # Re-attack the victim model to measure the effect of adversarial training
+    attack(victim, train) # Re-attack the victim model to measure the effect of adversarial training
 
 if __name__ == '__main__':
     main()

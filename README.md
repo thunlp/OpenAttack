@@ -78,22 +78,29 @@ python demo.py
 ![demo](./docs/source/images/demo.gif)
 ## Usage Examples
 
-#### Use Built-in Attacks
+#### Attack Built-in Victim Models
 
-OpenAttack builds in some commonly used text classification models such as LSTM and BERT as well as datasets such as [SST](https://nlp.stanford.edu/sentiment/treebank.html) for sentiment analysis and [SNLI](https://nlp.stanford.edu/projects/snli/) for natural language inference. You can effortlessly conduct adversarial attacks against the built-in victim models on the datasets.
+OpenAttack builds in some commonly used NLP models like BERT ([Devlin et al. 2018](https://arxiv.org/abs/1810.04805)) and RoBERTa ([Liu et al. 2019](https://arxiv.org/abs/1907.11692)) that have been fine-tuned on some commonly used datasets (such as [SST-2](https://nlp.stanford.edu/sentiment/treebank.html)). You can effortlessly conduct adversarial attacks against these built-in victim models.
 
-The following code snippet shows how to use a genetic algorithm-based attack model ([Alzantot et al., 2018](https://www.aclweb.org/anthology/D18-1316.pdf)) to attack BERT on the SST dataset:
+The following code snippet shows how to use PWWS, a greedy algorithm-based attack model ([Ren et al., 2019](https://www.aclweb.org/anthology/P19-1103.pdf)), to attack BERT on the SST-2 dataset (the complete executable code is [here](./examples/workflow.py)).
 
 ```python
 import OpenAttack as oa
+import datasets # use the Hugging Face's datasets library
+# change the SST dataset into 2-class
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
 # choose a trained victim classification model
-victim = oa.DataManager.load("Victim.BERT.SST")
-# choose an evaluation dataset 
-dataset = oa.DataManager.load("Dataset.SST.sample")
-# choose Genetic as the attacker and initialize it with default parameters
-attacker = oa.attackers.GeneticAttacker() 
+victim = oa.DataManager.loadVictim("BERT.SST")
+# choose 20 examples from SST-2 as the evaluation data 
+dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
+# choose PWWS as the attacker and initialize it with default parameters
+attacker = oa.attackers.PWWSAttacker()
 # prepare for attacking
-attack_eval = oa.attack_evals.DefaultAttackEval(attacker, victim)
+attack_eval = OpenAttack.AttackEval(attacker, victim)
 # launch attacks and print attack results 
 attack_eval.eval(dataset, visualize=True)
 ```
@@ -101,34 +108,56 @@ attack_eval.eval(dataset, visualize=True)
 <details>
 <summary><strong>Customized Victim Model</strong></summary>
 
-The following code snippet shows how to use the genetic algorithm-based attack model to attack a customized sentiment analysis model (a statistical model built in NLTK) on SST.
+The following code snippet shows how to use PWWS to attack a **customized sentiment analysis model** (a statistical model built in NLTK) on SST-2 (the complete executable code is [here](./examples/custom_victim.py)).
 
 ```python
 import OpenAttack as oa
 import numpy as np
+import datasets
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# configure access interface of the customized victim model
+
+# configure access interface of the customized victim model by extending OpenAttack.Classifier.
 class MyClassifier(oa.Classifier):
     def __init__(self):
+        # nltk.sentiment.vader.SentimentIntensityAnalyzer is a traditional sentiment classification model.
+        nltk.download('vader_lexicon')
         self.model = SentimentIntensityAnalyzer()
-    # access to the classification probability scores with respect input sentences
-    def get_prob(self, input_): 
-        rt = []
-        for sent in input_:
-            rs = self.model.polarity_scores(sent)
-            prob = rs["pos"] / (rs["neg"] + rs["pos"])
-            rt.append(np.array([1 - prob, prob]))
-        return np.array(rt)
+    
+    def get_pred(self, input_):
+        return self.get_prob(input_).argmax(axis=1)
 
+    # access to the classification probability scores with respect input sentences
+    def get_prob(self, input_):
+        ret = []
+        for sent in input_:
+            # SentimentIntensityAnalyzer calculates scores of “neg” and “pos” for each instance
+            res = self.model.polarity_scores(sent)
+
+            # we use 𝑠𝑜𝑐𝑟𝑒_𝑝𝑜𝑠 / (𝑠𝑐𝑜𝑟𝑒_𝑛𝑒𝑔 + 𝑠𝑐𝑜𝑟𝑒_𝑝𝑜𝑠) to represent the probability of positive sentiment
+            # Adding 10^−6 is a trick to avoid dividing by zero.
+            prob = (res["pos"] + 1e-6) / (res["neg"] + res["pos"] + 2e-6)
+
+            ret.append(np.array([1 - prob, prob]))
+        
+        # The get_prob method finally returns a np.ndarray of shape (len(input_), 2). See Classifier for detail.
+        return np.array(ret)
+
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+    
+# load some examples of SST-2 for evaluation
+dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
 # choose the costomized classifier as the victim model
 victim = MyClassifier()
-# choose an evaluation dataset 
-dataset = oa.DataManager.load("Dataset.SST.sample")
-# choose Genetic as the attacker and initialize it with default parameters
-attacker = oa.attackers.GeneticAttacker()
+# choose PWWS as the attacker and initialize it with default parameters
+attacker = oa.attackers.PWWSAttacker()
 # prepare for attacking
-attack_eval = oa.attack_evals.DefaultAttackEval(attacker, victim)
+attack_eval = oa.AttackEval(attacker, victim)
 # launch attacks and print attack results 
 attack_eval.eval(dataset, visualize=True)
 ```
@@ -137,36 +166,91 @@ attack_eval.eval(dataset, visualize=True)
 
 <details>
 <summary><strong>Customized Dataset</strong></summary>
-Test
+
+The following code snippet shows how to use PWWS to attack an existing fine-tuned sentiment analysis model on a **customized** dataset (the complete executable code is [here](./examples/custom_dataset.py)).
+
+```python
+import OpenAttack as oa
+import transformers
+import datasets
+
+# load a fine-tuned sentiment analysis model from Transformers (you can also use our fine-tuned Victim.BERT.SST)
+tokenizer = transformers.AutoTokenizer.from_pretrained("echarlaix/bert-base-uncased-sst2-acc91.1-d37-hybrid")
+model = transformers.AutoModelForSequenceClassification.from_pretrained("echarlaix/bert-base-uncased-sst2-acc91.1-d37-hybrid", num_labels=2, output_hidden_states=False)
+victim = oa.classifiers.TransformersClassifier(model, tokenizer, model.bert.embeddings.word_embeddings)
+
+# choose PWWS as the attacker and initialize it with default parameters
+attacker = oa.attackers.PWWSAttacker()
+
+# create your customized dataset
+dataset = datasets.Dataset.from_dict({
+    "x": [
+        "I hate this movie.",
+        "I like this apple."
+    ],
+    "y": [
+        0, # 0 for negative
+        1, # 1 for positive
+    ]
+})
+
+# prepare for attacking
+attack_eval = oa.AttackEval(attacker, victim, metrics = [oa.metric.EditDistance(), oa.metric.ModificationRate()])
+# launch attacks and print attack results
+attack_eval.eval(dataset, visualize=True)
+```
+</details>
+
+<details>
+<summary><strong>Multiprocessing</strong></summary>
+
+OpenAttack supports convenient multiprocessing to accelerate the process of adversarial attacks. The following code snippet shows how to use multiprocessing in adversarial attacks with Genetic ([Alzantot et al. 2018](https://www.aclweb.org/anthology/D18-1316)), a genetic algorithm-based attack model (the complete executable code is [here](./examples/multiprocess_eval.py)).
+
+```python
+import OpenAttack as oa
+import datasets
+
+def dataset_mapping(x):
+    return {
+        "x": x["sentence"],
+        "y": 1 if x["label"] > 0.5 else 0,
+    }
+
+victim = oa.loadVictim("BERT.SST")
+dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
+attacker = oa.attackers.GeneticAttacker()
+attack_eval = oa.AttackEval(attacker, victim)
+# Using multiprocessing simply by specify num_workers
+attack_eval.eval(dataset, visualize=True, num_workers=4)
+```
 </details>
 
 <details>
 <summary><strong>Chinese Attack</strong></summary>
-Test
+
+OpenAttack now supports adversarial attacks against English and Chinese victim models. [Here](./examples/chinese.py) is an example code of conducting adversarial attacks against a Chinese review classification model using PWWS.
 </details>
 
 <details>
 <summary><strong>Customized Attack Model</strong></summary>
 
-OpenAttack incorporates many handy components which can be easily assembled into new attack model. 
-
-[Here](./examples/custom_attacker.py) gives an example of how to design a simple attack model which shuffles the tokens in the original sentence.
+OpenAttack incorporates many handy components that can be easily assembled into new attack models. [Here](./examples/custom_attacker.py) gives an example of how to design a simple attack model that shuffles the tokens in the original sentence.
 </details>
 
 <details>
 <summary><strong>Adversarial Training</strong></summary>
 
-OpenAttack can easily generate adversarial examples by attacking instances in the training set, which can be added to original training data set to retrain a more robust victim model, i.e., adversarial training. 
-
-[Here](./examples/adversarial_training.py)  gives an example of how to conduct adversarial training with OpenAttack.
+OpenAttack can easily generate adversarial examples by attacking instances in the training set, which can be added to original training data set to retrain a more robust victim model, i.e., adversarial training. [Here](./examples/adversarial_training.py)  gives an example of how to conduct adversarial training with OpenAttack.
 </details>
 
 <details>
 <summary><strong>More Examples</strong></summary>
 
-- Customized Evaluation Metric. OpenAttack supports designing a customized adversarial attack evaluation metric. [Here](./examples/custom_eval.py) gives an example of how to add BLEU score as a customized evaluation metric to evaluate adversarial attacks.
+- Attack Sentence Pair Classification Models. In addition to single sentence classification models, OpenAttack support attacks against sentence pair classification models. [Here](./examples/nli_attack.py) is an example code of conducting adversarial attacks against an NLI model with OpenAttack.
 
-- Attack Sentence Pair Classification Models
+- Customized Evaluation Metric. OpenAttack supports designing a customized adversarial attack evaluation metric. [Here](./examples/custom_eval.py) gives an example of how to add a customized evaluation metric and use it to evaluate adversarial attacks.
+
+
 </details>
 
 
