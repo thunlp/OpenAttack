@@ -80,7 +80,7 @@ project-features
 .. topic:: project-feature-1
     :class: project-feature
 
-    .. image:: images/全部.png
+    .. image:: images/全部.svg
 
     All-type Support 
 
@@ -89,7 +89,7 @@ project-features
 .. topic:: project-feature-2
     :class: project-feature
 
-    .. image:: images/多语言.png
+    .. image:: images/多语言.svg
 
     Multilinguality
 
@@ -99,7 +99,7 @@ project-features
 .. topic:: project-feature-3
     :class: project-feature
 
-    .. image:: images/并行数据挖掘.png
+    .. image:: images/并行数据挖掘.svg
 
     Parallel processing 
 
@@ -112,12 +112,12 @@ project-features
 
     Compatibility with 🤗
 
-        OpenAttack is fully integrated with 🤗 Transformers and Datasets libraries;
+        OpenAttack is fully integrated with 🤗 `Transformers <https://github.com/huggingface/transformers>`__ and `Datasets <https://github.com/huggingface/datasets>`__ libraries;
 
 .. topic:: project-feature-5
     :class: project-feature
 
-    .. image:: images/可扩展性强.png
+    .. image:: images/可扩展性强.svg
 
     Extensibility
 
@@ -135,31 +135,31 @@ Uses
 
     .. container::
 
-        .. image:: images/Align_baseline+row.png
+        .. image:: images/Align_baseline+row.svg
 
         Attack Baseline
 
     .. container::
 
-        .. image:: images/攻击.png
+        .. image:: images/攻击.svg
 
         Attack Evaluation 
 
     .. container::
 
-        .. image:: images/开发套件.png
+        .. image:: images/开发套件.svg
 
         Develop New Attack Models
 
     .. container::
 
-        .. image:: images/盾牌.png
+        .. image:: images/盾牌.svg
 
         Evaluate Robustness
 
     .. container::
 
-        .. image:: images/训练.png
+        .. image:: images/训练.svg
 
         Adversarial Training
 
