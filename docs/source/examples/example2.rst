@@ -45,9 +45,9 @@ Load Dataset and Evaluate
     :linenos:
     
     dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
-    clsf = MyClassifier()
+    victim = MyClassifier()
     attacker = OpenAttack.attackers.PWWSAttacker()
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     attack_eval.eval(dataset, visualize=True)
 
 Secondly, we load SST dataset for evaluation and initialize ``MyClassifier`` which is defined in the first step.
@@ -92,9 +92,9 @@ Complete Code
                 "y": 1 if x["label"] > 0.5 else 0,
             }
         dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
-        clsf = MyClassifier()
+        victim = MyClassifier()
         attacker = OpenAttack.attackers.PWWSAttacker()
-        attack_eval = OpenAttack.AttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, victim)
         attack_eval.eval(dataset, visualize=True)
 
 

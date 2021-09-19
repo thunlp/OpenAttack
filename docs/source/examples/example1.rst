@@ -14,7 +14,7 @@ Initializing Classifier
 
 .. code-block:: python
     
-    clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
+    victim = OpenAttack.loadVictim("BERT.SST")
 
 :py:data:`.Victim.BERT.SST` is a pytorch model which is trained on SST dataset.
 
@@ -55,7 +55,7 @@ Evaluation
 .. code-block:: python
     :linenos:
 
-    attack_eval = OpenAttack.AttackEval(attacker, clsf)
+    attack_eval = OpenAttack.AttackEval(attacker, victim)
     attack_eval.eval(dataset, visualize=True)
 
 :py:class:`.AttackEval` is the class used for evaluation. It has many options however we will not go into details here.
@@ -73,7 +73,7 @@ Complete Code
     import OpenAttack
     import datasets
     def main():
-        clsf = OpenAttack.loadVictim("BERT.SST")
+        victim = OpenAttack.loadVictim("BERT.SST")
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
@@ -81,7 +81,7 @@ Complete Code
             }
         dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_mapping)
         attacker = OpenAttack.attackers.GeneticAttacker()
-        attack_eval = OpenAttack.AttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, victim)
         attack_eval.eval(dataset, visualize=True)
 
 

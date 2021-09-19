@@ -94,7 +94,7 @@ Complete Code
 
 
     def main():
-        clsf = OpenAttack.DataManager.load("Victim.BERT.SST")
+        victim = OpenAttack.loadVictim("BERT.SST")
         def dataset_mapping(x):
             return {
                 "x": x["sentence"],
@@ -103,7 +103,7 @@ Complete Code
         dataset = datasets.load_dataset("sst").map(function=dataset_mapping)
 
         attacker = MyAttacker()
-        attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, clsf)
+        attack_eval = OpenAttack.attack_evals.DefaultAttackEval(attacker, victim)
         attack_eval.eval(dataset, visualize=True)
 
 

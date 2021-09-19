@@ -29,7 +29,7 @@ In this example, we use `OpenAttack.loadVictim` to load the victim model and mov
 .. code-block:: python
     :linenos:
 
-    clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
+    victim = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
 
 
 Initialize an Attacker
@@ -54,7 +54,7 @@ Just like the other examples, we only need one simple line of code to start the 
 .. code-block:: python
     :linenos:
 
-    OpenAttack.AttackEval(attacker, clsf, lang="chinese").eval(dataset, progress_bar=True)
+    OpenAttack.AttackEval(attacker, victim, lang="chinese").eval(dataset, progress_bar=True)
 
 
 Complete Code 
@@ -67,13 +67,13 @@ Complete Code
     import datasets
     def main():
         attacker = OpenAttack.attackers.PWWSAttacker(lang="chinese")
-        clsf = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
+        victim = OpenAttack.loadVictim("BERT.AMAZON_ZH").to("cuda:0")
         def dataset_mapping(x):
             return {
                 "x": x["review_body"],
                 "y": x["stars"],
             }
         dataset = datasets.load_dataset("amazon_reviews_multi",'zh',split="train[:20]").map(function=dataset_mapping)
-        attack_eval = OpenAttack.AttackEval(attacker, clsf)
+        attack_eval = OpenAttack.AttackEval(attacker, victim)
         attack_eval.eval(dataset, visualize=True, progress_bar=True)
 
