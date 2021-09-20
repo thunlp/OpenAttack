@@ -229,6 +229,7 @@ attack_eval.eval(dataset, visualize=True, num_workers=4)
 
 <details>
 <summary><strong>Chinese Attack</strong></summary>
+
 OpenAttack now supports adversarial attacks against English and Chinese victim models. [Here](./examples/chinese.py) is an example code of conducting adversarial attacks against a Chinese review classification model using PWWS.
 </details>
 
@@ -240,6 +241,7 @@ OpenAttack incorporates many handy components that can be easily assembled into 
 
 <details>
 <summary><strong>Adversarial Training</strong></summary>
+
 OpenAttack can easily generate adversarial examples by attacking instances in the training set, which can be added to original training data set to retrain a more robust victim model, i.e., adversarial training. [Here](./examples/adversarial_training.py)  gives an example of how to conduct adversarial training with OpenAttack.
 </details>
 
