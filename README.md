@@ -1,4 +1,6 @@
-<h1 align="center">OpenAttack</h1>
+<p align="center">
+    <img src="docs/source/images/logo.svg" width = "400"  alt="OpenAttack Logo" align=center />
+</p>
 <p align="center">
   <a target="_blank">
     <img src="https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master" alt="Github Runner Covergae Status">
@@ -22,6 +24,7 @@
   <a href="https://openattack.readthedocs.io/" target="_blank">Documentation</a> • <a href="#features--uses">Features & Uses</a> • <a href="#usage-examples">Usage Examples</a> • <a href="#attack-models">Attack Models</a> • <a href="#toolkit-design">Toolkit Design</a> 
 <br>
 </p>
+
 OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation. 
 
 ## Features & Uses
