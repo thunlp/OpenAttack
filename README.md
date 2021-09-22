@@ -1,4 +1,6 @@
-<h1 align="center">OpenAttack</h1>
+<p align="center">
+    <img src="docs/source/images/logo.svg" width = "400"  alt="OpenAttack Logo" align=center />
+</p>
 <p align="center">
   <a target="_blank">
     <img src="https://github.com/thunlp/OpenAttack/workflows/Test/badge.svg?branch=master" alt="Github Runner Covergae Status">
