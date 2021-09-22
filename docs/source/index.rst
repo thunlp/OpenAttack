@@ -64,6 +64,9 @@ project-slogans
 
     OpenAttack is an open-source Python-based textual adversarial attack toolkit, which handles the whole process of textual adversarial attacking, including preprocessing text, accessing the victim model, generating adversarial examples and evaluation.
 
+.. image:: images/logo.jpg
+   :class: project-image
+
 .. topic:: install link
     :class: link-button
 
