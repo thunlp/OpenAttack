@@ -1,6 +1,6 @@
 nltk>=3.5
 numpy
-tqdm<4.50.0,>=4.27
 datasets
+tqdm
 transformers>=4.0.0
 torch>=1.5.1
