@@ -17,4 +17,4 @@ from .textbugger import TextBuggerAttacker
 from .pso import PSOAttacker
 from .bert_attack import BERTAttacker
 from .bae import BAEAttacker
-from .geometry import GEOAttacker
+# from .geometry import GEOAttacker  FIXME: cannot import name 'zero_gradients' from 'torch.autograd.gradcheck'
