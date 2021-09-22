@@ -1,7 +1,7 @@
 nltk
 numpy
-tqdm<4.50.0,>=4.27
 datasets
+tqdm
 transformers
 torch
 sphinx-thunlp-theme>=0.0.9
