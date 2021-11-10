@@ -22,7 +22,7 @@ class DataManager(object):
 
     ``OpenAttack.load`` and ``OpenAttack.download`` is a alias of 
     ``OpenAttack.DataManager.load`` and ``OpenAttack.DataManager.download``, they are exactly equivalent.
-    These two methods are useful for both developer and user, that's the reason we provide shortter name for them.
+    These two methods are useful for both developer and user, that's the reason we provide shorter name for them.
     """
 
     AVAILABLE_DATAS = [x["name"] for x in data_list]
