@@ -103,7 +103,6 @@ class BERTAttacker(ClassificationAttacker):
 
         orig_probs = torch.Tensor(victim.get_prob([feature.seq]))
         orig_probs = orig_probs[0].squeeze()
-        orig_probs = torch.softmax(orig_probs, -1)
        
         current_prob = orig_probs.max()
 
@@ -168,9 +167,8 @@ class BERTAttacker(ClassificationAttacker):
                 seq_len = input_ids.size(1)
                 
                 temp_prob = torch.Tensor(victim.get_prob([temp_text]))[0].squeeze()
-                feature.query += 1
-                temp_prob = torch.softmax(temp_prob, -1)
                 temp_label = torch.argmax(temp_prob)
+                feature.query += 1
 
                 if goal.check(feature.final_adverse, temp_label):
                     feature.change += 1
@@ -232,7 +230,6 @@ class BERTAttacker(ClassificationAttacker):
         masked_words = self._get_masked(words)
         texts = [' '.join(words) for words in masked_words]  # list of text of masked words
         leave_1_probs = torch.Tensor(tgt_model.get_prob(texts))
-        leave_1_probs = torch.softmax(leave_1_probs, -1)  
         leave_1_probs_argmax = torch.argmax(leave_1_probs, dim=-1)
 
         import_scores = (orig_prob
