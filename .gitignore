@@ -131,6 +131,9 @@ dmypy.json
 # vscode
 .vscode
 
+# PyCharm
+.idea
+
 # vim
 **.swp
 

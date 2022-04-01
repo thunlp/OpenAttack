@@ -20,13 +20,13 @@ def LOAD(path):
     with open(os.path.join(path, "counter-fitted-vectors.txt"), "r", encoding='utf-8') as f:
         id2vec = []
         word2id = {}
-        for line in f.readlines():
+        for idx, line in enumerate(f.readlines()):
             tmp = line.strip().split(" ")
             word = tmp[0]
             embed = np.array([float(x) for x in tmp[1:]])
             if len(embed) != 300:
                 continue
-            word2id[word] = len(word2id)
+            word2id[word] = idx
             id2vec.append(embed)
         id2vec = np.stack(id2vec)
     return WordEmbedding(word2id, id2vec)
