@@ -54,7 +54,7 @@ class WordNetSubstitute(WordSubstitute):
         for wordnet_synonym in wordnet_synonyms:
             spacy_synonym = wordnet_synonym.name().replace('_', ' ').split()[0]
             synonyms.append(spacy_synonym)  # original word
-        token = word.replace('_', ' ').split()[0]
+        token = word.replace('_', ' ').split()[0]   #bug
 
         sss = []
         for synonym in synonyms:
