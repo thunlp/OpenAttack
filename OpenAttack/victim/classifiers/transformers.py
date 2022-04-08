@@ -1,10 +1,11 @@
 import numpy as np
 from .base import Classifier
-from ...utils import language_by_name, HookCloser
+from ...utils import language_by_name,get_language, HookCloser
 from ...text_process.tokenizer import TransformersTokenizer
 from ...attack_assist.word_embedding import WordEmbedding
 import transformers
 import torch
+from ...tags import TAG_English
 
 class TransformersClassifier(Classifier):
 
@@ -39,8 +40,12 @@ class TransformersClassifier(Classifier):
 
         if lang is not None:
             self.__lang_tag = language_by_name(lang)
+            if self.__lang_tag is None:
+                raise ValueError("Unknown language `%s`" % lang)
+        elif tokenizer is not None:
+            self.__lang_tag = get_language([tokenizer])
         else:
-            self.__lang_tag = None
+            self.__lang_tag = TAG_English
 
         if device is None:
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
