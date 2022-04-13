@@ -10,7 +10,7 @@ import copy
 import random
 import numpy as np
 import torch
-from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+from transformers import BertConfig, BertTokenizerFast, BertForMaskedLM
 
 
 
@@ -77,7 +77,7 @@ class BAEAttacker(ClassificationAttacker):
         else:
             self.encoder = sentence_encoder
 
-        self.tokenizer_mlm = BertTokenizer.from_pretrained(mlm_path, do_lower_case=True)
+        self.tokenizer_mlm = BertTokenizerFast.from_pretrained(mlm_path, do_lower_case=True)
         if device is not None:
             self.device = device
         else:

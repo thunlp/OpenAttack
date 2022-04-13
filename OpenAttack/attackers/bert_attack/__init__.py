@@ -1,7 +1,7 @@
 import copy
 from typing import List, Optional, Union
 import numpy as np
-from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+from transformers import BertConfig, BertTokenizerFast, BertForMaskedLM
 import torch
 
 
@@ -61,7 +61,7 @@ class BERTAttacker(ClassificationAttacker):
         """
 
 
-        self.tokenizer_mlm = BertTokenizer.from_pretrained(mlm_path, do_lower_case=True)
+        self.tokenizer_mlm = BertTokenizerFast.from_pretrained(mlm_path, do_lower_case=True)
         if device is not None:
             self.device = device
         else:
