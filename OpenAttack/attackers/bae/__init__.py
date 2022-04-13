@@ -291,16 +291,8 @@ class BAEAttacker(ClassificationAttacker):
 
         return words, sub_words, keys
 
-    def _get_masked(self, words):
-        len_text = len(words)
-        masked_words = []
-        for i in range(len_text - 1):
-            masked_words.append(words[0:i] + ['[UNK]'] + words[i + 1:])
-        # list of words
-        return masked_words
-    
     def _get_masked_insert(self, words):
-        len_text = len(words)
+        len_text = max(len(words), 2)
         masked_words = []
         for i in range(len_text - 1):
             masked_words.append(words[0:i + 1] + ['[UNK]'] + words[i + 1:])
