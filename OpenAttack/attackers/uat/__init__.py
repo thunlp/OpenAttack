@@ -93,7 +93,7 @@ class UATAttacker(ClassificationAttacker):
             if tag not in victim.TAGS:
                 raise AttributeError("`%s` requires victim to support `%s`" % (self.__class__.__name__, tag.name))
         
-        if tokenizer is not None:
+        if tokenizer is None:
             lang_tag = language_by_name(lang)
             if lang_tag is None:
                 raise ValueError("Invalid language type `%s`" % lang)

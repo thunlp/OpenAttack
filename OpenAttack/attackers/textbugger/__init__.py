@@ -86,7 +86,7 @@ class TextBuggerAttacker(ClassificationAttacker):
             ranked_words = self.get_w_word_importances(x, victim, goal)
         for word_idx in ranked_words:
             word = x[word_idx]
-            if word in self.filter_words:
+            if word.lower() in self.filter_words:
                 continue
             bug = self.selectBug(word, word_idx, x, victim, goal)
             x = self.replaceWithBug(x, word_idx, bug)
