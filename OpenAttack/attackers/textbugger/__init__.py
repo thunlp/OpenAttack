@@ -98,7 +98,7 @@ class TextBuggerAttacker(ClassificationAttacker):
 
         return None
 
-    def get_word_importances(self, sentence_tokens, clsf, goal : ClassifierGoal):
+    def get_word_importances(self, sentence_tokens, clsf, goal: ClassifierGoal):
         word_losses = {}
         for i in range(len(sentence_tokens)):
             sentence_tokens_without =  sentence_tokens[:i] + sentence_tokens[i + 1:]
@@ -108,7 +108,9 @@ class TextBuggerAttacker(ClassificationAttacker):
         word_losses = [k for k, _ in sorted(word_losses.items(), key=lambda item: item[1], reverse=goal.targeted)]
         return word_losses
 
-    def get_w_word_importances(self, sentence_tokens, clsf, y_orig):  # white  
+    def get_w_word_importances(self, sentence_tokens, clsf, goal : ClassifierGoal):  # white
+        # get y_predict
+        y_orig = goal.target
         _, grad = clsf.get_grad([sentence_tokens], [y_orig])
         grad = grad[0]
         if grad.shape[0] != len(sentence_tokens):
