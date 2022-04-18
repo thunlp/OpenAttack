@@ -37,18 +37,19 @@ def main():
     #attacker = OpenAttack.attackers.PWWSAttacker()
     print("Build model")
     #clsf = OpenAttack.loadVictim("BERT.SST")
-    tokenizer = transformers.AutoTokenizer.from_pretrained("./data/Victim.BERT.SST")
-    model = transformers.AutoModelForSequenceClassification.from_pretrained("./data/Victim.BERT.SST", num_labels=2, output_hidden_states=True)
-    clsf = OpenAttack.classifiers.TransformersClassifier(model, tokenizer=tokenizer, max_length=100, embedding_layer=model.bert.embeddings.word_embeddings)
+    clsf = OpenAttack.DataManager.loadVictim("BERT.SST")
+    #tokenizer = transformers.AutoTokenizer.from_pretrained("./data/Victim.BERT.SST")
+    #model = transformers.AutoModelForSequenceClassification.from_pretrained("./data/Victim.BERT.SST", num_labels=2, output_hidden_states=True)
+    #clsf = OpenAttack.classifiers.TransformersClassifier(model, tokenizer=tokenizer, max_length=100, embedding_layer=model.bert.embeddings.word_embeddings)
 
-    dataset = datasets.load_dataset("sst", split="train[:5]").map(function=dataset_mapping)
+    dataset = datasets.load_dataset("sst", split="train[:100]").map(function=dataset_mapping)
     print("New Attacker")
-    attacker = OpenAttack.attackers.GEOAttacker(data=dataset)
+    attacker = OpenAttack.attackers.UATAttacker()
+    attacker.set_triggers(clsf, dataset)
     print("Start attack")
     attack_eval = OpenAttack.AttackEval( attacker, clsf, metrics=[
         OpenAttack.metric.Fluency(),
         OpenAttack.metric.GrammaticalErrors(),
-        OpenAttack.metric.SemanticSimilarity(),
         OpenAttack.metric.EditDistance(),
         OpenAttack.metric.ModificationRate()
     ] )

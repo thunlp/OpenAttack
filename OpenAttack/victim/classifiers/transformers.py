@@ -43,7 +43,7 @@ class TransformersClassifier(Classifier):
             if self.__lang_tag is None:
                 raise ValueError("Unknown language `%s`" % lang)
         elif tokenizer is not None:
-            self.__lang_tag = get_language([tokenizer])
+            self.__lang_tag = TAG_English
         else:
             self.__lang_tag = TAG_English
 

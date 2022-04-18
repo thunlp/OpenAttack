@@ -51,7 +51,11 @@ class UATAttacker(ClassificationAttacker):
 
         self.triggers = triggers
 
-    
+    def set_triggers(self,
+            victim : Classifier, 
+            dataset : datasets.Dataset,):
+        self.triggers = self.get_triggers(victim, dataset, self.tokenizer)
+
     def attack(self, victim: Classifier, sentence : str, goal : ClassifierGoal):
         trigger_sent = self.tokenizer.detokenize( self.triggers + self.tokenizer.tokenize(sentence, pos_tagging=False) )
         pred = victim.get_pred([trigger_sent])[0]
@@ -107,8 +111,8 @@ class UATAttacker(ClassificationAttacker):
 
         id2word = { v: k for k, v in word2id.items() }
 
-        def get_candidates(gradient):
-            idx = embedding.dot( gradient.T ).argsort()[:beam_size].tolist()
+        def get_candidates(gradient, cur_id):
+            idx = (embedding - embedding[cur_id]).dot( gradient.T ).argsort()[:beam_size].tolist()
             return [ id2word[id_] for id_ in idx]
         
         curr_trigger = ["the" for _ in range(trigger_len)]
@@ -131,7 +135,7 @@ class UATAttacker(ClassificationAttacker):
                     for trigger, _ in beams:
                         xt = list(map(lambda x: trigger + x, x))
                         grad = victim.get_grad(xt, y)[1]
-                        candidates_words = get_candidates(grad[:, i, :].mean(axis=0))
+                        candidates_words = get_candidates(grad[:, i, :].mean(axis=0), word2id[trigger[i]])
 
                         for cw in candidates_words:
                             tt = trigger[:i] + [cw] + trigger[i + 1:]
