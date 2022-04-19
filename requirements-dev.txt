@@ -2,7 +2,7 @@ black
 twine
 language_tool_python
 nltk>=3.5
-numpy==1.20
+numpy==1.21.0
 datasets
 tqdm
 transformers>=4.0.0
