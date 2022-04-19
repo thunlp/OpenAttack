@@ -10,7 +10,7 @@ import copy
 import random
 import numpy as np
 import torch
-from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+from transformers import BertConfig, BertTokenizerFast, BertForMaskedLM
 
 
 
@@ -77,7 +77,7 @@ class BAEAttacker(ClassificationAttacker):
         else:
             self.encoder = sentence_encoder
 
-        self.tokenizer_mlm = BertTokenizer.from_pretrained(mlm_path, do_lower_case=True)
+        self.tokenizer_mlm = BertTokenizerFast.from_pretrained(mlm_path, do_lower_case=True)
         if device is not None:
             self.device = device
         else:
@@ -291,16 +291,8 @@ class BAEAttacker(ClassificationAttacker):
 
         return words, sub_words, keys
 
-    def _get_masked(self, words):
-        len_text = len(words)
-        masked_words = []
-        for i in range(len_text - 1):
-            masked_words.append(words[0:i] + ['[UNK]'] + words[i + 1:])
-        # list of words
-        return masked_words
-    
     def _get_masked_insert(self, words):
-        len_text = len(words)
+        len_text = max(len(words), 2)
         masked_words = []
         for i in range(len_text - 1):
             masked_words.append(words[0:i + 1] + ['[UNK]'] + words[i + 1:])

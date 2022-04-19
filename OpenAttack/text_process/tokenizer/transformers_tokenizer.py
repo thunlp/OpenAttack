@@ -11,7 +11,11 @@ class TransformersTokenizer(Tokenizer):
     @property
     def TAGS(self):
         return { self.__lang_tag }
-
+    
+    @TAGS.setter
+    def TAGS(self,value):
+        self.__lang_tag = value
+        
     def __init__(self, tokenizer : transformers.PreTrainedTokenizerBase, lang_tag):
         self.__tokenizer = tokenizer
         self.__lang_tag = lang_tag

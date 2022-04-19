@@ -46,7 +46,7 @@ def main():
     # choose the costomized classifier as the victim model
     victim = MyClassifier()
     # choose PWWS as the attacker and initialize it with default parameters
-    attacker = OpenAttack.attackers.PWWSAttacker()
+    attacker = OpenAttack.attackers.UATAttacker()
     # prepare for attacking
     attack_eval = OpenAttack.AttackEval(attacker, victim)
     # launch attacks and print attack results 

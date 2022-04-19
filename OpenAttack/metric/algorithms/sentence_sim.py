@@ -14,7 +14,7 @@ class SentenceSim(AttackMetric):
 
         """
         from sentence_transformers import SentenceTransformer
-        from ..data_manager import DataManager
+        from ...data_manager import DataManager
         self.model = SentenceTransformer(DataManager.load("AttackAssist.SentenceTransformer"), device='cuda')
 
     def calc_score(self, sen1 : str, sen2 : str) -> float:

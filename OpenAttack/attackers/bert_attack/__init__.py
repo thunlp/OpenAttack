@@ -1,7 +1,7 @@
 import copy
 from typing import List, Optional, Union
 import numpy as np
-from transformers import BertConfig, BertTokenizer, BertForMaskedLM
+from transformers import BertConfig, BertTokenizerFast, BertForMaskedLM
 import torch
 
 
@@ -61,7 +61,7 @@ class BERTAttacker(ClassificationAttacker):
         """
 
 
-        self.tokenizer_mlm = BertTokenizer.from_pretrained(mlm_path, do_lower_case=True)
+        self.tokenizer_mlm = BertTokenizerFast.from_pretrained(mlm_path, do_lower_case=True)
         if device is not None:
             self.device = device
         else:
@@ -103,7 +103,6 @@ class BERTAttacker(ClassificationAttacker):
 
         orig_probs = torch.Tensor(victim.get_prob([feature.seq]))
         orig_probs = orig_probs[0].squeeze()
-        orig_probs = torch.softmax(orig_probs, -1)
        
         current_prob = orig_probs.max()
 
@@ -168,9 +167,8 @@ class BERTAttacker(ClassificationAttacker):
                 seq_len = input_ids.size(1)
                 
                 temp_prob = torch.Tensor(victim.get_prob([temp_text]))[0].squeeze()
-                feature.query += 1
-                temp_prob = torch.softmax(temp_prob, -1)
                 temp_label = torch.argmax(temp_prob)
+                feature.query += 1
 
                 if goal.check(feature.final_adverse, temp_label):
                     feature.change += 1
@@ -213,18 +211,10 @@ class BERTAttacker(ClassificationAttacker):
         return words, sub_words, keys
 
     def _get_masked(self, words):
-        len_text = len(words)
+        len_text = max(len(words), 2)
         masked_words = []
         for i in range(len_text - 1):
             masked_words.append(words[0:i] + ['[UNK]'] + words[i + 1:])
-        # list of words
-        return masked_words
-    
-    def _get_masked_insert(self, words):
-        len_text = len(words)
-        masked_words = []
-        for i in range(len_text - 1):
-            masked_words.append(words[0:i + 1] + ['[UNK]'] + words[i + 1:])
         # list of words
         return masked_words
     
@@ -232,7 +222,6 @@ class BERTAttacker(ClassificationAttacker):
         masked_words = self._get_masked(words)
         texts = [' '.join(words) for words in masked_words]  # list of text of masked words
         leave_1_probs = torch.Tensor(tgt_model.get_prob(texts))
-        leave_1_probs = torch.softmax(leave_1_probs, -1)  
         leave_1_probs_argmax = torch.argmax(leave_1_probs, dim=-1)
 
         import_scores = (orig_prob

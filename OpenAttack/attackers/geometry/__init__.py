@@ -10,7 +10,7 @@ from ..classification import ClassificationAttacker, Classifier
 from ...attack_assist.goal import ClassifierGoal
 from ...tags import TAG_English, Tag
 from ...exceptions import WordNotInDictionaryException
-from transformers import BertConfig, BertTokenizer
+from transformers import BertConfig, BertTokenizerFast
 from transformers import BertForSequenceClassification, BertForMaskedLM
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
 import time
@@ -19,11 +19,24 @@ from nltk.corpus import stopwords
 import string
 from collections import Counter
 from copy import deepcopy
-from torch.autograd.gradcheck import zero_gradients
 from torch.nn import CosineSimilarity
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 from tqdm import tqdm
+
+if torch.__version__ < '1.9.0':
+    from torch.autograd.gradcheck import zero_gradients
+else:
+    import collections.abc as container_abcs
+
+    def zero_gradients(x):
+        if isinstance(x, torch.Tensor):
+            if x.grad is not None:
+                x.grad.detach_()
+                x.grad.zero_()
+        elif isinstance(x, container_abcs.Iterable):
+            for elem in x:
+                zero_gradients(elem)
 
 DEFAULT_CONFIG = {
     "threshold": 0.5,
@@ -107,6 +120,7 @@ class Sample:
         # [new_id, new_word, old_id, old_word, idx]
         self.new_info = new_info
 
+
 class DeepFool(nn.Module):
     def __init__(self, config, num_classes, max_iters, overshoot=0.02):
         super(DeepFool, self).__init__()
@@ -130,7 +144,7 @@ class DeepFool(nn.Module):
         net = deepcopy(net_.classifier)
         sent_vecs = deepcopy(vecs.data)
         input_shape = sent_vecs.size()
-        
+
         f_vecs = net.forward(sent_vecs).data
         # print("input and output:", sent_vecs.shape, f_vecs.shape)
         I = torch.argsort(f_vecs, dim=1, descending=True)
@@ -175,7 +189,7 @@ class DeepFool(nn.Module):
             x = pert_vecs.requires_grad_(True)
             fs = net.forward(x)
 
-            pert = torch.ones(input_shape[0])*np.inf
+            pert = torch.ones(input_shape[0]) * np.inf
             w = torch.zeros(input_shape)
 
             if torch.cuda.is_available():
@@ -249,11 +263,11 @@ class DeepFool(nn.Module):
 
             if target is None:
                 # in untargeted version, we finish perturbing when the network changes its predictions to the advs
-                finish_mask += ((k_i != label)*1.0).reshape((-1, 1)).float()
+                finish_mask += ((k_i != label) * 1.0).reshape((-1, 1)).float()
                 # print(torch.sum(finish_mask >= finished))
             else:
                 # in targeted version, we finish perturbing when the network classifies the advs as the target class
-                finish_mask += ((k_i == target)*1.0).reshape((-1, 1)).float()
+                finish_mask += ((k_i == target) * 1.0).reshape((-1, 1)).float()
 
             loop_i += 1
             self.loops += 1
@@ -334,10 +348,9 @@ class WordSaliencyBatch:
         print('start')
         torch.cuda.reset_max_memory_allocated()
         torch.cuda.reset_max_memory_cached()
-        print(torch.cuda.max_memory_allocated()/1024/1024)
-        print(torch.cuda.memory_allocated()/1024/1024)
+        print(torch.cuda.max_memory_allocated() / 1024 / 1024)
+        print(torch.cuda.memory_allocated() / 1024 / 1024)
         self.model = deepcopy(model_)
-        
 
         # self.model.eval()
 
@@ -399,7 +412,7 @@ class WordSaliencyBatch:
         # compute probs for new_word_ids
         # [batch_size*max_steps, max_steps]
         new_word_ids = new_word_ids.view(
-            cur_batch_size*self.config['max_steps'], -1)
+            cur_batch_size * self.config['max_steps'], -1)
 
         # construct new_lengths
         # [batch_size, 1]
@@ -440,9 +453,9 @@ class WordSaliencyBatch:
         # [batch_size*max_steps, num_classes]
         all_probs = torch.softmax(new_logits, dim=-1)
 
-        #print('end')
-        #print(torch.cuda.max_memory_allocated()/1024/1024)
-        #print(torch.cuda.memory_allocated()/1024/1024)
+        # print('end')
+        # print(torch.cuda.max_memory_allocated()/1024/1024)
+        # print(torch.cuda.memory_allocated()/1024/1024)
 
         # [batch_size, max_steps]
         all_true_probs = torch.masked_select(
@@ -497,7 +510,8 @@ class GreedyAttack:
         self.model = None
         self.word_saliency = WordSaliencyBatch(config, word2id)
 
-    def select_word_batch(self, all_word_ids, cur_available, labels, lengths, finish_mask, stopwords_mask, mask, previous_replaced_words=None):
+    def select_word_batch(self, all_word_ids, cur_available, labels, lengths, finish_mask, stopwords_mask, mask,
+                          previous_replaced_words=None):
         """
         select words in a batch fashion
         :param all_word_ids: [batch_size, max_steps]
@@ -526,7 +540,8 @@ class GreedyAttack:
         mask = torch.mul(mask, cur_available)
         mask = mask.bool()
         _, all_replace_orders = self.word_saliency.compute_saliency(model_=self.model, word_ids=all_word_ids,
-                                                                    labels=labels, lengths=lengths, mask=mask, order=True)
+                                                                    labels=labels, lengths=lengths, mask=mask,
+                                                                    order=True)
 
         if torch.cuda.is_available():
             all_replace_orders = all_replace_orders.cuda()
@@ -556,8 +571,11 @@ class GreedyAttack:
         n_new_samples = []
 
         for idx in range(cur_batch_size):
-            new_word_ids, new_lengths, new_labels = self.construct_new_sample2(word_ids=word_ids[idx], label=labels, length=lengths,
-                                                                               word_idx=word_indices[idx], sample_id=sample_ids[idx], finish_mask=finish_mask[idx])
+            new_word_ids, new_lengths, new_labels = self.construct_new_sample2(word_ids=word_ids[idx], label=labels,
+                                                                               length=lengths,
+                                                                               word_idx=word_indices[idx],
+                                                                               sample_id=sample_ids[idx],
+                                                                               finish_mask=finish_mask[idx])
             all_new_word_ids.append(new_word_ids)
             all_new_lengths.append(new_lengths)
             all_new_labels.append(new_labels)
@@ -652,7 +670,7 @@ class GreedyAttack:
         # sent_vecs: [batch_size, hidden_size]
         # logits, sent_vecs = model(word_ids, lengths)
         outputs = model(word_ids)
-        logits = outputs.logits 
+        logits = outputs.logits
         sent_vecs = torch.mean(outputs.hidden_states[-1], dim=1)
 
         # preds: [batch_size], original predictions before perturbing
@@ -713,9 +731,9 @@ class GreedyAttack:
         # 											stopwords_mask=stopwords_mask, mask=mask)
         previous_replaced_words = []
         intermediate_word_ids.append(word_ids)
-        
+
         for iter_idx in range(self.max_loops):
-            #print(f'Running the {iter_idx}th loop...')
+            # print(f'Running the {iter_idx}th loop...')
 
             if finish_mask.sum() == cur_batch_size:
                 break
@@ -743,28 +761,29 @@ class GreedyAttack:
                                                         labels=labels, lengths=lengths, finish_mask=finish_mask,
                                                         stopwords_mask=stopwords_mask, mask=mask)
             words_to_replace = all_replace_orders[:, 0]
-            #print("words:", words_to_replace)
+            # print("words:", words_to_replace)
             words_to_replace_one_hot = torch.nn.functional.one_hot(
                 words_to_replace, num_classes=word_ids.size(1))
             cur_available = torch.mul(
-                cur_available, 1-words_to_replace_one_hot)
+                cur_available, 1 - words_to_replace_one_hot)
 
             # all_new_samples have N samples inside
             # n_new_samples: [batch_size], number of new samples for each old sample
             # def construct_new_sample_batch(self, word_ids, labels, lengths, word_indices, sample_ids, finish_mask):
             # start = timer()
-            all_new_word_ids, all_new_lengths, all_new_labels, n_new_samples = self.construct_new_sample_batch2(word_ids=cur_word_ids,
-                                                                                                                labels=labels, lengths=lengths,
-                                                                                                                word_indices=words_to_replace,
-                                                                                                                sample_ids=sample_ids, finish_mask=finish_mask)
+            all_new_word_ids, all_new_lengths, all_new_labels, n_new_samples = self.construct_new_sample_batch2(
+                word_ids=cur_word_ids,
+                labels=labels, lengths=lengths,
+                word_indices=words_to_replace,
+                sample_ids=sample_ids, finish_mask=finish_mask)
             assert all_new_word_ids.size(0) == all_new_labels.size(0)
 
             if torch.cuda.is_available():
                 # [N, max_steps]
                 all_new_word_ids = all_new_word_ids.cuda()
                 # [N]
-                #all_new_lengths = all_new_lengths.cuda()
-                #all_new_labels = all_new_labels.cuda()
+                # all_new_lengths = all_new_lengths.cuda()
+                # all_new_labels = all_new_labels.cuda()
 
             # compute new sent_vecs
             # all_new_logits: [N, num_classes]
@@ -772,7 +791,7 @@ class GreedyAttack:
             # all_new_logits, all_new_sent_vectors = model(all_new_word_ids, all_new_lengths)
             outputs = model(all_new_word_ids)
             all_new_logits = outputs.logits
-            all_new_sent_vectors = torch.mean(outputs.hidden_states[-1],dim=1)
+            all_new_sent_vectors = torch.mean(outputs.hidden_states[-1], dim=1)
             # [N]
             all_new_predictions = torch.argmax(all_new_logits, dim=-1)
             # [N, num_classes]
@@ -899,7 +918,7 @@ class GreedyAttack:
             # [batch_size]
             cur_projections = torch.where(
                 cur_update_mask, selected_projections, cur_projections)
-           
+
             cur_predictions = torch.where(
                 cur_update_mask, selected_predictions, cur_predictions)
             # [batch_size, max_steps]
@@ -972,8 +991,8 @@ class GreedyAttack:
             intermediate_cosines = intermediate_cosines.cuda()
             intermediate_projections = intermediate_projections.cuda()
             intermediate_distances = intermediate_distances.cuda()
-        return final_r_tot, final_word_ids, final_predictions, intermediate_normals,\
-            intermediate_cosines, intermediate_distances, original_predictions, intermediate_word_ids, intermediate_pred_probs
+        return final_r_tot, final_word_ids, final_predictions, intermediate_normals, \
+               intermediate_cosines, intermediate_distances, original_predictions, intermediate_word_ids, intermediate_pred_probs
 
     @staticmethod
     def norm_dim(w):
@@ -988,13 +1007,13 @@ class GreedyAttack:
 class GEOAttacker(ClassificationAttacker):
     @property
     def TAGS(self):
-        return { self.__lang_tag,  Tag("get_pred", "victim"), Tag("get_prob", "victim") }
+        return {self.__lang_tag, Tag("get_pred", "victim"), Tag("get_prob", "victim")}
 
-    def __init__(self, 
-            tokenizer : Optional[Tokenizer] = None,
-            substitute : Optional[WordSubstitute] = None,
-            lang = None,
-            **kwargs):
+    def __init__(self,
+                 tokenizer: Optional[Tokenizer] = None,
+                 substitute: Optional[WordSubstitute] = None,
+                 lang=None,
+                 **kwargs):
         """
         :param float threshold: Threshold used in substitute module. **Default:** 0.5
         :param WordSubstitute substitute: Substitute method used in this attacker.
@@ -1013,9 +1032,9 @@ class GEOAttacker(ClassificationAttacker):
         if self.config["substitute"] is None:
             self.config["substitute"] = WordNetSubstitute()
         '''
-        #check_parameters(self.config.keys(), DEFAULT_CONFIG)
+        # check_parameters(self.config.keys(), DEFAULT_CONFIG)
 
-        #self.processor = self.config["processor"]
+        # self.processor = self.config["processor"]
         lst = []
         if tokenizer is not None:
             lst.append(tokenizer)
@@ -1027,7 +1046,7 @@ class GEOAttacker(ClassificationAttacker):
             self.__lang_tag = language_by_name(lang)
             if self.__lang_tag is None:
                 raise ValueError("Unknown language `%s`" % lang)
-        
+
         if substitute is None:
             substitute = get_default_substitute(self.__lang_tag)
         self.substitute = substitute
@@ -1036,7 +1055,7 @@ class GEOAttacker(ClassificationAttacker):
             tokenizer = get_default_tokenizer(self.__lang_tag)
         self.tokenizer = tokenizer
 
-        #self.substitute = self.config["substitute"]
+        # self.substitute = self.config["substitute"]
         self.max_length = self.config["max_length"]
         self.max_steps = self.config["max_steps"]
         self.max_loops = self.config["max_loops"]
@@ -1054,13 +1073,14 @@ class GEOAttacker(ClassificationAttacker):
         self.pre_trained_embedding = None
 
         self.greedy_attack = GreedyAttack(
-            self.config, word2id=self.word2id, id2word=self.id2word, wordid2synonyms=self.wordid2synonyms, vocab=self.vocab)
+            self.config, word2id=self.word2id, id2word=self.id2word, wordid2synonyms=self.wordid2synonyms,
+            vocab=self.vocab)
 
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     def preprocess(self, x_batch):
         ls_of_words = [list(map(
-            lambda x:x[0], self.tokenizer.tokenize(sent))) for sent in x_batch]
+            lambda x: x[0], self.tokenizer.tokenize(sent))) for sent in x_batch]
         words = ls_of_words[0]
         seq_len = list(map(lambda x: len(x), x_batch))
         max_len = max(seq_len)
@@ -1082,8 +1102,8 @@ class GEOAttacker(ClassificationAttacker):
             words.append(self.config['token_pad'])
         return torch.tensor(word_ids), max_len
 
-    def attack(self, clsf: Classifier, x_orig : str, goal : ClassifierGoal):
-        #torch.cuda.empty_cache()
+    def attack(self, clsf: Classifier, x_orig: str, goal: ClassifierGoal):
+        # torch.cuda.empty_cache()
         x_orig = x_orig.lower()
         if goal.target is None:
             targeted = False
@@ -1126,7 +1146,7 @@ class GEOAttacker(ClassificationAttacker):
 
         final_pred_clsf = clsf.get_pred([final_sent])[0]
         if final_pred_clsf == goal.target:
-            #return final_sent, final_pred_clsf
+            # return final_sent, final_pred_clsf
             return None
         else:
             return final_sent
@@ -1140,7 +1160,7 @@ class GEOAttacker(ClassificationAttacker):
                 stopwords_mask.append(0)
                 continue
             # word = word[0]
-            if word in string.punctuation or word not in self.word2id.keys() or word == self.PAD_WORD\
+            if word in string.punctuation or word not in self.word2id.keys() or word == self.PAD_WORD \
                     or word == self.UNK_WORD or word not in self.vocab:
                 mask.append(0)
 
@@ -1162,7 +1182,7 @@ class GEOAttacker(ClassificationAttacker):
             word_ = self.id2word[idx]
             if word_ != word:
                 print()
-            if word == word_ and not(word == self.PAD_WORD or word == self.UNK_WORD):
+            if word == word_ and not (word == self.PAD_WORD or word == self.UNK_WORD):
                 vocab.append(word)
             else:
                 continue
@@ -1210,7 +1230,7 @@ class GEOAttacker(ClassificationAttacker):
     def build_vocab(self, data):
         all_words = []
         for elem in data:
-            #all_words += self.config["processor"].get_tokens(elem['x'])
+            # all_words += self.config["processor"].get_tokens(elem['x'])
             all_words += self.tokenizer.tokenize(elem['x'])
         counter = Counter([word[0].lower() for word in all_words])
 
@@ -1219,7 +1239,7 @@ class GEOAttacker(ClassificationAttacker):
         # keep the most frequent vocabSize words, including the special tokens
         # -1 means we have no limits on the number of words
         if self.vocab_size != -1:
-            count_pairs = count_pairs[0:self.vocab_size-2]
+            count_pairs = count_pairs[0:self.vocab_size - 2]
 
         count_pairs.append((self.UNK_WORD, 100000))
         count_pairs.append((self.PAD_WORD, 100000))
@@ -1266,10 +1286,10 @@ class GEOAttacker(ClassificationAttacker):
         # cur_batch_size = lengths.size(0)
         if torch.cuda.is_available():
             word_ids = word_ids.cuda()
-            #lengths = lengths.cuda()
-            #labels = labels.cuda()
+            # lengths = lengths.cuda()
+            # labels = labels.cuda()
             stopwords_mask = stopwords_mask.cuda()
-            #sample_ids = sample_ids.cuda()
+            # sample_ids = sample_ids.cuda()
             mask = mask.cuda()
 
         # [batch_size]
@@ -1279,8 +1299,8 @@ class GEOAttacker(ClassificationAttacker):
         # original_predictions: tensor
         # perturbed_projections: tensor
         sample_ids = torch.Tensor([sample_ids])
-        final_r_tot, final_word_ids, perturbed_predictions, intermediate_normals, intermediate_cosines,\
-            intermediate_distances, original_predictions, intermediate_word_ids, intermediate_pred_probs = \
+        final_r_tot, final_word_ids, perturbed_predictions, intermediate_normals, intermediate_cosines, \
+        intermediate_distances, original_predictions, intermediate_word_ids, intermediate_pred_probs = \
             self.greedy_attack.adv_attack(word_ids=word_ids, lengths=lengths, labels=labels,
                                           sample_ids=sample_ids, model=model, samples=sample,
                                           stopwords_mask=stopwords_mask, mask=mask)
