@@ -10,7 +10,7 @@ from ..classification import ClassificationAttacker, Classifier
 from ...attack_assist.goal import ClassifierGoal
 from ...tags import TAG_English, Tag
 from ...exceptions import WordNotInDictionaryException
-from transformers import BertConfig, BertTokenizer
+from transformers import BertConfig, BertTokenizerFast
 from transformers import BertForSequenceClassification, BertForMaskedLM
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
 import time
