@@ -141,7 +141,7 @@ class AttackEval:
             for ret in self.__iter_metrics(zip(dataset, result_iter())):
                 yield ret
 
-    def eval(self, dataset: Iterable[Dict[str, Any]], total_len : Optional[int] = None, visualize : bool = False, progress_bar : bool = False, num_workers : int = 0, chunk_size : Optional[int] = None):
+    def eval(self, dataset: Iterable[Dict[str, Any]], total_len : Optional[int] = None, visualize : bool = False, progress_bar : bool = False, num_workers : int = 0, chunk_size : Optional[int] = None, save_dir : Optional[str] = None):
         """
         Evaluation function of `AttackEval`.
 
@@ -174,11 +174,17 @@ class AttackEval:
         total_result_cnt = {}
         total_inst = 0
         success_inst = 0
+        instances = []
 
         # Begin for
         for i, res in enumerate(result_iterator):
             total_inst += 1
             success_inst += int(res["success"])
+            if res["success"]:
+                instances.append(res["data"]['x'],res["result"])
+            else:
+                instances.append(res["data"]['x'],None)
+                
 
             if visualize and (TAG_Classification in self.victim.TAGS):
                 x_orig = res["data"]["x"]
@@ -237,7 +243,13 @@ class AttackEval:
                 total_result_cnt[kw] += 1
                 total_result[kw] += float(val)
         # End for
-
+        
+        if save_dir != None:
+            name = ['origin','attack']
+            ori_adv_data = pd.DataFrame(columns=name,data=instances)
+            ori_adv_data.to_csv(save_dir,index=False)
+        
+        
         summary = {}
         summary["Total Attacked Instances"] = total_inst
         summary["Successful Instances"] = success_inst
