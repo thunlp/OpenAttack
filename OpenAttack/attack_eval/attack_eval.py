@@ -267,4 +267,16 @@ class AttackEval:
         return summary
     
     ## TODO generate adversarial samples
+    def get_adv_samples(self,dataset: Iterable[Dict[str, Any]],  num_workers : int = 0, chunk_size : Optional[int] = None):
+        result_iterator = self.ieval(dataset, num_workers, chunk_size)
+        instances = []
+        for i, res in enumerate(result_iterator):
+            total_inst += 1
+            success_inst += int(res["success"])
+            if res["success"]:
+                instances.append(res["data"]['x'],res["result"])
+            else:
+                instances.append(res["data"]['x'],None)
+        return instances
+            
     
