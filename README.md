@@ -102,7 +102,7 @@ dataset = datasets.load_dataset("sst", split="train[:20]").map(function=dataset_
 # choose PWWS as the attacker and initialize it with default parameters
 attacker = oa.attackers.PWWSAttacker()
 # prepare for attacking
-attack_eval = OpenAttack.AttackEval(attacker, victim)
+attack_eval = oa.AttackEval(attacker, victim)
 # launch attacks and print attack results 
 attack_eval.eval(dataset, visualize=True)
 ```
