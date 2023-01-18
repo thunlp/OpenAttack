@@ -53,8 +53,22 @@ class UATAttacker(ClassificationAttacker):
 
     def set_triggers(self,
             victim : Classifier, 
-            dataset : datasets.Dataset,):
-        self.triggers = self.get_triggers(victim, dataset, self.tokenizer)
+            dataset : datasets.Dataset, 
+            epoch : int = 5,
+            batch_size : int = 5,
+            trigger_len : int = 3,
+            beam_size : int = 5,
+            lang = None):
+            
+        self.triggers = self.get_triggers(victim,
+                                            dataset,
+                                            self.tokenizer, 
+                                            epoch=epoch,
+                                            batch_size=batch_size,
+                                            trigger_len=trigger_len,
+                                            beam_size=beam_size,
+                                            lang=lang
+                                        )
 
     def attack(self, victim: Classifier, sentence : str, goal : ClassifierGoal):
         trigger_sent = self.tokenizer.detokenize( self.triggers + self.tokenizer.tokenize(sentence, pos_tagging=False) )
