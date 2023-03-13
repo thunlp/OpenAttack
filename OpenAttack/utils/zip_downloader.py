@@ -2,7 +2,7 @@ import urllib
 import zipfile
 import os
 from tqdm import tqdm
-
+import ssl
 
 def make_zip_downloader(URL : str, file_list=None, resource_name = None):
     """
@@ -28,7 +28,8 @@ def make_zip_downloader(URL : str, file_list=None, resource_name = None):
         else:
             name = resource_name
         
-        with urllib.request.urlopen(remote_url) as fin:
+        context = ssl._create_unverified_context()
+        with urllib.request.urlopen(remote_url, context=context) as fin:
             CHUNK_SIZE = 4 * 1024
             total_length = int(fin.headers["content-length"])
             with open(path + ".zip", "wb") as ftmp:
