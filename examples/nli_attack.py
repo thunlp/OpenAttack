@@ -4,6 +4,8 @@ This example code shows how to conduct adversarial attacks against a sentence pa
 import OpenAttack
 import transformers
 import datasets
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 class NLIWrapper(OpenAttack.classifiers.Classifier):
     def __init__(self, model : OpenAttack.classifiers.Classifier):
